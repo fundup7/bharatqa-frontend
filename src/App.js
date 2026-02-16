@@ -1,11 +1,57 @@
 import React, { useState, useEffect } from 'react';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import './App.css';
 
 const API = process.env.REACT_APP_API_URL || 'https://bharatqa-backend.onrender.com/api';
 const BACKEND = process.env.REACT_APP_BACKEND_URL || 'https://bharatqa-backend.onrender.com';
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
 
 function App() {
+    return (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <AppContent />
+        </GoogleOAuthProvider>
+    );
+}
+
+function AppContent() {
     const [view, setView] = useState('home');
+    const [company, setCompany] = useState(null);
+
+    // Load saved company from localStorage
+    useEffect(() => {
+        const saved = localStorage.getItem('bharatqa_company');
+        if (saved) {
+            try { setCompany(JSON.parse(saved)); } catch (e) { }
+        }
+    }, []);
+
+    const handleLogin = async (credentialResponse) => {
+        try {
+            const res = await fetch(API + '/auth/google', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ credential: credentialResponse.credential })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                setCompany(data.company);
+                localStorage.setItem('bharatqa_company', JSON.stringify(data.company));
+                setView('company');
+            } else {
+                alert('Login failed: ' + (data.error || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Login failed: ' + err.message);
+        }
+    };
+
+    const handleLogout = () => {
+        setCompany(null);
+        localStorage.removeItem('bharatqa_company');
+        setView('home');
+    };
 
     return (
         <div className="App">
@@ -21,22 +67,54 @@ function App() {
                     {['home', 'company', 'tester', 'admin'].map(v => (
                         <button
                             key={v}
-                            onClick={() => setView(v)}
+                            onClick={() => {
+                                if (v === 'company' && !company) return;
+                                setView(v);
+                            }}
                             style={{
                                 ...navBtn,
                                 background: view === v ? 'rgba(255,255,255,0.2)' : 'transparent',
-                                borderBottom: view === v ? '2px solid white' : '2px solid transparent'
+                                borderBottom: view === v ? '2px solid white' : '2px solid transparent',
+                                opacity: (v === 'company' && !company) ? 0.5 : 1
                             }}
                         >
                             {v.charAt(0).toUpperCase() + v.slice(1)}
                         </button>
                     ))}
                 </div>
+
+                {/* Auth status bar */}
+                {company && (
+                    <div style={{
+                        marginTop: '10px', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', gap: '10px'
+                    }}>
+                        {company.picture && (
+                            <img src={company.picture} alt="" style={{
+                                width: '28px', height: '28px', borderRadius: '50%',
+                                border: '2px solid rgba(255,255,255,0.5)'
+                            }} />
+                        )}
+                        <span style={{ fontSize: '13px', opacity: 0.9 }}>{company.name}</span>
+                        <button onClick={handleLogout} style={{
+                            background: 'rgba(255,255,255,0.15)', border: 'none',
+                            color: 'white', padding: '4px 10px', borderRadius: '4px',
+                            cursor: 'pointer', fontSize: '11px'
+                        }}>
+                            Logout
+                        </button>
+                    </div>
+                )}
             </header>
 
             <div style={{ padding: '15px', maxWidth: '900px', margin: '0 auto' }}>
-                {view === 'home' && <Home />}
-                {view === 'company' && <CompanyDashboard />}
+                {view === 'home' && <Home company={company} onLogin={handleLogin} />}
+                {view === 'company' && company && (
+                    <CompanyDashboard company={company} />
+                )}
+                {view === 'company' && !company && (
+                    <LoginPrompt onLogin={handleLogin} />
+                )}
                 {view === 'tester' && <TesterDashboard />}
                 {view === 'admin' && <AdminDashboard />}
             </div>
@@ -44,8 +122,37 @@ function App() {
     );
 }
 
+// ===== LOGIN PROMPT =====
+function LoginPrompt({ onLogin }) {
+    return (
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <h2>Company Login</h2>
+            <p style={{ color: '#666', marginBottom: '30px' }}>
+                Sign in with Google to manage your tests and view reports
+            </p>
+            <div style={{
+                ...cardStyle, display: 'inline-block', padding: '30px 50px'
+            }}>
+                <h3 style={{ marginTop: 0 }}>🔐 Sign In</h3>
+                <GoogleLogin
+                    onSuccess={onLogin}
+                    onError={() => alert('Login failed')}
+                    theme="outline"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    width="300"
+                />
+                <p style={{ color: '#999', fontSize: '12px', marginTop: '15px', marginBottom: 0 }}>
+                    We only access your name, email, and profile picture
+                </p>
+            </div>
+        </div>
+    );
+}
+
 // ===== HOME =====
-function Home() {
+function Home({ company, onLogin }) {
     const [health, setHealth] = useState(null);
 
     useEffect(() => {
@@ -60,7 +167,6 @@ function Home() {
             <h2>Welcome to BharatQA</h2>
             <p style={{ color: '#666' }}>Real device testing from real users across Bharat</p>
 
-            {/* Server status */}
             <div style={{
                 ...cardStyle,
                 background: health ? '#F0FDF4' : '#FEF2F2',
@@ -68,24 +174,62 @@ function Home() {
             }}>
                 <strong>Server: </strong>
                 {health ? '🟢 Connected' : '🔴 Not connected — is backend running?'}
+                {health?.ai_enabled && ' • 🤖 AI Enabled'}
             </div>
+
+            {/* Google Sign In for Companies */}
+            {!company && (
+                <div style={{ ...cardStyle, padding: '25px', textAlign: 'center' }}>
+                    <h3>📱 For Companies</h3>
+                    <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>
+                        Sign in to upload APKs and get real device test reports
+                    </p>
+                    <GoogleLogin
+                        onSuccess={onLogin}
+                        onError={() => alert('Login failed')}
+                        theme="filled_blue"
+                        size="large"
+                        text="signin_with"
+                        shape="rectangular"
+                    />
+                </div>
+            )}
+
+            {company && (
+                <div style={{
+                    ...cardStyle, background: '#F0FDF4',
+                    borderLeft: '4px solid #10B981', textAlign: 'left'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        {company.picture && (
+                            <img src={company.picture} alt="" style={{
+                                width: '40px', height: '40px', borderRadius: '50%'
+                            }} />
+                        )}
+                        <div>
+                            <strong>Welcome, {company.name}!</strong>
+                            <p style={{ margin: 0, color: '#666', fontSize: '13px' }}>{company.email}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div style={{ ...cardStyle, textAlign: 'left' }}>
                 <h3>How It Works</h3>
                 <ol style={{ lineHeight: '2' }}>
-                    <li><strong>Company</strong> uploads APK + test instructions</li>
+                    <li><strong>Company</strong> signs in and uploads APK + test instructions</li>
                     <li><strong>Tester</strong> opens BharatQA app on Android phone</li>
                     <li>Taps <strong>START</strong> — screen recording + device monitoring begins</li>
-                    <li>Tests the app normally (enable "Show Taps" for touch visibility)</li>
+                    <li>Tests the app normally</li>
                     <li>Taps <strong>STOP</strong> — video + stats upload automatically</li>
-                    <li><strong>Company</strong> gets video, device stats, and bug report</li>
+                    <li><strong>Company</strong> gets video, device stats, AI analysis, and bug report</li>
                 </ol>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginTop: '15px' }}>
                 <div style={{ ...cardStyle, textAlign: 'center' }}>
                     <h3>📱 For Companies</h3>
-                    <p style={{ color: '#666', fontSize: '14px' }}>Upload your APK and get real device test reports with video recordings</p>
+                    <p style={{ color: '#666', fontSize: '14px' }}>Upload your APK and get real device test reports with AI analysis</p>
                 </div>
                 <div style={{ ...cardStyle, textAlign: 'center' }}>
                     <h3>💰 For Testers</h3>
@@ -96,19 +240,21 @@ function Home() {
     );
 }
 
-// ===== COMPANY DASHBOARD =====
-function CompanyDashboard() {
+// ===== COMPANY DASHBOARD (Now with Auth!) =====
+function CompanyDashboard({ company }) {
     const [tests, setTests] = useState([]);
     const [showForm, setShowForm] = useState(false);
     const [selectedTest, setSelectedTest] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => { loadTests(); }, []);
 
     const loadTests = async () => {
         try {
             setLoading(true);
-            const res = await fetch(API + '/tests');
+            // Load only THIS company's tests
+            const res = await fetch(API + '/company/' + company.id + '/tests');
             setTests(await res.json());
         } catch (err) { console.error(err); }
         setLoading(false);
@@ -123,12 +269,26 @@ function CompanyDashboard() {
         } catch (err) { console.error(err); }
     };
 
-    if (showForm) return <CreateTestForm onClose={() => { setShowForm(false); loadTests(); }} />;
+    if (showForm) return <CreateTestForm company={company} onClose={() => { setShowForm(false); loadTests(); }} />;
     if (selectedTest) return <BugReports test={selectedTest} onClose={() => setSelectedTest(null)} />;
 
     return (
         <div>
-            <h2>Company Dashboard</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                <h2>My Dashboard</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    {company.picture && (
+                        <img src={company.picture} alt="" style={{
+                            width: '32px', height: '32px', borderRadius: '50%'
+                        }} />
+                    )}
+                    <div>
+                        <div style={{ fontWeight: 'bold', fontSize: '14px' }}>{company.name}</div>
+                        <div style={{ color: '#666', fontSize: '12px' }}>{company.email}</div>
+                    </div>
+                </div>
+            </div>
+
             <button onClick={() => setShowForm(true)} style={{
                 ...btnStyle, background: '#10B981', width: '100%', fontSize: '16px', padding: '14px'
             }}>
@@ -153,22 +313,17 @@ function CompanyDashboard() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                             <h4 style={{ margin: '0 0 5px 0' }}>{test.app_name}</h4>
-                            <p style={{ color: '#666', margin: '0 0 5px 0', fontSize: '14px' }}>
-                                by {test.company_name}
-                            </p>
                             <p style={{ color: '#999', margin: 0, fontSize: '12px' }}>
-                                {test.apk_file ? '📦 APK uploaded' : '⚠️ No APK'}
+                                {test.apk_file_url ? '📦 APK uploaded' : '⚠️ No APK'}
                                 {' • '}
                                 {new Date(test.created_at).toLocaleDateString()}
                             </p>
                         </div>
-                        <div>
-                            <button onClick={(e) => deleteTest(test.id, e)} style={{
-                                ...btnStyle, background: '#EF4444', padding: '5px 10px', fontSize: '12px'
-                            }}>
-                                Delete
-                            </button>
-                        </div>
+                        <button onClick={(e) => deleteTest(test.id, e)} style={{
+                            ...btnStyle, background: '#EF4444', padding: '5px 10px', fontSize: '12px'
+                        }}>
+                            Delete
+                        </button>
                     </div>
                 </div>
             ))}
@@ -176,10 +331,10 @@ function CompanyDashboard() {
     );
 }
 
-// ===== CREATE TEST =====
-function CreateTestForm({ onClose }) {
+// ===== CREATE TEST (with company_id) =====
+function CreateTestForm({ company, onClose }) {
     const [form, setForm] = useState({
-        company_name: '', app_name: '', instructions: '', apk: null
+        app_name: '', instructions: '', apk: null
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -189,7 +344,8 @@ function CreateTestForm({ onClose }) {
 
         try {
             const data = new FormData();
-            data.append('company_name', form.company_name);
+            data.append('company_name', company.name);
+            data.append('company_id', company.id);
             data.append('app_name', form.app_name);
             data.append('instructions', form.instructions);
             if (form.apk) data.append('apk', form.apk);
@@ -203,7 +359,7 @@ function CreateTestForm({ onClose }) {
                 alert('Error: ' + err.error);
             }
         } catch (err) {
-            alert('Failed to create test. Is backend running?');
+            alert('Failed to create test');
         }
         setSubmitting(false);
     };
@@ -211,13 +367,10 @@ function CreateTestForm({ onClose }) {
     return (
         <div>
             <h3>Create New Test</h3>
+            <div style={{ ...cardStyle, background: '#F0FDF4', marginBottom: '15px' }}>
+                <span>Creating as: <strong>{company.name}</strong> ({company.email})</span>
+            </div>
             <form onSubmit={handleSubmit}>
-                <div style={formGroup}>
-                    <label>Company Name *</label>
-                    <input type="text" value={form.company_name}
-                        onChange={e => setForm({ ...form, company_name: e.target.value })}
-                        required style={inputStyle} placeholder="e.g. Acme Corp" />
-                </div>
                 <div style={formGroup}>
                     <label>App Name *</label>
                     <input type="text" value={form.app_name}
@@ -229,16 +382,13 @@ function CreateTestForm({ onClose }) {
                     <textarea value={form.instructions}
                         onChange={e => setForm({ ...form, instructions: e.target.value })}
                         required style={{ ...inputStyle, minHeight: '120px' }}
-                        placeholder={"What should the tester do?\n\n1. Open the app\n2. Try to login with test@test.com\n3. Navigate to settings\n4. Try changing profile picture"} />
+                        placeholder={"What should the tester do?\n\n1. Open the app\n2. Try to login\n3. Navigate to settings"} />
                 </div>
                 <div style={formGroup}>
                     <label>Upload APK (optional)</label>
                     <input type="file" accept=".apk"
                         onChange={e => setForm({ ...form, apk: e.target.files[0] })}
                         style={inputStyle} />
-                    <p style={{ color: '#999', fontSize: '12px', marginTop: '4px' }}>
-                        Max 500MB. Testers will download this to test.
-                    </p>
                 </div>
                 <button type="submit" disabled={submitting} style={{
                     ...btnStyle, background: submitting ? '#9CA3AF' : '#10B981', width: '100%'
@@ -255,16 +405,11 @@ function CreateTestForm({ onClose }) {
     );
 }
 
-// ===== BUG REPORTS =====
+// ===== BUG REPORTS (same as before but with AI) =====
 function BugReports({ test, onClose }) {
     const [bugs, setBugs] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        loadBugs();
-        loadStats();
-    }, []);
 
     const loadBugs = async () => {
         try {
@@ -281,12 +426,14 @@ function BugReports({ test, onClose }) {
         } catch (err) { console.error(err); }
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { loadBugs(); loadStats(); }, []);
+
     const deleteBug = async (bugId) => {
         if (!window.confirm('Delete this bug report?')) return;
         try {
             await fetch(API + '/bugs/' + bugId, { method: 'DELETE' });
-            loadBugs();
-            loadStats();
+            loadBugs(); loadStats();
         } catch (err) { console.error(err); }
     };
 
@@ -296,7 +443,6 @@ function BugReports({ test, onClose }) {
         report += '═══════════════════════════════════\n';
         report += 'App: ' + test.app_name + '\n';
         report += 'Company: ' + test.company_name + '\n';
-        report += 'Date: ' + new Date().toLocaleString() + '\n';
         report += 'Total Reports: ' + bugs.length + '\n';
         report += '═══════════════════════════════════\n\n';
 
@@ -304,30 +450,8 @@ function BugReports({ test, onClose }) {
             report += '--- Report #' + (i + 1) + ' ---\n';
             report += 'Title: ' + bug.bug_title + '\n';
             report += 'Severity: ' + (bug.severity || 'N/A').toUpperCase() + '\n';
-            report += 'Tester: ' + bug.tester_name + '\n';
-            report += 'Device: ' + (bug.device_info || 'N/A') + '\n';
-            report += 'Duration: ' + (bug.test_duration || 0) + 's\n';
-            report += 'Date: ' + new Date(bug.created_at).toLocaleString() + '\n';
-            report += '\nDescription:\n' + (bug.bug_description || 'N/A') + '\n';
-
-            if (bug.device_stats) {
-                try {
-                    const ds = JSON.parse(bug.device_stats);
-                    report += '\nDevice Stats:\n';
-                    report += '  Battery: ' + ds.batteryStart + '% → ' + ds.batteryEnd + '% (' + ds.batteryDrain + '% drain)\n';
-                    report += '  Network: ' + ds.networkType + ' (' + ds.networkSpeed + ')\n';
-                    report += '  Device: ' + ds.deviceModel + '\n';
-                    report += '  Android: ' + ds.androidVersion + '\n';
-                    report += '  Location: ' + ds.city + ', ' + ds.state + '\n';
-                    report += '  Address: ' + ds.fullAddress + '\n';
-                    report += '  Coordinates: ' + ds.latitude + ', ' + ds.longitude + '\n';
-                    if (ds.crashDetected) report += '  ⚠️ CRASH: ' + ds.crashInfo + '\n';
-                } catch (e) { }
-            }
-
-            if (bug.recording_url) {
-                report += '\nVideo: ' + BACKEND + '/uploads/' + bug.recording_url + '\n';
-            }
+            report += 'Description:\n' + (bug.bug_description || 'N/A') + '\n';
+            if (bug.ai_analysis) report += '\nAI Analysis:\n' + bug.ai_analysis + '\n';
             report += '\n' + '─'.repeat(40) + '\n\n';
         });
 
@@ -342,20 +466,8 @@ function BugReports({ test, onClose }) {
         <div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button onClick={onClose} style={btnStyle}>← Back</button>
-                <button onClick={exportReport} style={{ ...btnStyle, background: '#10B981' }}>
-                    📄 Export Report
-                </button>
-<button onClick={() => { loadBugs(); loadStats(); }} style={{
-    ...btnStyle, background: '#7C3AED'
-}}>
-    🔄 Refresh
-</button>
-                {test.apk_file && (
-                    <a href={BACKEND + '/api/tests/' + test.id + '/download-apk'}
-                        style={{ ...btnStyle, background: '#F59E0B', textDecoration: 'none', display: 'inline-block' }}>
-                        📦 Download APK
-                    </a>
-                )}
+                <button onClick={exportReport} style={{ ...btnStyle, background: '#10B981' }}>📄 Export</button>
+                <button onClick={() => { loadBugs(); loadStats(); }} style={{ ...btnStyle, background: '#7C3AED' }}>🔄 Refresh</button>
             </div>
 
             <h3 style={{ marginTop: '15px' }}>{test.app_name}</h3>
@@ -363,239 +475,112 @@ function BugReports({ test, onClose }) {
 
             {stats && (
                 <div style={{
-                    ...cardStyle,
-                    background: 'linear-gradient(135deg, #F8FAFC, #EEF2FF)',
-                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))',
+                    ...cardStyle, background: 'linear-gradient(135deg, #F8FAFC, #EEF2FF)',
+                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
                     gap: '10px', textAlign: 'center'
                 }}>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4F46E5' }}>{stats.total_bugs}</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Total Bugs</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#7C3AED' }}>{stats.total_testers}</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Testers</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#EF4444' }}>{stats.critical_bugs}</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Critical</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#F59E0B' }}>{stats.high_bugs}</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>High</div>
-                    </div>
-                    <div>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>{Math.round(stats.avg_duration || 0)}s</div>
-                        <div style={{ fontSize: '12px', color: '#666' }}>Avg Duration</div>
-                    </div>
+                    <StatBox value={stats.total_bugs} label="Bugs" color="#4F46E5" />
+                    <StatBox value={stats.total_testers} label="Testers" color="#7C3AED" />
+                    <StatBox value={stats.critical_bugs} label="Critical" color="#EF4444" />
+                    <StatBox value={stats.high_bugs} label="High" color="#F59E0B" />
+                    <StatBox value={Math.round(stats.avg_duration || 0) + 's'} label="Avg Time" color="#10B981" />
                 </div>
             )}
 
-            <h4 style={{ marginTop: '15px' }}>
-                Bug Reports {!loading && <span style={{ color: '#666', fontWeight: 'normal' }}>({bugs.length})</span>}
-            </h4>
-
-            {loading && <p style={{ color: '#666' }}>Loading reports...</p>}
-
-            {!loading && bugs.length === 0 && (
-                <p style={{ color: '#666', textAlign: 'center', padding: '20px' }}>
-                    No reports yet. Waiting for testers...
-                </p>
-            )}
+            {loading && <p style={{ color: '#666' }}>Loading...</p>}
+            {!loading && bugs.length === 0 && <p style={{ color: '#666', textAlign: 'center' }}>No reports yet.</p>}
 
             {bugs.map(bug => {
                 let deviceStats = null;
-                try { deviceStats = bug.device_stats ? JSON.parse(bug.device_stats) : null; } catch (e) { }
+                try { deviceStats = typeof bug.device_stats === 'string' ? JSON.parse(bug.device_stats) : bug.device_stats; } catch (e) { }
 
-                const severityColors = {
-                    critical: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#10B981'
-                };
-                const borderColor = severityColors[bug.severity] || '#10B981';
+                const sevColors = { critical: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#10B981' };
+                const borderColor = sevColors[bug.severity] || '#10B981';
 
                 return (
                     <div key={bug.id} style={{ ...cardStyle, borderLeft: '4px solid ' + borderColor }}>
-
-                        {/* Title + Severity + Delete */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
                             <h4 style={{ margin: 0, flex: 1 }}>{bug.bug_title}</h4>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                 <span style={{
-                                    background: borderColor, color: 'white',
-                                    padding: '3px 10px', borderRadius: '12px', fontSize: '11px',
-                                    fontWeight: 'bold', textTransform: 'uppercase'
+                                    background: borderColor, color: 'white', padding: '3px 10px',
+                                    borderRadius: '12px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase'
                                 }}>{bug.severity}</span>
                                 <button onClick={() => deleteBug(bug.id)} style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    fontSize: '16px', padding: '0 4px'
+                                    background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px'
                                 }}>🗑️</button>
                             </div>
                         </div>
 
-                        {/* Description */}
-                        <pre style={{
-                            margin: '10px 0', whiteSpace: 'pre-wrap', fontFamily: 'inherit',
-                            fontSize: '14px', lineHeight: '1.5', color: '#374151'
-                        }}>{bug.bug_description}</pre>
+                        <pre style={{ margin: '10px 0', whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '14px', color: '#374151' }}>
+                            {bug.bug_description}
+                        </pre>
 
-                        {/* Meta info */}
                         <div style={{ color: '#666', fontSize: '13px' }}>
-                            <span>👤 {bug.tester_name}</span>
-                            <span style={{ margin: '0 10px' }}>•</span>
-                            <span>📱 {bug.device_info}</span>
-                            <span style={{ margin: '0 10px' }}>•</span>
-                            <span>⏱️ {bug.test_duration || 0}s</span>
-                            <span style={{ margin: '0 10px' }}>•</span>
-                            <span>{new Date(bug.created_at).toLocaleString()}</span>
+                            👤 {bug.tester_name} • 📱 {bug.device_info} • ⏱️ {bug.test_duration || 0}s • {new Date(bug.created_at).toLocaleString()}
                         </div>
 
-                        {/* Device Stats — ONE block with everything */}
                         {deviceStats && (
-                            <div style={{
-                                background: '#F8FAFC', padding: '12px', borderRadius: '8px',
-                                marginTop: '10px', fontSize: '13px'
-                            }}>
+                            <div style={{ background: '#F8FAFC', padding: '12px', borderRadius: '8px', marginTop: '10px', fontSize: '13px' }}>
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-
-                                    {/* Battery */}
-                                    <div>🔋 Battery: {deviceStats.batteryStart}% → {deviceStats.batteryEnd}%
-                                        <span style={{
-                                            color: deviceStats.batteryDrain > 5 ? '#EF4444' : '#10B981',
-                                            fontWeight: 'bold'
-                                        }}> ({deviceStats.batteryDrain}% drain)</span>
+                                    <div>🔋 {deviceStats.batteryStart}% → {deviceStats.batteryEnd}%
+                                        <span style={{ color: deviceStats.batteryDrain > 5 ? '#EF4444' : '#10B981', fontWeight: 'bold' }}> ({deviceStats.batteryDrain}%)</span>
                                     </div>
-
-                                    {/* Network */}
                                     <div>📶 {deviceStats.networkType} ({deviceStats.networkSpeed})</div>
-
-                                    {/* Device */}
                                     <div>📱 {deviceStats.deviceModel}</div>
-
-                                    {/* Android */}
                                     <div>🤖 {deviceStats.androidVersion}</div>
-
-                                    {/* Location */}
-                                    <div style={{
-                                        gridColumn: '1 / -1', marginTop: '4px', paddingTop: '4px',
-                                        borderTop: '1px solid #E5E7EB'
-                                    }}>
-                                        📍 <strong>{deviceStats.city}, {deviceStats.state}</strong>
-                                        <span style={{ color: '#666', marginLeft: '8px' }}>
-                                            ({deviceStats.locationAccuracy?.toFixed(0)}m accuracy, {deviceStats.locationSource})
-                                        </span>
-                                    </div>
-
-                                    {/* Full Address */}
-                                    {deviceStats.fullAddress && deviceStats.fullAddress !== 'Unknown' && (
-                                        <div style={{ gridColumn: '1 / -1', color: '#666' }}>
-                                            🏠 {deviceStats.fullAddress}
-                                        </div>
-                                    )}
-
-                                    {/* Google Maps Link */}
-                                    {deviceStats.latitude !== 0 && (
-                                        <div style={{ gridColumn: '1 / -1' }}>
-                                            <a
-                                                href={`https://www.google.com/maps?q=${deviceStats.latitude},${deviceStats.longitude}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ color: '#4F46E5', fontSize: '12px' }}
-                                            >
-                                                🗺️ View on Google Maps
-                                            </a>
-                                        </div>
-                                    )}
-
-                                    {/* Crash Info */}
-                                    {deviceStats.crashDetected && (
-                                        <div style={{ gridColumn: '1 / -1', color: '#EF4444', fontWeight: 'bold' }}>
-                                            ⚠️ CRASH: {deviceStats.crashInfo}
+                                    {deviceStats.city && deviceStats.city !== 'Unknown' && (
+                                        <div style={{ gridColumn: '1 / -1', borderTop: '1px solid #E5E7EB', paddingTop: '4px', marginTop: '4px' }}>
+                                            📍 <strong>{deviceStats.city}, {deviceStats.state}</strong>
+                                            {deviceStats.latitude !== 0 && (
+                                                <a href={`https://www.google.com/maps?q=${deviceStats.latitude},${deviceStats.longitude}`}
+                                                    target="_blank" rel="noopener noreferrer"
+                                                    style={{ color: '#4F46E5', fontSize: '12px', marginLeft: '10px' }}>
+                                                    🗺️ Map
+                                                </a>
+                                            )}
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
-{/* AI Analysis */}
-{bug.ai_analysis && (
-    <div style={{
-        background: 'linear-gradient(135deg, #EEF2FF, #F0FDF4)',
-        padding: '16px', borderRadius: '8px',
-        marginTop: '10px', fontSize: '13px',
-        border: '1px solid #C7D2FE'
-    }}>
-        <div style={{
-            display: 'flex', justifyContent: 'space-between',
-            alignItems: 'center', marginBottom: '10px'
-        }}>
-            <strong style={{ color: '#4F46E5', fontSize: '14px' }}>
-                🤖 AI Analysis
-            </strong>
-            <span style={{
-                background: '#4F46E5', color: 'white',
-                padding: '2px 8px', borderRadius: '10px',
-                fontSize: '10px'
-            }}>
-                Gemini Flash
-            </span>
-        </div>
-        <pre style={{
-            whiteSpace: 'pre-wrap', fontFamily: 'inherit',
-            margin: 0, lineHeight: '1.6', color: '#374151'
-        }}>
-            {bug.ai_analysis}
-        </pre>
-    </div>
-)}
 
-{!bug.ai_analysis && bug.recording_url && (
-    <button
-        onClick={async () => {
-            try {
-                const r = await fetch(API + '/bugs/' + bug.id + '/analyze', { method: 'POST' });
-                const data = await r.json();
-                if (data.cached) {
-                    loadBugs();
-                } else {
-                    alert('🤖 Analysis started! Click Refresh in 30-60 seconds.');
-                }
-            } catch (err) {
-                alert('Failed to start analysis');
-            }
-        }}
-        style={{
-            ...btnStyle, background: '#7C3AED',
-            width: '100%', marginTop: '10px'
-        }}
-    >
-        🤖 Analyze with AI
-    </button>
-)}
-
-                        {/* Screenshots */}
-                        {bug.screenshots && (
-                            <div style={{ marginTop: '10px' }}>
-                                <strong style={{ fontSize: '13px' }}>Screenshots:</strong>
-                                <div style={{ display: 'flex', gap: '8px', marginTop: '5px', overflowX: 'auto' }}>
-                                    {bug.screenshots.split(',').map((s, i) => (
-                                        <img key={i} src={BACKEND + '/uploads/' + s.trim()}
-                                            alt={`Screenshot ${i + 1}`}
-                                            style={{ height: '150px', borderRadius: '8px', border: '1px solid #E5E7EB' }} />
-                                    ))}
+                        {bug.ai_analysis && (
+                            <div style={{
+                                background: 'linear-gradient(135deg, #EEF2FF, #F0FDF4)', padding: '16px',
+                                borderRadius: '8px', marginTop: '10px', border: '1px solid #C7D2FE'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <strong style={{ color: '#4F46E5' }}>🤖 AI Analysis</strong>
+                                    <span style={{ background: '#4F46E5', color: 'white', padding: '2px 8px', borderRadius: '10px', fontSize: '10px' }}>
+                                        {bug.ai_model || 'Gemini'}
+                                    </span>
                                 </div>
+                                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0, lineHeight: '1.6', color: '#374151', fontSize: '13px' }}>
+                                    {bug.ai_analysis}
+                                </pre>
                             </div>
                         )}
 
-                        {/* Screen Recording */}
+                        {!bug.ai_analysis && bug.recording_url && (
+                            <button onClick={async () => {
+                                try {
+                                    const r = await fetch(API + '/bugs/' + bug.id + '/analyze', { method: 'POST' });
+                                    const data = await r.json();
+                                    if (data.cached) loadBugs();
+                                    else alert('🤖 Analysis started! Click Refresh in 30-60s.');
+                                } catch (err) { alert('Failed'); }
+                            }} style={{ ...btnStyle, background: '#7C3AED', width: '100%', marginTop: '10px' }}>
+                                🤖 Analyze with AI
+                            </button>
+                        )}
+
                         {bug.recording_url && (
                             <div style={{ marginTop: '10px' }}>
                                 <strong style={{ fontSize: '13px' }}>Screen Recording:</strong>
-                                <video
-                                    src={BACKEND + '/uploads/' + bug.recording_url}
-                                    controls
-                                    style={{
-                                        width: '100%', maxWidth: '500px', borderRadius: '8px',
-                                        marginTop: '5px', border: '1px solid #E5E7EB'
-                                    }}
-                                />
+                                <video src={bug.recording_url} controls style={{
+                                    width: '100%', maxWidth: '500px', borderRadius: '8px', marginTop: '5px'
+                                }} />
                             </div>
                         )}
                     </div>
@@ -604,7 +589,18 @@ function BugReports({ test, onClose }) {
         </div>
     );
 }
-// ===== TESTER DASHBOARD (Web) =====
+
+// ===== STAT BOX =====
+function StatBox({ value, label, color }) {
+    return (
+        <div>
+            <div style={{ fontSize: '22px', fontWeight: 'bold', color }}>{value}</div>
+            <div style={{ fontSize: '11px', color: '#666' }}>{label}</div>
+        </div>
+    );
+}
+
+// ===== TESTER DASHBOARD =====
 function TesterDashboard() {
     const [testerName, setTesterName] = useState('');
     const [earnings, setEarnings] = useState(null);
@@ -622,16 +618,13 @@ function TesterDashboard() {
     return (
         <div>
             <h2>Tester Dashboard</h2>
-
             <div style={cardStyle}>
                 <h3>📱 How to Test</h3>
                 <ol style={{ lineHeight: '2', color: '#374151' }}>
-                    <li>Install the <strong>BharatQA Android app</strong> on your phone</li>
-                    <li>Make sure phone and laptop are on <strong>same WiFi</strong></li>
+                    <li>Install the <strong>BharatQA Android app</strong></li>
                     <li>Open app → Enter your name → Pick a test</li>
-                    <li>Tap <strong>START</strong> — recording begins automatically</li>
-                    <li>Test the app normally</li>
-                    <li>Tap <strong>STOP</strong> — report uploads automatically</li>
+                    <li>Tap <strong>START</strong> → Test the app normally</li>
+                    <li>Tap <strong>STOP</strong> → Report uploads automatically</li>
                     <li>Earn <strong>₹50</strong> per test! 💰</li>
                 </ol>
             </div>
@@ -639,71 +632,29 @@ function TesterDashboard() {
             <div style={{ ...cardStyle, marginTop: '15px' }}>
                 <h3>💰 Check Your Earnings</h3>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <input
-                        type="text"
-                        placeholder="Enter your tester name"
-                        value={testerName}
+                    <input type="text" placeholder="Your tester name" value={testerName}
                         onChange={e => setTesterName(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && lookupEarnings()}
-                        style={{ ...inputStyle, flex: 1 }}
-                    />
+                        style={{ ...inputStyle, flex: 1 }} />
                     <button onClick={lookupEarnings} style={btnStyle}>Check</button>
                 </div>
 
                 {searched && earnings && (
                     <div style={{ marginTop: '15px' }}>
-                        <div style={{
-                            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-                            gap: '10px', textAlign: 'center', marginBottom: '15px'
-                        }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', textAlign: 'center' }}>
                             <div style={{ background: '#F0FDF4', padding: '12px', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>
-                                    ₹{earnings.total_earned}
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#666' }}>Total Earned</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#10B981' }}>₹{earnings.total_earned}</div>
+                                <div style={{ fontSize: '12px', color: '#666' }}>Total</div>
                             </div>
                             <div style={{ background: '#FEF3C7', padding: '12px', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#F59E0B' }}>
-                                    ₹{earnings.pending_amount}
-                                </div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#F59E0B' }}>₹{earnings.pending_amount}</div>
                                 <div style={{ fontSize: '12px', color: '#666' }}>Pending</div>
                             </div>
                             <div style={{ background: '#EEF2FF', padding: '12px', borderRadius: '8px' }}>
-                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4F46E5' }}>
-                                    {earnings.tests_completed}
-                                </div>
-                                <div style={{ fontSize: '12px', color: '#666' }}>Tests Done</div>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4F46E5' }}>{earnings.tests_completed}</div>
+                                <div style={{ fontSize: '12px', color: '#666' }}>Tests</div>
                             </div>
                         </div>
-
-                        {earnings.earnings.length === 0 && (
-                            <p style={{ color: '#666', textAlign: 'center' }}>
-                                No earnings found for "{testerName}". Start testing!
-                            </p>
-                        )}
-
-                        {earnings.earnings.map((e, i) => (
-                            <div key={i} style={{
-                                ...cardStyle, display: 'flex',
-                                justifyContent: 'space-between', alignItems: 'center'
-                            }}>
-                                <div>
-                                    <strong>{e.app_name || 'Test #' + e.test_id}</strong>
-                                    <p style={{ margin: 0, color: '#666', fontSize: '12px' }}>
-                                        {e.company_name || ''} • {new Date(e.created_at).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontWeight: 'bold', color: '#10B981' }}>₹{e.amount}</div>
-                                    <div style={{
-                                        fontSize: '11px',
-                                        color: e.status === 'paid' ? '#10B981' : '#F59E0B'
-                                    }}>
-                                        {e.status === 'paid' ? '✅ Paid' : '⏳ Pending'}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 )}
             </div>
@@ -711,7 +662,7 @@ function TesterDashboard() {
     );
 }
 
-// ===== ADMIN DASHBOARD =====
+// ===== ADMIN =====
 function AdminDashboard() {
     const [stats, setStats] = useState(null);
     const [recentBugs, setRecentBugs] = useState([]);
@@ -719,96 +670,49 @@ function AdminDashboard() {
     useEffect(() => {
         fetch(API + '/admin/stats').then(r => r.json()).then(setStats).catch(console.error);
         fetch(API + '/admin/all-bugs').then(r => r.json())
-            .then(bugs => setRecentBugs(bugs.slice(0, 10)))
-            .catch(console.error);
+            .then(bugs => setRecentBugs(bugs.slice(0, 10))).catch(console.error);
     }, []);
 
     return (
         <div>
             <h2>Admin Dashboard</h2>
-
             {stats && (
-                <div style={{
-                    display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                    gap: '12px'
-                }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
                     {[
-                        { label: 'Total Tests', value: stats.total_tests, color: '#4F46E5', icon: '📋' },
-                        { label: 'Total Bugs', value: stats.total_bugs, color: '#7C3AED', icon: '🐛' },
+                        { label: 'Tests', value: stats.total_tests, color: '#4F46E5', icon: '📋' },
+                        { label: 'Bugs', value: stats.total_bugs, color: '#7C3AED', icon: '🐛' },
                         { label: 'Testers', value: stats.total_testers, color: '#10B981', icon: '👥' },
-                        { label: 'Earnings Paid', value: '₹' + stats.total_earnings, color: '#F59E0B', icon: '💰' },
-                        { label: 'Critical Bugs', value: stats.critical_bugs, color: '#EF4444', icon: '🚨' }
+                        { label: 'Companies', value: stats.total_companies || 0, color: '#3B82F6', icon: '🏢' },
+                        { label: 'Earnings', value: '₹' + stats.total_earnings, color: '#F59E0B', icon: '💰' },
+                        { label: 'Critical', value: stats.critical_bugs, color: '#EF4444', icon: '🚨' }
                     ].map((item, i) => (
-                        <div key={i} style={{
-                            ...cardStyle, textAlign: 'center',
-                            borderTop: '3px solid ' + item.color
-                        }}>
-                            <div style={{ fontSize: '28px' }}>{item.icon}</div>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: item.color }}>
-                                {item.value}
-                            </div>
+                        <div key={i} style={{ ...cardStyle, textAlign: 'center', borderTop: '3px solid ' + item.color }}>
+                            <div style={{ fontSize: '24px' }}>{item.icon}</div>
+                            <div style={{ fontSize: '24px', fontWeight: 'bold', color: item.color }}>{item.value}</div>
                             <div style={{ fontSize: '12px', color: '#666' }}>{item.label}</div>
                         </div>
                     ))}
                 </div>
             )}
 
-            <h3 style={{ marginTop: '20px' }}>Recent Bug Reports</h3>
-            {recentBugs.map(bug => {
-                const severityColors = {
-                    critical: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#10B981'
-                };
-                return (
-                    <div key={bug.id} style={{
-                        ...cardStyle, borderLeft: '4px solid ' + (severityColors[bug.severity] || '#10B981')
-                    }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                            <div>
-                                <strong>{bug.bug_title}</strong>
-                                <p style={{ margin: '4px 0 0', color: '#666', fontSize: '13px' }}>
-                                    {bug.app_name} • {bug.tester_name} • {new Date(bug.created_at).toLocaleString()}
-                                </p>
-                            </div>
-                            <span style={{
-                                background: severityColors[bug.severity] || '#10B981',
-                                color: 'white', padding: '3px 10px', borderRadius: '12px',
-                                fontSize: '11px', fontWeight: 'bold', height: 'fit-content',
-                                textTransform: 'uppercase'
-                            }}>
-                                {bug.severity}
-                            </span>
-                        </div>
-                    </div>
-                );
-            })}
-
-            {recentBugs.length === 0 && (
-                <p style={{ color: '#666', textAlign: 'center' }}>No bug reports yet.</p>
-            )}
+            <h3 style={{ marginTop: '20px' }}>Recent Reports</h3>
+            {recentBugs.map(bug => (
+                <div key={bug.id} style={{ ...cardStyle, borderLeft: '4px solid ' + ({ critical: '#EF4444', high: '#F59E0B', medium: '#3B82F6', low: '#10B981' }[bug.severity] || '#10B981') }}>
+                    <strong>{bug.bug_title}</strong>
+                    <p style={{ margin: '4px 0 0', color: '#666', fontSize: '13px' }}>
+                        {bug.app_name} • {bug.tester_name} • {new Date(bug.created_at).toLocaleString()}
+                    </p>
+                </div>
+            ))}
         </div>
     );
 }
 
 // ===== STYLES =====
-const navBtn = {
-    color: 'white', border: 'none', padding: '8px 16px', margin: '0 4px',
-    borderRadius: '5px 5px 0 0', cursor: 'pointer', fontSize: '14px',
-    background: 'transparent', transition: 'background 0.2s'
-};
-const btnStyle = {
-    background: '#4F46E5', color: 'white', border: 'none', padding: '10px 20px',
-    margin: '5px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px',
-    fontWeight: '500'
-};
-const cardStyle = {
-    background: 'white', border: '1px solid #E5E7EB', borderRadius: '10px',
-    padding: '15px', marginTop: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-};
+const navBtn = { color: 'white', border: 'none', padding: '8px 16px', margin: '0 4px', borderRadius: '5px 5px 0 0', cursor: 'pointer', fontSize: '14px', background: 'transparent' };
+const btnStyle = { background: '#4F46E5', color: 'white', border: 'none', padding: '10px 20px', margin: '5px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500' };
+const cardStyle = { background: 'white', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '15px', marginTop: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' };
 const formGroup = { marginBottom: '15px', textAlign: 'left' };
-const inputStyle = {
-    width: '100%', padding: '10px 12px', marginTop: '5px',
-    border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '15px',
-    boxSizing: 'border-box', outline: 'none'
-};
+const inputStyle = { width: '100%', padding: '10px 12px', marginTop: '5px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '15px', boxSizing: 'border-box' };
 
 export default App;
