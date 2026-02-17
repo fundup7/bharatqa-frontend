@@ -71,24 +71,30 @@ function AppContent() {
                     Crowdsourced Real-Device Testing
                 </p>
                 <div style={{ marginTop: '10px' }}>
-                    {['home', 'company', 'tester', 'admin'].map(v => (
-                        <button
-                            key={v}
-                            onClick={() => {
-                                if (v === 'company' && !company) return;
-                                setView(v);
-                            }}
-                            style={{
-                                ...navBtn,
-                                background: view === v ? 'rgba(255,255,255,0.2)' : 'transparent',
-                                borderBottom: view === v ? '2px solid white' : '2px solid transparent',
-                                opacity: (v === 'company' && !company) ? 0.5 : 1
-                            }}
-                        >
-                            {v.charAt(0).toUpperCase() + v.slice(1)}
-                        </button>
-                    ))}
-                </div>
+  {['home', 'company', 'settings', 'tester', 'admin'].map(v => (
+    <button
+      key={v}
+      onClick={() => {
+        if ((v === 'company' || v === 'settings') && !company) return;
+        setView(v);
+      }}
+      style={{
+        ...navBtn,
+        background: view === v 
+          ? 'rgba(255,255,255,0.2)' 
+          : 'transparent',
+        borderBottom: view === v 
+          ? '2px solid white' 
+          : '2px solid transparent',
+        opacity: ((v === 'company' || v === 'settings') && !company) 
+          ? 0.5 : 1
+      }}
+    >
+      {v === 'settings' ? '⚙️' : ''} 
+      {v.charAt(0).toUpperCase() + v.slice(1)}
+    </button>
+  ))}
+</div>
 
                 {/* Auth status bar */}
                 {company && (
@@ -120,6 +126,49 @@ function AppContent() {
 {view === 'company' && company && (
   <CompanyDashboard company={company} />
 )}
+
+<div style={{ 
+  padding: '15px', 
+  maxWidth: '900px', 
+  margin: '0 auto' 
+}}>
+  {view === 'home' && (
+    <Home company={company} onLogin={handleLogin} />
+  )}
+  
+  {view === 'company' && company && !company.onboarding_complete && (
+    <OnboardingForm
+      company={company}
+      onComplete={(updated) => {
+        setCompany(updated);
+        setView('company');
+      }}
+    />
+  )}
+  
+  {view === 'company' && company && company.onboarding_complete && (
+    <CompanyDashboard company={company} />
+  )}
+  
+  {view === 'company' && !company && (
+    <LoginPrompt onLogin={handleLogin} />
+  )}
+
+  {/* NEW: Settings View */}
+  {view === 'settings' && company && (
+    <SettingsPage
+      company={company}
+      onUpdate={(updated) => setCompany(updated)}
+      onLogout={handleLogout}
+    />
+  )}
+  {view === 'settings' && !company && (
+    <LoginPrompt onLogin={handleLogin} />
+  )}
+
+  {view === 'tester' && <TesterDashboard />}
+  {view === 'admin' && <AdminDashboard />}
+</div>
 
 // With this:
 {view === 'company' && company && !company.onboarding_complete && (
@@ -615,6 +664,456 @@ const labelStyle = {
   marginBottom: '4px', 
   display: 'block' 
 };
+
+// ===== SETTINGS PAGE =====
+function SettingsPage({ company, onUpdate, onLogout }) {
+  const [form, setForm] = useState({
+    company_name: '',
+    industry: '',
+    company_size: '',
+    role: '',
+    phone: '',
+    website: '',
+    referral_source: ''
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showDanger, setShowDanger] = useState(false);
+
+  const industries = [
+    'Fintech', 'E-commerce', 'EdTech', 'HealthTech',
+    'Social Media', 'Gaming', 'SaaS / B2B', 'Logistics',
+    'Food & Delivery', 'Travel', 'Media & Entertainment',
+    'Government / GovTech', 'Other'
+  ];
+
+  const companySizes = ['Just me', '2-10', '11-50', '51-200', '200+'];
+
+  const roles = [
+    'Founder / CEO', 'CTO / Tech Lead', 'QA Lead / Manager',
+    'Developer', 'Product Manager', 'Other'
+  ];
+
+  const referralSources = [
+    'Google Search', 'Twitter / X', 'LinkedIn',
+    'Friend / Colleague', 'YouTube', 'Reddit',
+    'Product Hunt', 'Other'
+  ];
+
+  // Load current profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await fetch(
+          API + '/auth/company/' + company.id
+        );
+        const data = await res.json();
+        setForm({
+          company_name: data.company_name || '',
+          industry: data.industry || '',
+          company_size: data.company_size || '',
+          role: data.role || '',
+          phone: data.phone || '',
+          website: data.website || '',
+          referral_source: data.referral_source || ''
+        });
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+      }
+      setLoading(false);
+    };
+    loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    if (!form.company_name || !form.industry || 
+        !form.company_size || !form.role || !form.phone) {
+      alert('Please fill all required fields');
+      return;
+    }
+
+    const phoneClean = form.phone.replace(/\D/g, '');
+    if (phoneClean.length < 10) {
+      alert('Please enter a valid 10-digit phone number');
+      return;
+    }
+
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await fetch(
+        API + '/auth/company/' + company.id, 
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form)
+        }
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setSaved(true);
+        // Update parent state & localStorage
+        const updated = { 
+          ...company, 
+          ...data.company 
+        };
+        onUpdate(updated);
+        localStorage.setItem(
+          'bharatqa_company', 
+          JSON.stringify(updated)
+        );
+        // Hide success message after 3 seconds
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert('Error: ' + (data.error || 'Failed to save'));
+      }
+    } catch (err) {
+      alert('Failed to save: ' + err.message);
+    }
+    setSaving(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmText = prompt(
+      'This will DELETE your account and ALL your tests.\n\n' +
+      'Type "DELETE" to confirm:'
+    );
+    
+    if (confirmText !== 'DELETE') {
+      if (confirmText !== null) {
+        alert('You must type DELETE exactly to confirm');
+      }
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        API + '/auth/company/' + company.id, 
+        { method: 'DELETE' }
+      );
+      const data = await res.json();
+      
+      if (data.success) {
+        alert('Account deleted. We\'re sorry to see you go!');
+        onLogout();
+      } else {
+        alert('Error: ' + (data.error || 'Failed to delete'));
+      }
+    } catch (err) {
+      alert('Failed to delete: ' + err.message);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: '50px' }}>
+        <p style={{ color: '#666' }}>Loading settings...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <h2>⚙️ Settings</h2>
+
+      {/* Success Banner */}
+      {saved && (
+        <div style={{
+          ...cardStyle,
+          background: '#F0FDF4',
+          borderLeft: '4px solid #10B981',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          animation: 'fadeIn 0.3s ease'
+        }}>
+          <span style={{ fontSize: '20px' }}>✅</span>
+          <span style={{ color: '#065F46', fontWeight: '500' }}>
+            Settings saved successfully!
+          </span>
+        </div>
+      )}
+
+      {/* Google Account Card */}
+      <div style={{
+        ...cardStyle,
+        background: 'linear-gradient(135deg, #F8FAFC, #EEF2FF)'
+      }}>
+        <h3 style={{ 
+          margin: '0 0 12px 0', 
+          fontSize: '14px', 
+          color: '#6B7280',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          Google Account
+        </h3>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '15px' 
+        }}>
+          {company.picture && (
+            <img
+              src={company.picture}
+              alt=""
+              style={{
+                width: '55px', height: '55px',
+                borderRadius: '50%',
+                border: '3px solid white',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              }}
+            />
+          )}
+          <div>
+            <div style={{ 
+              fontWeight: 'bold', 
+              fontSize: '16px' 
+            }}>
+              {company.name}
+            </div>
+            <div style={{ 
+              color: '#666', 
+              fontSize: '14px' 
+            }}>
+              {company.email}
+            </div>
+            <div style={{ 
+              color: '#999', 
+              fontSize: '12px', 
+              marginTop: '4px' 
+            }}>
+              Member since {new Date(
+                company.created_at
+              ).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </div>
+          </div>
+        </div>
+        <p style={{ 
+          color: '#999', 
+          fontSize: '12px', 
+          margin: '12px 0 0 0',
+          fontStyle: 'italic'
+        }}>
+          🔒 Email and profile picture are managed by Google
+        </p>
+      </div>
+
+      {/* Edit Profile Form */}
+      <div style={cardStyle}>
+        <h3 style={{ 
+          margin: '0 0 15px 0', 
+          fontSize: '14px', 
+          color: '#6B7280',
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px'
+        }}>
+          Company Profile
+        </h3>
+
+        <form onSubmit={handleSave}>
+          {/* Company Name */}
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              Company Name 
+              <span style={{ color: '#EF4444' }}> *</span>
+            </label>
+            <input
+              type="text"
+              value={form.company_name}
+              onChange={e => setForm({ 
+                ...form, company_name: e.target.value 
+              })}
+              placeholder="e.g. Acme Technologies"
+              required
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Industry */}
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              Industry 
+              <span style={{ color: '#EF4444' }}> *</span>
+            </label>
+            <select
+              value={form.industry}
+              onChange={e => setForm({ 
+                ...form, industry: e.target.value 
+              })}
+              required
+              style={inputStyle}
+            >
+              <option value="">Select your industry</option>
+              {industries.map(i => (
+                <option key={i} value={i}>{i}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Company Size & Role */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '1fr 1fr', 
+            gap: '12px' 
+          }}>
+            <div style={formGroup}>
+              <label style={labelStyle}>
+                Team Size 
+                <span style={{ color: '#EF4444' }}> *</span>
+              </label>
+              <select
+                value={form.company_size}
+                onChange={e => setForm({ 
+                  ...form, company_size: e.target.value 
+                })}
+                required
+                style={inputStyle}
+              >
+                <option value="">Select</option>
+                {companySizes.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={formGroup}>
+              <label style={labelStyle}>
+                Your Role 
+                <span style={{ color: '#EF4444' }}> *</span>
+              </label>
+              <select
+                value={form.role}
+                onChange={e => setForm({ 
+                  ...form, role: e.target.value 
+                })}
+                required
+                style={inputStyle}
+              >
+                <option value="">Select</option>
+                {roles.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              Phone Number 
+              <span style={{ color: '#EF4444' }}> *</span>
+            </label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <span style={{
+                ...inputStyle,
+                width: '60px',
+                textAlign: 'center',
+                background: '#F3F4F6',
+                flex: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                +91
+              </span>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={e => {
+                  const val = e.target.value
+                    .replace(/\D/g, '')
+                    .slice(0, 10);
+                  setForm({ ...form, phone: val });
+                }}
+                placeholder="9876543210"
+                required
+                style={{ ...inputStyle, flex: 1 }}
+                maxLength="10"
+              />
+            </div>
+          </div>
+
+          {/* Website */}
+          <div style={formGroup}>
+            <label style={labelStyle}>Website</label>
+            <input
+              type="url"
+              value={form.website}
+              onChange={e => setForm({ 
+                ...form, website: e.target.value 
+              })}
+              placeholder="https://yourcompany.com"
+              style={inputStyle}
+            />
+          </div>
+
+          {/* Referral */}
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              How did you find BharatQA?
+            </label>
+            <select
+              value={form.referral_source}
+              onChange={e => setForm({ 
+                ...form, referral_source: e.target.value 
+              })}
+              style={inputStyle}
+            >
+              <option value="">Select</option>
+              {referralSources.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Save Button */}
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              ...btnStyle,
+              background: saving 
+                ? '#9CA3AF' 
+                : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+              width: '100%',
+              fontSize: '16px',
+              padding: '14px',
+              marginTop: '10px',
+              border: 'none',
+              borderRadius: '10px'
+            }}
+          >
+            {saving ? '💾 Saving...' : '💾 Save Changes'}
+          </button>
+        </form>
+      </div>
+
+      {/* Danger Zone */}
+      <div style={{
+        ...cardStyle,
+        border: '1px solid #FCA5A5',
+        marginTop: '25px'
+      }}>
+        <button
+          type="button"
+          onClick={() => setShowDanger(!showDanger)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#EF4444',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: 
 
 // ===== COMPANY DASHBOARD (Now with Auth!) =====
 function CompanyDashboard({ company }) {
