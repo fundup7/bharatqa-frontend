@@ -27,25 +27,32 @@ function AppContent() {
     }, []);
 
     const handleLogin = async (credentialResponse) => {
-        try {
-            const res = await fetch(API + '/auth/google', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ credential: credentialResponse.credential })
-            });
-            const data = await res.json();
+  try {
+    const res = await fetch(API + '/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        credential: credentialResponse.credential 
+      })
+    });
+    const data = await res.json();
 
-            if (data.success) {
-                setCompany(data.company);
-                localStorage.setItem('bharatqa_company', JSON.stringify(data.company));
-                setView('company');
-            } else {
-                alert('Login failed: ' + (data.error || 'Unknown error'));
-            }
-        } catch (err) {
-            alert('Login failed: ' + err.message);
-        }
-    };
+    if (data.success) {
+      setCompany(data.company);
+      localStorage.setItem(
+        'bharatqa_company', 
+        JSON.stringify(data.company)
+      );
+      setView('company'); 
+      // If onboarding not complete, they'll see the form
+      // If complete, they'll see the dashboard
+    } else {
+      alert('Login failed: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('Login failed: ' + err.message);
+  }
+};
 
     const handleLogout = () => {
         setCompany(null);
@@ -109,12 +116,24 @@ function AppContent() {
 
             <div style={{ padding: '15px', maxWidth: '900px', margin: '0 auto' }}>
                 {view === 'home' && <Home company={company} onLogin={handleLogin} />}
-                {view === 'company' && company && (
-                    <CompanyDashboard company={company} />
-                )}
-                {view === 'company' && !company && (
-                    <LoginPrompt onLogin={handleLogin} />
-                )}
+                // Replace this line:
+{view === 'company' && company && (
+  <CompanyDashboard company={company} />
+)}
+
+// With this:
+{view === 'company' && company && !company.onboarding_complete && (
+  <OnboardingForm 
+    company={company} 
+    onComplete={(updated) => {
+      setCompany(updated);
+      setView('company');
+    }} 
+  />
+)}
+{view === 'company' && company && company.onboarding_complete && (
+  <CompanyDashboard company={company} />
+)}
                 {view === 'tester' && <TesterDashboard />}
                 {view === 'admin' && <AdminDashboard />}
             </div>
@@ -239,6 +258,363 @@ function Home({ company, onLogin }) {
         </div>
     );
 }
+
+// ===== ONBOARDING FORM =====
+function OnboardingForm({ company, onComplete }) {
+  const [form, setForm] = useState({
+    company_name: '',
+    industry: '',
+    company_size: '',
+    role: '',
+    phone: '',
+    website: '',
+    referral_source: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [showOptional, setShowOptional] = useState(false);
+
+  const industries = [
+    'Fintech', 'E-commerce', 'EdTech', 'HealthTech', 
+    'Social Media', 'Gaming', 'SaaS / B2B', 'Logistics',
+    'Food & Delivery', 'Travel', 'Media & Entertainment',
+    'Government / GovTech', 'Other'
+  ];
+
+  const companySizes = [
+    'Just me', '2-10', '11-50', '51-200', '200+'
+  ];
+
+  const roles = [
+    'Founder / CEO', 'CTO / Tech Lead', 'QA Lead / Manager',
+    'Developer', 'Product Manager', 'Other'
+  ];
+
+  const referralSources = [
+    'Google Search', 'Twitter / X', 'LinkedIn', 
+    'Friend / Colleague', 'YouTube', 'Reddit',
+    'Product Hunt', 'Other'
+  ];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!form.company_name || !form.industry || 
+        !form.company_size || !form.role || !form.phone) {
+      alert('Please fill all required fields');
+      return;
+    }
+
+    // Basic phone validation
+    const phoneClean = form.phone.replace(/\D/g, '');
+    if (phoneClean.length < 10) {
+      alert('Please enter a valid phone number');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(
+        API + '/auth/onboarding/' + company.id, 
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form)
+        }
+      );
+      const data = await res.json();
+      
+      if (data.success) {
+        // Update localStorage with complete profile
+        const updated = { 
+          ...company, 
+          ...data.company, 
+          onboarding_complete: true 
+        };
+        localStorage.setItem(
+          'bharatqa_company', 
+          JSON.stringify(updated)
+        );
+        onComplete(updated);
+      } else {
+        alert('Error: ' + (data.error || 'Something went wrong'));
+      }
+    } catch (err) {
+      alert('Failed to save: ' + err.message);
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+      <div style={{ textAlign: 'center', marginBottom: '25px' }}>
+        <div style={{ fontSize: '40px', marginBottom: '10px' }}>
+          🎉
+        </div>
+        <h2 style={{ margin: '0 0 5px 0' }}>
+          Welcome, {company.name}!
+        </h2>
+        <p style={{ color: '#666', margin: 0 }}>
+          Complete your profile to start testing
+        </p>
+      </div>
+
+      {/* Google profile card */}
+      <div style={{ 
+        ...cardStyle, 
+        background: '#F0FDF4', 
+        borderLeft: '4px solid #10B981',
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '12px',
+        marginBottom: '20px'
+      }}>
+        {company.picture && (
+          <img 
+            src={company.picture} 
+            alt="" 
+            style={{ 
+              width: '45px', height: '45px', 
+              borderRadius: '50%' 
+            }} 
+          />
+        )}
+        <div>
+          <div style={{ fontWeight: 'bold' }}>
+            {company.name}
+          </div>
+          <div style={{ color: '#666', fontSize: '13px' }}>
+            {company.email}
+          </div>
+        </div>
+        <span style={{ 
+          marginLeft: 'auto', 
+          background: '#10B981', 
+          color: 'white',
+          padding: '3px 10px', 
+          borderRadius: '12px', 
+          fontSize: '11px' 
+        }}>
+          ✓ Verified
+        </span>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        {/* Company Name */}
+        <div style={formGroup}>
+          <label style={labelStyle}>
+            Company Name <span style={{ color: '#EF4444' }}>*</span>
+          </label>
+          <input
+            type="text"
+            value={form.company_name}
+            onChange={e => setForm({ 
+              ...form, company_name: e.target.value 
+            })}
+            placeholder="e.g. Acme Technologies"
+            required
+            style={inputStyle}
+          />
+        </div>
+
+        {/* Industry */}
+        <div style={formGroup}>
+          <label style={labelStyle}>
+            Industry <span style={{ color: '#EF4444' }}>*</span>
+          </label>
+          <select
+            value={form.industry}
+            onChange={e => setForm({ 
+              ...form, industry: e.target.value 
+            })}
+            required
+            style={inputStyle}
+          >
+            <option value="">Select your industry</option>
+            {industries.map(i => (
+              <option key={i} value={i}>{i}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Company Size & Role - side by side */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 1fr', 
+          gap: '12px' 
+        }}>
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              Team Size <span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <select
+              value={form.company_size}
+              onChange={e => setForm({ 
+                ...form, company_size: e.target.value 
+              })}
+              required
+              style={inputStyle}
+            >
+              <option value="">Select</option>
+              {companySizes.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          <div style={formGroup}>
+            <label style={labelStyle}>
+              Your Role <span style={{ color: '#EF4444' }}>*</span>
+            </label>
+            <select
+              value={form.role}
+              onChange={e => setForm({ 
+                ...form, role: e.target.value 
+              })}
+              required
+              style={inputStyle}
+            >
+              <option value="">Select</option>
+              {roles.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Phone */}
+        <div style={formGroup}>
+          <label style={labelStyle}>
+            Phone Number <span style={{ color: '#EF4444' }}>*</span>
+          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span style={{ 
+              ...inputStyle, 
+              width: '60px', 
+              textAlign: 'center',
+              background: '#F3F4F6',
+              flex: 'none'
+            }}>
+              +91
+            </span>
+            <input
+              type="tel"
+              value={form.phone}
+              onChange={e => {
+                const val = e.target.value
+                  .replace(/\D/g, '')
+                  .slice(0, 10);
+                setForm({ ...form, phone: val });
+              }}
+              placeholder="9876543210"
+              required
+              style={{ ...inputStyle, flex: 1 }}
+              maxLength="10"
+            />
+          </div>
+        </div>
+
+        {/* Optional Section */}
+        <button
+          type="button"
+          onClick={() => setShowOptional(!showOptional)}
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            color: '#4F46E5',
+            cursor: 'pointer', 
+            fontSize: '14px', 
+            padding: '10px 0',
+            width: '100%', 
+            textAlign: 'left' 
+          }}
+        >
+          {showOptional ? '▼' : '▶'} 
+          Tell us more (optional)
+        </button>
+
+        {showOptional && (
+          <div style={{ 
+            background: '#F9FAFB', 
+            padding: '15px', 
+            borderRadius: '8px',
+            marginBottom: '15px' 
+          }}>
+            <div style={formGroup}>
+              <label style={labelStyle}>Website</label>
+              <input
+                type="url"
+                value={form.website}
+                onChange={e => setForm({ 
+                  ...form, website: e.target.value 
+                })}
+                placeholder="https://yourcompany.com"
+                style={inputStyle}
+              />
+            </div>
+
+            <div style={formGroup}>
+              <label style={labelStyle}>
+                How did you find BharatQA?
+              </label>
+              <select
+                value={form.referral_source}
+                onChange={e => setForm({ 
+                  ...form, referral_source: e.target.value 
+                })}
+                style={inputStyle}
+              >
+                <option value="">Select</option>
+                {referralSources.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
+          disabled={submitting}
+          style={{ 
+            ...btnStyle,
+            background: submitting 
+              ? '#9CA3AF' 
+              : 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+            width: '100%',
+            fontSize: '16px',
+            padding: '14px',
+            marginTop: '10px',
+            border: 'none',
+            borderRadius: '10px'
+          }}
+        >
+          {submitting 
+            ? 'Setting up...' 
+            : '🚀 Start Testing'}
+        </button>
+
+        <p style={{ 
+          textAlign: 'center', 
+          color: '#999', 
+          fontSize: '12px',
+          marginTop: '15px' 
+        }}>
+          You can update this info later in settings
+        </p>
+      </form>
+    </div>
+  );
+}
+
+// Add this style with your other styles
+const labelStyle = { 
+  fontSize: '14px', 
+  fontWeight: '500', 
+  color: '#374151',
+  marginBottom: '4px', 
+  display: 'block' 
+};
 
 // ===== COMPANY DASHBOARD (Now with Auth!) =====
 function CompanyDashboard({ company }) {
