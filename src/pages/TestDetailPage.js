@@ -367,7 +367,6 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                           </div>
                         </div>
                       )}
-                    </div>
                   </div>
 
                   {/* AI Analysis */}
