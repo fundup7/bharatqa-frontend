@@ -7,12 +7,20 @@ import './DashboardPage.css';
 export default function DashboardPage({ company, onSelectTest, onViewChange, showToast }) {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uniqueTesters, setUniqueTesters] = useState(0);
 
   const loadTests = useCallback(async () => {
+
+    const u = await apiClient.getCompanyUniqueTesters(company.id);
+    setUniqueTesters(u.unique_testers || 0);
+
     try {
       setLoading(true);
       const data = await apiClient.getTests(company.id);
       setTests(data);
+
+      const u = await apiClient.getCompanyUniqueTesters(company.id);
+      setUniqueTesters(u.unique_testers || 0);
     } catch (err) {
       console.error(err);
       showToast('Failed to load tests', 'error');
@@ -22,13 +30,14 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
   }, [company.id, showToast]);
 
   useEffect(() => {
+    
     loadTests();
   }, [loadTests]);
 
   const deleteTest = async (testId, e) => {
     e.stopPropagation();
     if (!window.confirm('Delete this test and ALL its bug reports?')) return;
-    
+
     try {
       await apiClient.deleteTest(testId);
       showToast('Test deleted successfully');
@@ -50,8 +59,8 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
           <h1>Good morning, {company.name.split(' ')[0]} 👋</h1>
           <p>You have {tests.length} active test{tests.length !== 1 ? 's' : ''}</p>
         </div>
-        <button 
-          className="btn-primary" 
+        <button
+          className="btn-primary"
           onClick={() => onViewChange('create-test')}
         >
           <Plus size={20} /> Create New Test
@@ -66,11 +75,11 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
           { label: 'Testers', value: totalTesters, icon: Users, color: colors.electricBlue },
         ].map((stat, i) => (
           <div key={i} className="stat-card glass-card">
-            <div 
-              className="stat-icon" 
-              style={{ 
-                backgroundColor: `${stat.color}20`, 
-                color: stat.color 
+            <div
+              className="stat-icon"
+              style={{
+                backgroundColor: `${stat.color}20`,
+                color: stat.color
               }}
             >
               <stat.icon size={24} />
@@ -95,8 +104,8 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
           <div className="empty-icon">📋</div>
           <h3>No tests yet</h3>
           <p>Create your first test to start getting real device bug reports</p>
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={() => onViewChange('create-test')}
           >
             + Create Your First Test

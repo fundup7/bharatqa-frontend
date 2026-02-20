@@ -12,7 +12,7 @@ async function handleResponse(response) {
       try {
         const text = await response.text();
         if (text.length < 200) errorMessage = text;
-      } catch (e2) {}
+      } catch (e2) { }
     }
     throw new Error(errorMessage);
   }
@@ -48,13 +48,17 @@ export const apiClient = {
       body: JSON.stringify(data)
     }).then(handleResponse),
 
+
+  getCompanyUniqueTesters: (companyId) =>
+    fetch(API + `/company/${companyId}/unique-testers`).then(handleResponse),
+
   // Tests
   getTests: (companyId) =>
     fetch(API + `/company/${companyId}/tests`).then(handleResponse),
 
   createTest: (formData) =>
     fetch(API + '/tests', { method: 'POST', body: formData }),
-    // Note: createTest returns raw Response so caller can check res.ok
+  // Note: createTest returns raw Response so caller can check res.ok
 
   deleteTest: (testId) =>
     fetch(API + `/tests/${testId}`, { method: 'DELETE' }).then(handleResponse),

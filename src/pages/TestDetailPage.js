@@ -30,7 +30,7 @@ function safeJsonParse(v) {
     if (!v) return null;
     if (typeof v === 'string') return JSON.parse(v);
     if (typeof v === 'object') return v;
-  } catch {}
+  } catch { }
   return null;
 }
 
@@ -57,6 +57,47 @@ function fmtSeconds(v) {
   const m = Math.floor(n / 60);
   const s = n % 60;
   return `${m}m ${s}s`;
+}
+
+function normalizeMbps(v) {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'number') return `${v} Mbps`;
+  const s = String(v).trim();
+  // avoid "102 Mbps Mbps"
+  const cleaned = s.replace(/mbps/ig, '').trim();
+  return cleaned ? `${cleaned} Mbps` : null;
+}
+
+function extractTesterNotes(bug) {
+  const raw = (bug.bug_description || bug.description || '').trim();
+  if (!raw) return null;
+
+  // If the string contains a feedback section, prefer that.
+  const feedbackIdx = raw.toLowerCase().indexOf('tester feedback');
+  if (feedbackIdx !== -1) {
+    let after = raw.slice(feedbackIdx);
+
+    // remove header like "TESTER FEEDBACK:"
+    after = after.replace(/tester feedback\s*:\s*/i, '');
+
+    // remove "Rating: x/y" if present
+    after = after.replace(/rating\s*:\s*\d+(\.\d+)?\s*\/\s*\d+/ig, '');
+
+    // remove lines made of underscores / separators
+    after = after.replace(/[_—-]{5,}/g, ' ');
+
+    const cleaned = after.trim();
+    return cleaned.length ? cleaned : null;
+  }
+
+  // Detect auto-session-summary patterns and hide them
+  const tokens = ['Device:', 'Android:', 'Screen:', 'Battery:', 'Network:', 'Duration:', 'Coordinates:', 'Accuracy:', 'Address:'];
+  const hits = tokens.reduce((acc, t) => acc + (raw.includes(t) ? 1 : 0), 0);
+
+  // if it looks like mostly telemetry, don't show it as "Tester Notes"
+  if (hits >= 5) return null;
+
+  return raw;
 }
 
 export default function TestDetailPage({ test, onBack, showToast }) {
@@ -190,175 +231,102 @@ export default function TestDetailPage({ test, onBack, showToast }) {
 
       <div className="bugs-list">
         {bugs.map(bug => {
-          const isExpanded = expandedBug === bug.id;
-          const stats = safeJsonParse(bug.device_stats);
-          const videoUrl = getVideoUrl(bug);
+  const isExpanded = expandedBug === bug.id;
+  const stats = safeJsonParse(bug.device_stats);
+  const videoUrl = getVideoUrl(bug);
 
-          // Map stats with support for snake_case + camelCase keys
-          const deviceModel = pick(stats, ['device_model', 'deviceModel', 'model']);
-          const androidVersion = pick(stats, ['android_version', 'androidVersion', 'osVersion']);
-          const screenRes = pick(stats, ['screen_resolution', 'screenResolution', 'resolution']);
-          const networkType = pick(stats, ['network_type', 'networkType']);
-          const networkSpeed = pick(stats, ['network_speed_mbps', 'networkSpeedMbps', 'networkSpeed']);
-          const batteryStart = pick(stats, ['battery_start', 'batteryStart']);
-          const batteryEnd = pick(stats, ['battery_end', 'batteryEnd']);
-          const batteryDrain = pick(stats, ['battery_drain', 'batteryDrain']);
-          const durationSec = pick(stats, ['duration_seconds', 'durationSeconds', 'duration']);
-          const locationAddr = pick(stats, ['location_address', 'locationAddress', 'address']);
-          const lat = pick(stats, ['location_lat', 'locationLat', 'lat', 'latitude']);
-          const lng = pick(stats, ['location_lng', 'locationLng', 'lng', 'longitude']);
-          const accuracy = pick(stats, ['location_accuracy', 'locationAccuracy', 'accuracy']);
+  // ...your existing pick() calls...
+  const deviceModel = pick(stats, ['device_model','deviceModel','model']);
+  const androidVersion = pick(stats, ['android_version','androidVersion','osVersion']);
+  const screenRes = pick(stats, ['screen_resolution','screenResolution','resolution']);
+  const networkType = pick(stats, ['network_type','networkType']);
+  const networkSpeed = pick(stats, ['network_speed_mbps','networkSpeedMbps','networkSpeed']);
+  const batteryStart = pick(stats, ['battery_start','batteryStart']);
+  const batteryEnd = pick(stats, ['battery_end','batteryEnd']);
+  const batteryDrain = pick(stats, ['battery_drain','batteryDrain']);
+  const durationSec = pick(stats, ['duration_seconds','durationSeconds','duration']);
+  const locationAddr = pick(stats, ['location_address','locationAddress','address']);
+  const lat = pick(stats, ['location_lat','locationLat','lat','latitude']);
+  const lng = pick(stats, ['location_lng','locationLng','lng','longitude']);
+  const accuracy = pick(stats, ['location_accuracy','locationAccuracy','accuracy']);
 
-          const alreadyAnalyzed = Boolean(bug.ai_analysis);
-          const aiBusy = analyzingBug === bug.id;
+  const mapsUrl = (lat && lng)
+    ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`
+    : null;
 
-          const mapsUrl = (lat && lng)
-            ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}`
-            : null;
+  // ✅ DEFINE specItems HERE (JS section), not inside JSX
+  const specItems = [
+    { label: 'Device', value: deviceModel, icon: Smartphone },
+    { label: 'Android', value: androidVersion },
+    { label: 'Screen', value: screenRes },
+    { label: 'Battery start', value: batteryStart != null ? `${batteryStart}%` : null, icon: Battery },
+    { label: 'Battery end', value: batteryEnd != null ? `${batteryEnd}%` : null },
+    { label: 'Battery drain', value: batteryDrain != null ? `${batteryDrain}%` : null },
+    { label: 'Network', value: networkType, icon: Wifi },
+    { label: 'Network speed', value: normalizeMbps(networkSpeed) },
+    { label: 'Duration', value: durationSec ? `${durationSec}s` : null },
+    { label: 'Coordinates', value: (lat && lng) ? `${lat}, ${lng}` : null, full: true },
+    { label: 'Accuracy', value: accuracy ? `${accuracy} m` : null },
+    { label: 'Address', value: locationAddr, full: true, icon: MapPin },
+  ].filter(x => x.value);
 
-          return (
-            <div key={bug.id} className={`bug-card glass-card ${isExpanded ? 'bug-expanded' : ''}`}>
-              <div className="bug-header" onClick={() => toggleExpand(bug.id)}>
-                <div className="bug-severity-dot" style={{ background: severityColor(bug.severity) }} />
+  return (
+    <div key={bug.id} className={`bug-card glass-card ${isExpanded ? 'bug-expanded' : ''}`}>
+      {/* ...header... */}
 
-                <div className="bug-summary">
-                  <h3>{bug.bug_title || bug.title || 'Untitled Bug'}</h3>
+      {isExpanded && (
+        <div className="bug-detail">
 
-                  <div className="bug-meta-row">
-                    <span className="bug-tester">👤 {bug.tester_name || 'Anonymous'}</span>
-                    <span className="bug-time">
-                      <Clock size={12} /> {new Date(bug.created_at).toLocaleString()}
-                    </span>
+          {/* Steps */}
+          {bug.steps_to_reproduce && (
+            <div className="bug-panel">
+              <h4>Steps to Reproduce</h4>
+              <pre className="bug-steps">{bug.steps_to_reproduce}</pre>
+            </div>
+          )}
 
-                    {bug.severity && (
-                      <span
-                        className="bug-severity-badge"
-                        style={{ background: severityColor(bug.severity) + '20', color: severityColor(bug.severity) }}
-                      >
-                        {bug.severity}
-                      </span>
-                    )}
+          {/* ✅ Structured Specs */}
+          {specItems.length > 0 && (
+            <div className="bug-panel">
+              <h4>Session Specs</h4>
 
-                    {videoUrl && (
-                      <span className="bug-has-video">
-                        <Video size={12} /> Recording
-                      </span>
-                    )}
-
-                    {alreadyAnalyzed && (
-                      <span className="bug-ai-badge">
-                        <Check size={12} /> AI Done
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="bug-actions">
-                  <button
-                    className={`action-btn ai-btn ${alreadyAnalyzed ? 'action-btn--disabled' : ''}`}
-                    onClick={(e) => analyzeBug(bug, e)}
-                    disabled={aiBusy || alreadyAnalyzed}
-                    title={alreadyAnalyzed ? 'AI analysis already available' : 'Analyze with AI'}
-                  >
-                    {aiBusy ? (
-                      <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
-                    ) : alreadyAnalyzed ? (
-                      <Check size={16} />
-                    ) : (
-                      <Brain size={16} />
-                    )}
-                  </button>
-
-                  <button
-                    className="action-btn delete-action"
-                    onClick={(e) => deleteBug(bug.id, e)}
-                    title="Delete bug"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-
-                  <button
-                    type="button"
-                    className="action-btn expand-btn"
-                    onClick={(e) => { e.stopPropagation(); toggleExpand(bug.id); }}
-                    title={isExpanded ? "Collapse" : "Expand"}
-                  >
-                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div className="bug-detail">
-                  <div className="bug-detail-grid">
-                    {/* LEFT COLUMN */}
-                    <div className="bug-col">
-                      <div className="bug-panel">
-                        <h4>Tester Notes</h4>
-                        <p className="bug-description">
-                          {bug.bug_description || bug.description || 'No description provided.'}
-                        </p>
+              <div className="specs-grid">
+                {specItems.map((it, idx) => {
+                  const Icon = it.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className={`spec-card ${it.full ? 'spec-card--full' : ''}`}
+                    >
+                      <div className="spec-card-label">
+                        {Icon ? <Icon size={14} /> : null}
+                        <span>{it.label}</span>
                       </div>
 
-                      {bug.steps_to_reproduce && (
-                        <div className="bug-panel">
-                          <h4>Steps to Reproduce</h4>
-                          <pre className="bug-steps">{bug.steps_to_reproduce}</pre>
-                        </div>
-                      )}
-
-                      {/* Structured Specs */}
-                      {(stats || deviceModel || networkType || locationAddr) && (
-                        <div className="bug-panel">
-                          <h4>Session Specs</h4>
-
-                          <dl className="spec-grid">
-                            {deviceModel && (<><dt><Smartphone size={14} /> Device</dt><dd>{deviceModel}</dd></>)}
-                            {androidVersion && (<><dt>Android</dt><dd>{androidVersion}</dd></>)}
-                            {screenRes && (<><dt>Screen</dt><dd>{screenRes}</dd></>)}
-
-                            {typeof batteryStart !== 'undefined' && batteryStart !== null && (
-                              <><dt><Battery size={14} /> Battery start</dt><dd>{fmtPct(batteryStart)}</dd></>
-                            )}
-                            {typeof batteryEnd !== 'undefined' && batteryEnd !== null && (
-                              <><dt>Battery end</dt><dd>{fmtPct(batteryEnd)}</dd></>
-                            )}
-                            {batteryDrain !== null && batteryDrain !== undefined && batteryDrain !== '' && (
-                              <><dt>Battery drain</dt><dd>{fmtPct(batteryDrain)}</dd></>
-                            )}
-
-                            {networkType && (<><dt><Wifi size={14} /> Network</dt><dd>{networkType}</dd></>)}
-                            {networkSpeed && (<><dt>Network speed</dt><dd>{String(networkSpeed)} Mbps</dd></>)}
-
-                            {durationSec && (<><dt>Duration</dt><dd>{fmtSeconds(durationSec)}</dd></>)}
-
-                            {locationAddr && (
-                              <><dt><MapPin size={14} /> Location</dt><dd>{locationAddr}</dd></>
-                            )}
-                            {(lat && lng) && (
-                              <><dt>Coordinates</dt><dd>
-                                {lat}, {lng}
-                                {mapsUrl && (
-                                  <>
-                                    {' '}
-                                    <a className="spec-link" href={mapsUrl} target="_blank" rel="noreferrer">
-                                      View map
-                                    </a>
-                                  </>
-                                )}
-                              </dd></>
-                            )}
-                            {accuracy && (<><dt>Accuracy</dt><dd>{String(accuracy)} m</dd></>)}
-                          </dl>
-
-                          {!stats && (
-                            <div className="spec-muted">
-                              (No device_stats JSON found; showing only what’s available.)
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="spec-card-value">
+                        {it.value}
+                        {it.label === 'Coordinates' && mapsUrl && (
+                          <>
+                            {' '}
+                            <a className="spec-link" href={mapsUrl} target="_blank" rel="noreferrer">
+                              View map
+                            </a>
+                          </>
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+
+              {!stats && (
+                <div className="spec-muted">
+                  (No device_stats JSON found; showing only what’s available.)
+                </div>
+              )}
+            </div>
+          )}
+
 
                     {/* RIGHT COLUMN */}
                     <div className="bug-col">
