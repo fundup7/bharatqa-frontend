@@ -102,7 +102,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
     try {
       if (typeof bug.device_stats === 'string') return JSON.parse(bug.device_stats);
       if (typeof bug.device_stats === 'object') return bug.device_stats;
-    } catch (e) {}
+    } catch (e) { }
     return null;
   };
 
@@ -153,7 +153,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
           <h3>Failed to load bug reports</h3>
           <p>{error}</p>
           <p className="error-hint">
-            This usually means the backend server is waking up (Render free tier sleeps after inactivity). 
+            This usually means the backend server is waking up (Render free tier sleeps after inactivity).
             Wait 30-60 seconds and try again.
           </p>
           <button className="btn-primary" onClick={loadBugs}>
@@ -226,7 +226,15 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                   >
                     <Trash2 size={16} />
                   </button>
-                  <button className="action-btn expand-btn" onClick={() => toggleExpand(bug.id)}>
+                  <button
+                    type="button"
+                    className="action-btn expand-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();      // <-- IMPORTANT
+                      toggleExpand(bug.id);
+                    }}
+                    title={isExpanded ? "Collapse" : "Expand"}
+                  >
                     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </button>
                 </div>
