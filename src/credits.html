@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BharatQA | Enterprise App Testing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --saffron: #FF6B2B;
+            --indigo: #1A1A3E;
+            --base-dark: #0B0D1A;
+            --electric-blue: #4F8EF7;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--base-dark);
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, #1E1458 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, #0F3460 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 80%, #1A0533 0%, transparent 60%);
+            background-attachment: fixed;
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .sidebar-item-active {
+            background: rgba(255, 107, 43, 0.12);
+            border-left: 3px solid var(--saffron);
+            color: white;
+        }
+
+        .btn-saffron {
+            background: linear-gradient(135deg, #FF6B2B, #FF8C42);
+            box-shadow: 0 4px 24px rgba(255, 107, 43, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .btn-saffron:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        .btn-ai {
+            background: linear-gradient(135deg, #4F8EF7, #6B5CE7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-ai::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        .critical-glow {
+            box-shadow: 0 0 15px rgba(255, 59, 92, 0.4);
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 5px rgba(255, 59, 92, 0.4); }
+            50% { box-shadow: 0 0 20px rgba(255, 59, 92, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(255, 59, 92, 0.4); }
+        }
+    </style>
+</head>
+<body class="flex">
+
+    <aside class="w-64 fixed h-full flex flex-col border-r border-white/10 bg-white/5 backdrop-blur-md">
+        <div class="p-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#FF6B2B] rounded-lg flex items-center justify-center font-bold text-xl">B</div>
+                <span class="text-xl font-bold tracking-tight">BharatQA</span>
+            </div>
+        </div>
+
+        <div class="px-4 py-2">
+            <div class="flex items-center gap-3 p-3 mb-6 glass-card rounded-xl">
+                <div class="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center font-bold">Z</div>
+                <div>
+                    <p class="text-sm font-semibold">Zomato Ltd.</p>
+                    <p class="text-[10px] text-white/40 mono">zomato@qa.com</p>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 sidebar-item-active rounded-xl transition-all">
+                    <i class="fa-solid fa-chart-pie text-sm"></i>
+                    <span class="text-sm font-medium">Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fa-solid fa-vial text-sm"></i>
+                    <span class="text-sm font-medium">My Tests</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fa-solid fa-file-lines text-sm"></i>
+                    <span class="text-sm font-medium">Reports</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-4 py-3 text-white/60 hover:bg-white/5 rounded-xl transition-all">
+                    <i class="fa-solid fa-gear text-sm"></i>
+                    <span class="text-sm font-medium">Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6 text-xs text-white/30 border-t border-white/5">
+            <p>Made in India 🇮🇳</p>
+            <p class="mt-1">© 2026 BharatQA</p>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-64 p-10">
+        
+        <header class="flex justify-between items-end mb-10">
+            <div>
+                <h1 class="text-4xl font-bold">Good evening, Rahul 👋</h1>
+                <p class="text-white/60 mt-2">You have <span class="text-white">3 active tests</span> across 12 Indian states.</p>
+            </div>
+            <button class="btn-saffron px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Create New Test
+            </button>
+        </header>
+
+        <section class="grid grid-cols-4 gap-6 mb-10">
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-start">
+                    <p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Total Tests</p>
+                    <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">
+                        <i class="fa-solid fa-microscope"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold mt-2">07</h3>
+                <p class="text-[12px] text-green-400 mt-2">↑ 2 this week</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-start">
+                    <p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Total Bugs</p>
+                    <div class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400">
+                        <i class="fa-solid fa-bug"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold mt-2">34</h3>
+                <p class="text-[12px] text-orange-400 mt-2">↑ 8 today</p>
+            </div>
+
+            <div class="glass-card p-6 border-red-500/30">
+                <div class="flex justify-between items-start">
+                    <p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Critical Bugs</p>
+                    <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center text-red-500">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold mt-2 text-red-400">05</h3>
+                <p class="text-[12px] text-red-400/60 mt-2">Needs Attention</p>
+            </div>
+
+            <div class="glass-card p-6">
+                <div class="flex justify-between items-start">
+                    <p class="text-[11px] uppercase tracking-widest text-white/40 font-bold">Avg Duration</p>
+                    <div class="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400">
+                        <i class="fa-solid fa-clock"></i>
+                    </div>
+                </div>
+                <h3 class="text-3xl font-bold mt-2">8.3m</h3>
+                <p class="text-[12px] text-white/40 mt-2">Stable session time</p>
+            </div>
+        </section>
+
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold">Your Active Tests</h2>
+            <div class="flex gap-2">
+                <button class="px-4 py-2 glass-card text-xs rounded-lg">Sort: Newest</button>
+                <button class="px-4 py-2 glass-card text-xs rounded-lg">Filter: All</button>
+            </div>
+        </div>
+
+        <section class="grid grid-cols-3 gap-6">
+            <div class="glass-card p-6 group">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">🍕</div>
+                    <div>
+                        <h4 class="font-bold group-hover:text-saffron transition-colors">Zomato v4.2.0</h4>
+                        <p class="text-xs text-white/40">Created 2 hours ago</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 mb-6">
+                    <span class="bg-green-500/20 text-green-400 px-2 py-1 rounded text-[10px] mono">APK ✓</span>
+                    <span class="bg-white/5 text-white/60 px-2 py-1 rounded text-[10px] mono">14 Bugs</span>
+                    <span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-[10px] mono">2 Crit</span>
+                </div>
+
+                <div class="border-t border-white/5 pt-4 flex justify-between items-center">
+                    <span class="text-xs text-white/40 flex items-center gap-1">
+                        <i class="fa-solid fa-users"></i> 8 Testers
+                    </span>
+                    <button class="text-xs font-bold flex items-center gap-1 hover:gap-2 transition-all">
+                        View Reports <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 border-blue-500/30">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">💳</div>
+                    <div>
+                        <h4 class="font-bold">Checkout Flow</h4>
+                        <p class="text-xs text-white/40">Created Dec 14, 2025</p>
+                    </div>
+                    <div class="ml-auto text-blue-400 text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-sparkles"></i> AI Active
+                    </div>
+                </div>
+                
+                <div class="flex gap-2 mb-6">
+                    <span class="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-[10px] mono">Gemini Pro</span>
+                    <span class="bg-white/5 text-white/60 px-2 py-1 rounded text-[10px] mono">5 Bugs</span>
+                </div>
+
+                <div class="border-t border-white/5 pt-4 flex justify-between items-center">
+                    <span class="text-xs text-white/40 flex items-center gap-1">
+                        <i class="fa-solid fa-users"></i> 5 Testers
+                    </span>
+                    <button class="text-xs font-bold text-blue-400 flex items-center gap-1">
+                        AI Analysis <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="glass-card p-6 border-dashed border-white/20 flex flex-col items-center justify-center text-center opacity-60 hover:opacity-100">
+                <div class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <p class="text-sm font-medium">New Project</p>
+                <p class="text-[11px] text-white/40 px-6">Set up another testing environment</p>
+            </div>
+        </section>
+
+        <section class="mt-12 glass-card p-8 border-l-4 border-l-blue-500">
+            <div class="flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="btn-ai text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-tighter">Gemini ✦</span>
+                        <h2 class="text-xl font-bold">Recent AI Insight</h2>
+                    </div>
+                    <p class="text-white/80 italic leading-relaxed max-w-2xl">
+                        "Multiple testers on <span class="mono text-saffron">Redmi Note 11 (Android 12)</span> in Lucknow reported UI stuttering during the OTP verification phase. This suggests a potential race condition on slower 4G networks."
+                    </p>
+                </div>
+                <button class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-xs font-bold transition-all">
+                    Generate Full Report
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>

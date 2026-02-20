@@ -1,0 +1,185 @@
+.create-test-page {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.create-test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.create-test-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.create-test-header p {
+  font-size: 14px;
+  color: var(--text-sec);
+  margin: 0;
+}
+
+.create-test-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 24px;
+  align-items: start;
+}
+
+.create-test-form {
+  padding: 32px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 160px;
+  line-height: 1.6;
+  font-family: var(--font-body);
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  display: block;
+}
+
+select.form-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+/* APK Dropzone */
+.apk-dropzone {
+  padding: 48px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s;
+  border: 2px dashed var(--glass-border);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.apk-dropzone:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.apk-dropzone.drag-active {
+  border-color: var(--saffron);
+  background: var(--saffron-dim);
+}
+
+.apk-dropzone.has-file {
+  border-style: solid;
+  cursor: default;
+}
+
+.apk-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-sec);
+}
+
+.apk-placeholder h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.apk-placeholder p {
+  font-size: 14px;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.apk-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.apk-selected {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.apk-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(52, 199, 89, 0.15);
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apk-file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apk-file-info strong {
+  font-size: 14px;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.apk-file-info span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.apk-remove {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--red-dim);
+  border: 1px solid rgba(255, 59, 92, 0.3);
+  color: var(--red);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+
+.apk-remove:hover {
+  background: rgba(255, 59, 92, 0.2);
+}
+
+.full-width {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .create-test-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-row {
+    flex-direction: column;
+  }
+}

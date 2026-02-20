@@ -1,0 +1,1509 @@
+# BharatQA — Landing Page Complete UI Design Prompt
+
+---
+
+## 🎯 Landing Page Master Brief
+
+Design a **world-class, conversion-optimized marketing landing page** for **BharatQA** that feels like it belongs alongside Vercel, Linear, and Raycast — but with a distinctly **Indian soul**. Every section must earn its scroll. The page should make a startup CTO or product manager feel: *"This is exactly what we've been looking for."*
+
+**Emotional arc of the page:**
+```
+Arrival → Intrigue → Understanding → Trust → Desire → Action
+```
+
+---
+
+## 🌐 Full Page Architecture
+
+```
+01. Navigation Bar
+02. Hero Section
+03. Live Demo / Product Preview
+04. Social Proof Bar
+05. Problem → Solution Section
+06. How It Works (3-step)
+07. Feature Deep Dive
+08. Device Diversity / India Coverage
+09. AI Intelligence Section
+10. Pricing Section
+11. Testimonials
+12. FAQ
+13. Final CTA Banner
+14. Footer
+```
+
+---
+
+## 🎨 Landing Page Design System
+
+### Background System
+```css
+/* Page base */
+body {
+  background-color: #080B18;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, 
+      rgba(79, 142, 247, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 20%, 
+      rgba(255, 107, 43, 0.08), transparent),
+    radial-gradient(ellipse 70% 60% at 20% 80%, 
+      rgba(107, 92, 231, 0.1), transparent);
+}
+
+/* Animated gradient orbs — absolute positioned, z-index -1 */
+.orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(79,142,247,0.12), transparent 70%);
+  animation: float-1 20s ease-in-out infinite;
+  top: -200px; left: -100px;
+}
+.orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(255,107,43,0.08), transparent 70%);
+  animation: float-2 25s ease-in-out infinite;
+  top: 300px; right: -150px;
+}
+.orb-3 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(107,92,231,0.1), transparent 70%);
+  animation: float-3 30s ease-in-out infinite;
+  top: 800px; left: 40%;
+}
+
+@keyframes float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(60px, 40px) scale(1.05); }
+  66% { transform: translate(-30px, 80px) scale(0.95); }
+}
+```
+
+### Grid System
+```
+Max width: 1280px
+Padding: 0 48px (desktop) → 0 24px (tablet) → 0 20px (mobile)
+Column grid: 12-column, 24px gap
+Section spacing: 140px vertical (desktop) → 80px (mobile)
+```
+
+### Noise Texture Overlay
+```css
+/* Subtle grain — adds premium feel, reduces flat look */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,..."); /* SVG noise filter */
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9999;
+}
+```
+
+---
+
+## 01. NAVIGATION BAR
+
+### Layout
+```
+[Logo]                    [Nav Links]                    [CTA]
+Left                      Center                         Right
+```
+
+### Specs
+```
+Height: 64px
+Position: Fixed, top: 0, z-index: 1000
+Width: 100vw
+
+Background on load: transparent
+Background on scroll (>80px): 
+  rgba(8, 11, 24, 0.85)
+  backdrop-filter: blur(24px) saturate(160%)
+  border-bottom: 1px solid rgba(255,255,255,0.07)
+  
+Transition: background 300ms ease, border 300ms ease
+```
+
+### Left — Logo
+```
+[🔶 B]  BharatQA
+
+Logo mark: 32px × 32px rounded square
+  gradient fill: linear-gradient(135deg, #FF6B2B 0%, #FF4500 100%)
+  Letter "B" — white, bold — or abstract circuit/test icon
+
+Wordmark: 18px, weight 700, white
+  "Bharat" — white
+  "QA" — saffron (#FF6B2B)
+
+Hover: subtle scale(1.02) on full logo group
+```
+
+### Center — Navigation Links
+```
+Links: How it Works   Features   Pricing   Blog
+
+Style:
+  font-size: 14px
+  font-weight: 500
+  color: rgba(255,255,255,0.65)
+  letter-spacing: 0.01em
+  gap: 36px between links
+  
+Hover:
+  color: rgba(255,255,255,1)
+  transition: 150ms
+  
+Active/Current:
+  color: white
+  position: relative
+  ::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0; right: 0;
+    height: 1.5px;
+    background: #FF6B2B;
+    border-radius: 1px;
+  }
+
+Mobile: hidden, replaced by hamburger
+```
+
+### Right — CTA
+```
+[Sign In]    [Get Started Free →]
+
+Sign In:
+  ghost button, white text, 14px
+  hover: text brightens
+
+Get Started Free →:
+  background: #FF6B2B
+  border-radius: 10px
+  height: 38px
+  padding: 0 18px
+  font-size: 14px, weight 600
+  color: white
+  
+  Inner glow: box-shadow inset 0 1px 0 rgba(255,255,255,0.2)
+  Outer glow: box-shadow 0 0 24px rgba(255,107,43,0.3)
+  
+  Hover: 
+    background: #FF7A3D
+    box-shadow: 0 0 36px rgba(255,107,43,0.5)
+    translateY(-1px)
+  
+  Idle animation:
+    Subtle breathing glow — shadow pulses 0.3 → 0.5 opacity, 3s loop
+```
+
+### Mobile Nav
+```
+Hamburger icon (right side): 3 lines → X morphs on click
+  Line style: white, 18px wide, 2px height, rounded
+
+Mobile drawer:
+  Slides down from top (not sidebar)
+  glass-elevated background
+  Full width
+  Links stacked vertically, 56px height each
+  [Get Started] button — full width, saffron
+  Backdrop: rgba(0,0,0,0.5) behind drawer
+```
+
+---
+
+## 02. HERO SECTION
+
+### Dimensions
+```
+Min-height: 100vh
+Padding-top: 64px (nav height)
+Display: flex, align-items: center, justify-content: center
+Text-align: center
+```
+
+### Content Stack (centered, max-width 860px)
+```
+                    ┌─ ENTRY BADGE ─┐
+                    
+         ✦ New  ·  Now with Gemini 1.5 Pro AI →
+
+                    └───────────────┘
+                    
+                    
+   "Get Your App Tested by
+    Real Indians. Instantly."
+    
+    
+    Upload your APK → Real users across India test it 
+    on their actual Android phones → AI writes the 
+    complete bug reports. No QA team. No setup.
+    
+    
+         [Start Testing Free →]   [▶ Watch 2-min Demo]
+         
+         
+    ✓ Free to start   ✓ ₹50 per session   ✓ First results in minutes
+```
+
+### Entry Badge (Top Pill)
+```
+Design:
+  display: inline-flex
+  align-items: center
+  gap: 10px
+  padding: 6px 14px 6px 8px
+  border-radius: 100px
+  
+  background: rgba(255,255,255,0.06)
+  border: 1px solid rgba(255,255,255,0.12)
+  backdrop-filter: blur(12px)
+  
+  Left chip: 
+    background: linear-gradient(135deg, #FF6B2B, #FF4500)
+    border-radius: 100px
+    padding: 3px 10px
+    font-size: 11px, weight 700, uppercase
+    text: "✦ NEW"
+  
+  Right text:
+    font-size: 13px
+    color: rgba(255,255,255,0.75)
+    text: "Now with Gemini 1.5 Pro AI"
+  
+  Arrow: → in saffron color
+  
+  Hover:
+    border-color: rgba(255,107,43,0.4)
+    background: rgba(255,107,43,0.06)
+    cursor: pointer (links to AI section)
+  
+  Entrance animation:
+    opacity: 0 → 1
+    translateY: -8px → 0
+    duration: 500ms, delay: 100ms
+```
+
+### Headline
+```
+Font: Inter, 72px desktop / 48px tablet / 36px mobile
+Weight: 800
+Line-height: 1.05
+Letter-spacing: -0.03em
+Color: white
+
+"Get Your App Tested by" — white
+"Real Indians." — 
+  gradient text: linear-gradient(135deg, #FF6B2B 0%, #FF9A5C 50%, #FFD700 100%)
+  background-clip: text
+  -webkit-text-fill-color: transparent
+"Instantly." — white
+
+Animation:
+  Words appear with blur-in effect
+  blur(8px) opacity(0) → blur(0) opacity(1)
+  Each word staggers 50ms
+  Total duration: 800ms
+  Delay: 200ms after badge
+```
+
+### Subheadline
+```
+Font: 19px / 17px mobile
+Weight: 400
+Line-height: 1.65
+Color: rgba(255,255,255,0.55)
+Max-width: 620px, centered
+Margin-top: 24px
+
+Text:
+"Upload your APK → Real users across India test it on 
+their actual Android phones → AI writes the complete 
+bug reports. No QA team. No setup costs."
+
+The → arrows: color #FF6B2B (saffron) — visual flow indicators
+
+Animation:
+  opacity: 0 → 1
+  translateY: 12px → 0
+  duration: 600ms
+  delay: 600ms
+```
+
+### CTA Button Row
+```
+Gap: 16px, centered, flex-wrap: wrap
+Margin-top: 40px
+
+Button 1 — "Start Testing Free →" (PRIMARY):
+  height: 52px
+  padding: 0 28px
+  border-radius: 14px
+  font-size: 16px, weight: 600
+  background: linear-gradient(135deg, #FF6B2B 0%, #FF5500 100%)
+  color: white
+  
+  Glow: 0 8px 32px rgba(255,107,43,0.45)
+  Top border: inset 0 1px 0 rgba(255,255,255,0.25)
+  
+  Hover:
+    transform: translateY(-2px)
+    box-shadow: 0 16px 48px rgba(255,107,43,0.55)
+    background: linear-gradient(135deg, #FF7A3D 0%, #FF6622 100%)
+  
+  Click: scale(0.97)
+  
+  Idle: 
+    Shimmer animation — light streak moves left to right every 4s
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+Button 2 — "▶ Watch Demo" (SECONDARY):
+  height: 52px
+  padding: 0 24px
+  border-radius: 14px
+  font-size: 16px, weight: 500
+  background: rgba(255,255,255,0.06)
+  border: 1px solid rgba(255,255,255,0.14)
+  color: rgba(255,255,255,0.85)
+  backdrop-filter: blur(12px)
+  
+  Play icon: 
+    16px circle, white fill
+    Triangle inside
+    
+  Hover:
+    background: rgba(255,255,255,0.1)
+    border-color: rgba(255,255,255,0.25)
+    color: white
+    translateY(-1px)
+
+Animation:
+  Both buttons: opacity: 0 → 1, translateY: 16px → 0
+  duration: 500ms, delay: 900ms
+```
+
+### Trust Strip (Below Buttons)
+```
+Margin-top: 28px
+Display: flex, gap: 24px, justify-content: center, flex-wrap: wrap
+
+3 items:
+  [✓ Free to start]   [✓ ₹50 per session]   [✓ First results in minutes]
+
+Each item:
+  font-size: 13px
+  color: rgba(255,255,255,0.4)
+  
+  ✓ checkmark: color: #34C759 (green)
+  
+  Separator between: · dot, rgba(255,255,255,0.15)
+```
+
+### Hero Visual — Product Mockup Cluster
+```
+Position: Below CTA, or right-split on 1440px screens
+Margin-top: 80px
+
+COMPOSITION (3 floating elements):
+
+1. Main Dashboard Screenshot (Center/Front):
+   Width: 780px (desktop), scales down
+   Aspect: 16:10
+   Border-radius: 20px
+   
+   Screenshot content:
+     Show the dashboard with 3-4 test cards
+     Real-looking data — "Zomato Checkout v3.2", "PayApp Beta"
+   
+   Frame:
+     glass-card style border
+     Top bar (32px): 3 traffic light dots (red/yellow/green) left
+     Inner shadow: inset 0 0 0 1px rgba(255,255,255,0.08)
+   
+   Floating effect:
+     animation: hero-float 6s ease-in-out infinite;
+     @keyframes hero-float {
+       0%, 100% { transform: translateY(0px) rotateX(2deg); }
+       50% { transform: translateY(-12px) rotateX(2deg); }
+     }
+   
+   Perspective: 
+     parent: perspective(1200px)
+     rotateX(6deg) — slight top-down tilt (like a real monitor)
+   
+   Glow beneath: 
+     ::after pseudo-element
+     background: linear-gradient(to bottom, rgba(79,142,247,0.3), transparent)
+     blur(60px), -24px below, 80% width
+     animation: glow-pulse 4s ease-in-out infinite
+
+2. Bug Report Card (Left, floating):
+   Width: 280px
+   Position: absolute, left: -60px, top: 30%
+   
+   Glass card showing:
+     🔴 CRITICAL  Bug #14
+     "App crashes on payment..."
+     Device: Redmi Note 11 · Android 12
+     [Small severity badge]
+   
+   Animation:
+     translateY: different phase than main — slower
+     Rotates slightly: rotateZ(-3deg)
+     Float: 8s loop, 2s delay
+
+3. AI Analysis Card (Right, floating):
+   Width: 260px
+   Position: absolute, right: -50px, top: 20%
+   
+   Glass card showing:
+     [✦ Gemini] AI Analysis
+     Severity: CRITICAL ████
+     "Detected NullPointerException 
+      at PaymentActivity..."
+     [Gemini gradient icon]
+   
+   Blue glow border: 1px solid rgba(79,142,247,0.4)
+   Subtle blue ambient light on card
+   
+   Animation:
+     8s loop, 4s delay (opposite phase to bug card)
+     rotateZ(3deg)
+
+4. Notification Toasts (animate in/out continuously):
+   Position: Top-right of main mockup
+   
+   Toast 1 (appears at 0s):
+     [🟢] "New bug report from Mumbai"
+     Glass toast, 240px wide
+     Slides in from right → stays 3s → slides out
+   
+   Toast 2 (appears at 3s):
+     [🤖] "AI analysis complete — 3 bugs found"
+     Blue tinted
+   
+   Toast 3 (appears at 6s):
+     [📱] "Tester from Bengaluru joined"
+   
+   Loop: infinite, staggered
+
+Connection lines between cards:
+  SVG lines with animated dashes
+  stroke: rgba(255,255,255,0.1)
+  stroke-dasharray: 4 4
+  animation: dash-flow 2s linear infinite
+```
+
+### Hero Bottom Fade
+```
+::after on hero section:
+  Gradient from transparent → #080B18
+  Height: 200px
+  Position: absolute, bottom: 0
+  Allows smooth blend into next section
+```
+
+---
+
+## 03. LIVE DEMO / PRODUCT PREVIEW STRIP
+
+```
+Background: slightly lighter — rgba(255,255,255,0.02) panel
+Border-top and border-bottom: 1px solid rgba(255,255,255,0.05)
+Padding: 60px 0
+
+Center content:
+  Label: "SEE IT IN ACTION" — micro uppercase, saffron, tracked wide
+  Title: "From APK to Bug Report in Minutes"
+  
+  Below: Tab switcher (3 tabs):
+    [Upload APK]  [Testers Join]  [Reports Arrive]
+    
+    Tab style:
+      Pill shaped, glass
+      Active: saffron bg, white text
+      Inactive: transparent, muted text
+      Indicator: animated underline slides between tabs
+  
+  Content area (680px wide, centered):
+    Animated "screen" — changes based on active tab
+    
+    Tab 1 — Upload APK:
+      Drag-drop zone animation
+      File uploading progress bar
+      "myapp-v2.1.apk · 47.2MB ✓"
+      
+    Tab 2 — Testers Join:
+      Map of India
+      Pulsing dots appearing in different cities
+      Avatar icons + device names streaming in
+      
+    Tab 3 — Reports Arrive:
+      Bug cards dropping in one by one
+      Severity badges color-flashing
+      AI analysis text typing out character by character
+  
+  Auto-advance tabs every 4 seconds
+  Manual click overrides auto-advance
+  Progress bar under each tab showing time remaining
+```
+
+---
+
+## 04. SOCIAL PROOF BAR
+
+```
+Background: rgba(255,255,255,0.03)
+Border-top: 1px solid rgba(255,255,255,0.06)
+Border-bottom: 1px solid rgba(255,255,255,0.06)
+Padding: 32px 0
+
+Layout: Horizontal, 5 stats, evenly spaced, centered
+
+┌─────────┬─────────┬─────────┬─────────┬─────────┐
+│  50+    │  12     │  ₹50    │  <5min  │  4.9★   │
+│ Device  │ Indian  │  Per    │  First  │ Company │
+│ Models  │ States  │ Session │ Report  │ Rating  │
+└─────────┴─────────┴─────────┴─────────┴─────────┘
+
+Each stat:
+  Number/value: 28px, weight 700, white
+  Label: 12px, rgba(255,255,255,0.45), uppercase, tracked
+  
+  Dividers between: 1px solid rgba(255,255,255,0.08), vertical
+  
+  Hover on each: number briefly scales 1.1, returns
+
+Number counter animation:
+  On scroll-into-view: counts up from 0
+  Duration: 1.5s, ease-out cubic
+  "50+" — counts to 50, then "+" appears
+```
+
+---
+
+## 05. PROBLEM → SOLUTION SECTION
+
+```
+Padding: 140px 0
+Max-width: 1100px, centered
+
+Top label: "THE PROBLEM" — micro, red-tinted, uppercase
+
+Left column (problem):
+  Title: "Traditional QA is Broken"
+  
+  Problem list (4 items):
+  ✗ Emulators don't catch real-world bugs
+  ✗ Hiring QA teams costs ₹5-15 LPA
+  ✗ Bug reports take days to write
+  ✗ You never know what device users have
+  
+  Each ✗ item:
+    Red cross icon (×), muted red color
+    Text: rgba(255,255,255,0.65)
+    Line through on hover (strikethrough animation)
+    Glass card, subtle red tint
+
+─────────── VS ───────────
+  Center divider: vertical gradient line
+  "VS" badge: circular glass badge centered
+  Arrow pointing right →
+
+Right column (solution):
+  Top label: "THE SOLUTION" — micro, green-tinted, uppercase
+  Title: "BharatQA Changes Everything"
+  
+  Solution list (4 items):
+  ✓ Real Android phones from across India
+  ✓ Start free, pay ₹50 per test session
+  ✓ AI writes the full report automatically
+  ✓ See exact device/OS your users actually use
+  
+  Each ✓ item:
+    Green checkmark, green-tinted glass card
+    Text: white
+
+Animation:
+  Problem column: slides in from left on scroll
+  Solution column: slides in from right on scroll
+  "VS" badge: scale(0) → scale(1), bounces in
+```
+
+---
+
+## 06. HOW IT WORKS
+
+```
+Section label: "PROCESS" — micro uppercase, saffron
+Title: "Three Steps. Zero Complexity."
+Subtitle: "Be up and running in under 5 minutes."
+
+Layout: 
+  Desktop — horizontal 3 columns
+  Mobile — vertical stack with connecting line
+
+Background: None (transparent to base)
+```
+
+### Step Cards
+```
+3 cards with connecting SVG arrows between them
+
+Card 1:
+┌─────────────────────────────┐
+│                             │
+│  ┌────┐                    │
+│  │ 01 │                    │  ← Step number — glass badge
+│  └────┘                    │
+│                             │
+│  [🔼 Upload icon — 48px]   │  ← Icon in gradient circle
+│                             │
+│  Upload Your App           │  ← H3, white
+│                             │
+│  Create a test, add your   │
+│  APK file, and write simple│
+│  test instructions. Done   │
+│  in 60 seconds.            │
+│                             │
+│  ─────────────────────     │
+│  ⏱ Takes: ~60 seconds     │  ← Bottom metadata, muted
+└─────────────────────────────┘
+
+Card 2: (same structure)
+  Icon: 📱 (phone with people)
+  Title: "Real Testers Get to Work"
+  Body: "Testers across Indian cities install your app 
+         on their actual Android phones and follow 
+         your instructions."
+  Meta: ⚡ Testers join within minutes
+
+Card 3:
+  Icon: 🤖 (sparkle/AI)
+  Title: "AI Delivers Bug Reports"
+  Body: "Google Gemini watches the screen recordings 
+         and generates professional QA reports with 
+         severity assessments — automatically."
+  Meta: 📋 Reports appear as testers finish
+
+Card design:
+  glass-card base
+  Step number badge: 
+    top-left, 36px, rounded-xl
+    gradient border: saffron → blue
+    number: 20px, weight 800
+  
+  Icon circle: 
+    60px, border-radius: 16px
+    background: gradient matching step color
+    Step 1: orange gradient
+    Step 2: blue gradient
+    Step 3: purple gradient
+  
+  Border on hover: brightens to rgba(255,255,255,0.2)
+  Glow on hover: ambient color leaks from icon
+
+Connecting arrows (between cards):
+  SVG curved arrows
+  Color: rgba(255,255,255,0.15) default
+  Animated: dashes flow left → right continuously
+  On any card hover: arrow brightens
+  Mobile: vertical arrows, rotated 90°
+```
+
+---
+
+## 07. FEATURE DEEP DIVE
+
+```
+Section label: "FEATURES" — micro uppercase, electric blue
+Title: "Everything Your QA Process Needs"
+Subtitle: "Not just bug reports — complete testing intelligence."
+
+Layout: Bento grid
+  6 feature cards in asymmetric grid:
+  
+  [Large — 2×1]  [Small — 1×1]  [Small — 1×1]
+  [Small — 1×1]  [Small — 1×1]  [Large — 2×1]
+```
+
+### Feature Cards Content
+
+```
+Card A — LARGE (Real Device Testing):
+  Background: subtle orange-tinted glass
+  Left side: Feature info
+    Icon: 📱 large, 40px
+    Title: "Real Android Devices"
+    Body: "Not simulators. Actual Samsung, Redmi, 
+           Realme phones. Different models, different 
+           Android versions, real-world conditions."
+    Tags: [Samsung] [Redmi] [Realme] [OnePlus]
+           Glass pill tags, small
+  Right side: 
+    Scrolling list of device specs (vertical marquee)
+    "Samsung Galaxy M32 · Android 12"
+    "Redmi Note 11 · Android 11"  
+    [endless scroll, fades top and bottom]
+
+Card B — SMALL (Screen Recording):
+  Background: dark glass
+  Icon: 🎬 in red circle
+  Title: "Full Screen Recording"
+  Body: "Every tester session is recorded. Watch exactly 
+         what happened, in full video."
+  Visual: Mini video player mockup, 
+          play button, progress bar
+  
+Card C — SMALL (AI Reports):
+  Background: blue-tinted glass
+  Border: 1px solid rgba(79,142,247,0.25)
+  Blue ambient glow
+  Icon: ✦ Gemini icon
+  Title: "AI-Written QA Reports"
+  Body: "Google Gemini analyzes recordings and 
+         writes professional bug documentation."
+  Badge: [Powered by Gemini 1.5 Pro]
+         Google brand colors
+
+Card D — SMALL (Device Telemetry):
+  Background: dark glass
+  Icon: 📊 in purple circle
+  Title: "Device Telemetry"
+  Body: "Battery %, network speed, signal type, 
+         device model — logged automatically."
+  Visual: Mini data strips
+    🔋 67%  |  📶 4G LTE 42Mbps  |  🌡 36°C
+
+Card E — SMALL (Location Verified):
+  Background: dark glass  
+  Icon: 📍 in green circle
+  Title: "Geo-Verified Testers"
+  Body: "City, state, Google Maps link. Know exactly 
+         where your tester was."
+  Visual: Mini India map snippet with dot
+
+Card F — LARGE (Export):
+  Background: subtle purple-tinted glass
+  Left side: Feature info
+    Icon: 📥 in gradient
+    Title: "Export Everything"
+    Body: "Download all bug reports as structured text files. 
+           Share with your dev team instantly."
+    [Export Reports →] — glass button
+  Right side:
+    Code/file preview aesthetic
+    Text file content preview (monospace)
+    "bug_report_myapp_v2.1.txt"
+    File icon
+```
+
+---
+
+## 08. INDIA COVERAGE SECTION
+
+```
+Background: Very dark panel — rgba(0,0,0,0.3)
+Padding: 140px 0
+Max-width: 1200px
+
+Label: "COVERAGE" — micro, saffron uppercase
+Title: "Built for the Diversity of India"
+Subtitle: "Your app will be tested the way real Indian 
+           users actually use it — across cities, 
+           networks, and devices."
+
+Layout: Left text + Right visual (50/50 split)
+```
+
+### Left Content
+```
+4 stat items, stacked:
+
+┌────────────────────────────────┐
+│  [🏙] 12+ Cities               │
+│       Mumbai, Delhi, Bengaluru, │
+│       Hyderabad, Pune, Chennai, │
+│       Kolkata + more            │
+│                                 │
+│  [📱] 50+ Device Models        │
+│       Budget to flagship, as    │
+│       Indians actually use      │
+│                                 │
+│  [📶] All Network Types        │
+│       2G, 3G, 4G, 5G, WiFi     │
+│       Real conditions, not      │
+│       simulated                 │
+│                                 │
+│  [⚙️] Android 10–14           │
+│       Multiple OS versions      │
+│       so you catch version-     │
+│       specific bugs             │
+└────────────────────────────────┘
+
+Each item:
+  Icon: 36px glass circle
+  Title: 16px, weight 600, white
+  Body: 14px, rgba(255,255,255,0.5)
+  Left border: 2px saffron gradient on hover
+```
+
+### Right Visual — India Map
+```
+SVG India map:
+  Stroke: rgba(255,255,255,0.1)
+  Fill: rgba(255,255,255,0.03)
+  
+State fills on hover: saffron tint
+
+City dots (animated):
+  12 dots on major cities
+  Size: 10px circle
+  
+  Pulse animation:
+    Inner dot: 10px, saffron solid
+    Outer ring 1: 20px, saffron 30% opacity — scale out
+    Outer ring 2: 30px, saffron 15% opacity — scale out (delayed)
+    
+    @keyframes city-pulse {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+    Ring 2 has 0.5s delay
+
+City labels on hover:
+  "Mumbai" — glass tooltip
+  "12 testers" — sub-text
+  Appears on city dot hover
+
+Connecting lines between cities:
+  SVG curved paths
+  stroke-dasharray: animated flow
+  Color: rgba(79,142,247,0.2)
+
+Live counter (overlaid bottom-left of map):
+  Glass card, 180px
+  "🟢 Live Now"
+  "23 active testers"
+  Number: counting/changing effect
+```
+
+---
+
+## 09. AI INTELLIGENCE SECTION
+
+```
+Background: 
+  Dark panel with blue gradient glow centered
+  radial-gradient at center: rgba(79,142,247,0.08)
+
+Padding: 140px 0
+
+Label: "AI POWERED" — micro, electric blue, uppercase
+Title: "Reports Written by Google Gemini"
+Subtitle: "Not bullet points. Real QA documentation."
+
+Layout: Centered, max-width 900px
+```
+
+### AI Demo Component
+```
+Large glass card (full width):
+  border: 1px solid rgba(79,142,247,0.2)
+  Background: rgba(79,142,247,0.05)
+  Blue ambient glow
+
+Inside:
+
+Top bar:
+  [✦ Gemini 1.5 Pro]  badge (blue gradient)
+  [🔴 CRITICAL]       severity badge
+  [Analyzing...] → [Complete ✓]  status
+
+Divider
+
+Content area (2-column):
+  Left (40%): 
+    Video player mockup (blurred thumbnail)
+    Play button overlay
+    "Screen Recording · 4:32"
+    Progress bar
+    Below: Device info
+      📱 Redmi Note 11
+      🤖 Android 12
+      📶 4G LTE
+      🔋 67%
+    
+  Right (60%):
+    "AI Generated Report" label
+    
+    Text content (typewriter animation on scroll):
+    ─────────────────────────────────────
+    Bug ID: BQ-014
+    Severity: CRITICAL
+    
+    Summary:
+    Application terminates unexpectedly when user 
+    attempts to confirm payment on the checkout 
+    screen. This occurs consistently after 
+    selecting UPI as payment method.
+    
+    Steps to Reproduce:
+    1. Launch app and navigate to cart
+    2. Proceed to checkout
+    3. Select UPI payment method
+    4. Tap "Pay Now"
+    5. App crashes immediately
+    
+    Device Context:
+    Battery was at 67% (adequate), Network was 
+    4G LTE with 42Mbps down (stable). This 
+    suggests the issue is not network-related.
+    
+    Recommendation:
+    Investigate NullPointerException in 
+    PaymentConfirmationActivity.java line ~247
+    ─────────────────────────────────────
+    
+    Font: JetBrains Mono, 13px
+    Color: rgba(255,255,255,0.8)
+    
+    Typewriter: characters reveal at 30ms interval
+    Cursor: | blinking at end while typing
+
+Bottom bar of card:
+  [Generate Another Example]  [Try With Your App →]
+```
+
+### AI Feature Pills (Below Card)
+```
+Row of 4 pills:
+  [⏱ ~30 second analysis]
+  [📹 Watches full recording]  
+  [🎯 Severity assessment]
+  [📝 Professional format]
+
+Pill style: glass, white text, small icon left
+```
+
+---
+
+## 10. PRICING SECTION
+
+```
+Label: "PRICING" — micro uppercase, green
+Title: "Honest. Simple. Affordable."
+Subtitle: "No monthly fees. No contracts. Pay per test."
+
+Layout: Single centered card (640px max)
+```
+
+### Pricing Card
+```
+┌───────────────────────────────────────────┐
+│                                           │
+│  ⚡ Per Session Pricing                   │
+│                                           │
+│  ─────────────────────────────────────   │
+│                                           │
+│            ₹50                           │
+│     per test session                     │
+│                                           │
+│  The ₹50 goes directly to the tester     │
+│  who tested your app.                    │
+│                                           │
+│  ─────────────────────────────────────   │
+│                                           │
+│  ✓ Real device testing included          │
+│  ✓ Full screen recording                 │
+│  ✓ AI bug report generation              │
+│  ✓ Device telemetry & GPS location       │
+│  ✓ Unlimited test creation               │
+│  ✓ Free dashboard & account             │
+│                                           │
+│  ─────────────────────────────────────   │
+│                                           │
+│  Free to create account                 │
+│  Free to create tests                   │
+│  Pay only when testers submit reports   │
+│                                           │
+│  [Start Testing Free →]                 │
+│                                           │
+│  "No credit card required to start"     │
+└───────────────────────────────────────────┘
+
+Card design:
+  glass-elevated
+  Saffron glow border: 1px solid rgba(255,107,43,0.3)
+  Ambient saffron glow below card
+  
+₹50 price:
+  Font: 72px, weight 800
+  Gradient: #FF6B2B → #FFD700
+  
+  "per test session" — 16px, muted
+
+Checklist items:
+  ✓ — saffron color
+  Text — rgba(255,255,255,0.8)
+  Each item: 44px height, border-bottom rgba(255,255,255,0.06)
+
+Free notes (bottom):
+  Small, rgba(255,255,255,0.45)
+  ℹ icon before each
+
+CTA button:
+  Full width, saffron, 52px height
+  "Start Testing Free →"
+
+Comparison callout (below card):
+  vs ₹5-15L/yr for a QA hire
+  Glass pill, strikethrough on the ₹5-15L
+```
+
+---
+
+## 11. TESTIMONIALS
+
+```
+Label: "TRUSTED BY TEAMS" — micro uppercase, muted
+Title: "Companies Using BharatQA"
+
+Layout: 3-column card grid (or 2 + 1 featured)
+```
+
+### Testimonial Cards
+```
+Card structure:
+┌─────────────────────────────────────┐
+│  ★★★★★                             │
+│                                     │
+│  "We found 12 critical bugs before  │
+│   our app launch that our internal  │
+│   testing completely missed. The    │
+│   AI reports saved us weeks of      │
+│   debugging time."                  │
+│                                     │
+│  ─────────────────────────────────  │
+│                                     │
+│  [Avatar]  Arjun Mehta             │
+│            CTO, FinPay             │
+│            Mumbai                  │
+└─────────────────────────────────────┘
+
+Card style: glass-card
+Stars: saffron (#FF6B2B), filled SVG stars
+Quote: 15px, rgba(255,255,255,0.75), italic
+Name: 14px, weight 600, white
+Role: 13px, muted
+Avatar: 40px circle, gradient background with initials
+
+Hover: card lifts, quote brightens
+
+Featured card (center):
+  Slightly taller
+  Blue glow border
+  "Featured" pill top-right
+```
+
+### Company Logo Strip (Below Testimonials)
+```
+"Trusted by developers at"
+
+Horizontal scrolling logo ticker:
+  Logos: grayscale → color on hover
+  Opacity: 0.4 default → 1 on hover
+  Infinite scroll animation: logos slide left continuously
+  Fade edges: left and right gradient masks
+
+Mock company logos (placeholder style):
+  "Company A", "Startup B" etc. or real if available
+```
+
+---
+
+## 12. FAQ SECTION
+
+```
+Label: "FAQ" — micro uppercase
+Title: "Questions Answered"
+
+Layout: 2-column accordion grid
+  Left column: 4 FAQs
+  Right column: 4 FAQs
+  Mobile: single column
+```
+
+### FAQ Items
+```
+Questions:
+1. "How quickly will I get results?"
+   "First bug reports can appear within minutes of publishing your test, 
+    depending on tester availability in your region."
+
+2. "Do I need to provide an APK?"
+   "APK upload is optional. You can also provide Play Store link or 
+    test credentials. Testers can download directly from the Play Store."
+
+3. "What devices will testers use?"
+   "Testers use their own personal Android devices — real phones they 
+    use daily, ranging from budget to mid-range models."
+
+4. "How does AI analysis work?"
+   "Google Gemini 1.5 Pro watches the screen recording and analyzes 
+    the tester's interactions to identify bugs, assess severity, 
+    and write structured QA documentation."
+
+5. "Is my APK secure?"
+   "Your APK is stored securely and only accessible to verified testers. 
+    We use Google Cloud Storage with strict access controls."
+
+6. "Can I request specific testers?"
+   "Currently testers are matched automatically by location and device. 
+    Targeted testing by city or device is coming soon."
+
+7. "What if a report is unhelpful?"
+   "You can flag reports. We review flagged reports and 
+    credit your account if a report doesn't meet quality standards."
+
+8. "Do you support iOS?"
+   "Currently Android only. iOS testing is on our roadmap."
+
+Accordion item style:
+  Glass card, full width
+  Question: 15px, weight 600, white
+  Arrow: rotates 180° when open, saffron color
+  
+  Open state:
+    Answer text slides down with smooth max-height transition
+    Card border brightens
+    200ms ease-out animation
+  
+  Active Q: border-left: 2px solid #FF6B2B
+```
+
+---
+
+## 13. FINAL CTA BANNER
+
+```
+Background:
+  Full width section
+  Background: linear-gradient(135deg, 
+    rgba(255,107,43,0.12) 0%, 
+    rgba(79,142,247,0.08) 50%,
+    rgba(107,92,231,0.1) 100%)
+  Border-top: 1px solid rgba(255,107,43,0.2)
+  Border-bottom: 1px solid rgba(79,142,247,0.2)
+  
+Padding: 120px 0
+
+Center content (max-width 700px):
+
+  [🇮🇳 Made in India badge]
+  
+  Title (52px, bold):
+  "Ship Faster.
+   Bug Less.
+   Test Smarter."
+   
+  Each line: different color
+    "Ship Faster." — white
+    "Bug Less." — saffron gradient
+    "Test Smarter." — electric blue gradient
+
+  Subtitle:
+  "Join companies already using BharatQA 
+   to ship better Android apps."
+   
+  CTA buttons:
+    [Start Testing Free →]   [Talk to Us]
+    
+    Both 52px height, side by side
+    Primary: saffron (largest, most prominent)
+    Secondary: glass
+
+  Below buttons:
+    3 trust icons inline:
+    [🔐 SSL Secured]  [🔵 Google OAuth]  [🛡 Private & Safe]
+
+Background detail:
+  Scattered Indian flag color particles (saffron, white, green dots)
+  Very subtle, low opacity, random positions
+  Float animation, slow drift
+```
+
+---
+
+## 14. FOOTER
+
+```
+Background: rgba(0,0,0,0.4)
+Border-top: 1px solid rgba(255,255,255,0.06)
+Padding: 80px 0 40px
+
+4-column layout:
+```
+
+### Column 1 — Brand
+```
+[BharatQA Logo]
+
+Tagline: 
+"Real testing for real apps.
+ Built for India."
+
+"Made with ♥ in India 🇮🇳"
+  Font: 13px, muted
+  Heart: saffron color
+
+Social icons (if applicable):
+  [Twitter/X]  [LinkedIn]  [GitHub]
+  Glass circle buttons, 36px
+  Hover: brightens + scale(1.1)
+```
+
+### Column 2 — Product
+```
+"Product"  ← header, micro uppercase, muted
+
+Dashboard
+How it Works
+Pricing
+Create a Test
+View Reports
+```
+
+### Column 3 — Company
+```
+"Company"
+
+About
+Blog
+Careers
+Contact Us
+Press Kit
+```
+
+### Column 4 — Legal & Support
+```
+"Legal"
+
+Privacy Policy
+Terms of Service
+Cookie Policy
+
+─────
+
+"Support"
+
+Documentation
+Help Center
+Status Page
+```
+
+### Footer Bottom Bar
+```
+Full-width divider: 1px rgba(255,255,255,0.06)
+Padding-top: 32px
+
+Left: "© 2025 BharatQA · All rights reserved"
+      14px, rgba(255,255,255,0.35)
+
+Center: [Powered by Google Gemini ✦]
+         Google brand colors, small
+
+Right: [🇮🇳 Made in India]
+        saffron dot before text
+```
+
+---
+
+## 🎬 Scroll Animation System
+
+```javascript
+// All sections use IntersectionObserver
+
+// Standard entrance:
+{
+  initial: { opacity: 0, y: 32 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+}
+
+// Staggered children (cards):
+{
+  stagger: 0.1s between each child
+  parent triggers when 20% in viewport
+}
+
+// Section labels:
+{
+  initial: { opacity: 0, x: -16 },
+  animate: { opacity: 1, x: 0 },
+  duration: 0.4s
+}
+
+// Large headings:
+{
+  Word-by-word reveal
+  Each word: blur(6px) → blur(0), opacity 0→1
+  Stagger: 0.06s per word
+}
+
+// Numbers/stats:
+{
+  Count up animation triggered on viewport entry
+  Duration: 1.5s, ease-out
+  requestAnimationFrame loop
+}
+
+// Parallax:
+{
+  Hero background orbs: 0.3x scroll speed
+  Hero mockup image: 0.15x scroll speed (subtle)
+  Use CSS transform only, not top/left
+}
+```
+
+---
+
+## ♿ Accessibility Standards
+
+```
+Contrast ratios:
+  Body text on dark bg: ≥ 7:1 (AAA)
+  Secondary text: ≥ 4.5:1 (AA)
+  Button text: ≥ 4.5:1 (AA)
+  
+Focus states:
+  All interactive: 3px saffron outline, 2px offset
+  Never remove outline, restyle it
+  
+Motion:
+  @media (prefers-reduced-motion: reduce) {
+    All animations: disabled or simplified to opacity only
+    Float animations: stopped
+    Counters: show final value immediately
+  }
+
+Screen readers:
+  aria-label on all icon-only buttons
+  Decorative images: aria-hidden="true"
+  Skip to main content link (visually hidden, :focus shows)
+  
+Keyboard navigation:
+  Tab order: logical, left-to-right, top-to-bottom
+  Dropdowns: arrow keys navigate
+  Modals: focus trapped inside
+  Escape: closes all modals/drawers
+```
+
+---
+
+## 📱 Mobile Landing Page Adaptations
+
+```
+375px–767px (Mobile):
+
+NAV:
+  Logo left, hamburger right
+  CTA hidden from top nav
+  Mobile drawer: glass, full-width, slides down
+
+HERO:
+  Title: 36px → 32px
+  Subheadline: 16px
+  Buttons: stacked, full width
+  Mockup: single screenshot (no floating cards)
+  Floating cards: hidden on mobile
+
+SECTIONS:
+  All padding: 80px 0 → 60px 0
+  Two-column layouts: stack to single column
+  3-column grids: scroll horizontal (swipeable)
+
+BENTO GRID:
+  All cards: full width, stacked
+
+INDIA MAP:
+  Smaller (300px), centered
+  City dots still animated
+  Text column above map, not beside
+
+FAQ:
+  Single column, full width
+
+FOOTER:
+  2×2 column grid, then full width bottom
+  All columns stacked on mobile
+```
+
+---
+
+## 🔧 Technical Implementation Notes
+
+```
+RECOMMENDED STACK:
+  Framework: Next.js 14 (App Router)
+  Styling: Tailwind CSS + custom CSS variables
+  Animation: Framer Motion
+  Icons: Lucide React
+  Map: react-simple-maps (India SVG)
+  Video: Custom HTML5 player
+
+PERFORMANCE:
+  LCP target: < 2.5s
+  Images: Next.js Image component (WebP, lazy)
+  Fonts: next/font (Inter, JetBrains Mono)
+  Animations: GPU-accelerated (transform + opacity only)
+  Bundle: Dynamic imports for heavy sections
+
+SEO:
+  OG image: 1200×630, dark with hero text
+  Title: "BharatQA — Real Device App Testing for India"
+  Description: "Get your Android app tested by real 
+    users on real Indian devices. AI-powered bug reports. 
+    ₹50 per session."
+  Structured data: SoftwareApplication schema
+
+ANALYTICS:
+  Google Analytics 4
+  Track: CTA clicks, section visibility, scroll depth
+  Hotjar: heatmaps on hero and pricing
+```
+
+---
+
+## 🎨 Final Design Mood Reference
+
+```
+FEEL LIKE:                    NOT LIKE:
+─────────────────────         ─────────────────────
+Linear.app                    Generic SaaS template
+Vercel.com                    Cluttered landing page  
+Raycast.com                   Over-animated gimmick
+Clerk.com                     Stock photo heavy site
+Loom.com                      Corporate boring
+
+KEY DIFFERENTIATOR:
+The saffron orange + deep indigo + electric blue palette 
+immediately signals "Indian tech company" without being 
+cliché. The glassmorphism adds premium feel while the 
+clean data presentation builds trust.
+
+The hero mockup must look like REAL software — 
+actual screenshot fidelity, not a wireframe.
+
+Every animation serves a purpose.
+Every word earns its space.
+Every click feels satisfying.
+```
+
+---
+
+*Implement with Next.js + Framer Motion + Tailwind CSS. All glass effects via backdrop-filter. Animations trigger on IntersectionObserver. Mobile-first responsive. Target Lighthouse score: 95+ Performance, 100 Accessibility.*

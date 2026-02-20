@@ -1,0 +1,998 @@
+# BharatQA — Frontend UI Design Prompt
+
+---
+
+## 🎯 Master Design Prompt
+
+---
+
+### Overview
+
+Design a **complete, production-ready frontend UI** for **BharatQA** — a B2B SaaS platform where companies submit Android apps for real-device testing across India, powered by AI bug report generation. The design must feel **enterprise-trustworthy yet approachable**, combining cutting-edge **glassmorphism** and **liquid glass** aesthetics with **clinical minimalism**. Every interaction must feel **intentional, smooth, and confidence-inspiring** — because companies are trusting you with their unreleased apps.
+
+---
+
+## 🎨 Design System & Visual Language
+
+### Color Palette
+
+```
+Primary Brand:
+— Saffron Orange:     #FF6B2B  (CTA buttons, highlights, Indian identity)
+— Deep Indigo:        #1A1A3E  (dark backgrounds, sidebar)
+— Electric Blue:      #4F8EF7  (links, active states, AI indicators)
+
+Glass & Neutral:
+— Glass White:        rgba(255, 255, 255, 0.08)
+— Glass Border:       rgba(255, 255, 255, 0.15)
+— Frost Surface:      rgba(255, 255, 255, 0.04)
+— Pure White:         #FFFFFF
+— Soft White:         #F8F9FF
+
+Background:
+— Base Dark:          #0B0D1A  (primary background)
+— Mid Dark:           #111328
+— Gradient Mesh:      radial-gradient(ellipse at 20% 50%, #1E1458 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, #0F3460 0%, transparent 60%),
+                      radial-gradient(ellipse at 50% 80%, #1A0533 0%, transparent 60%)
+
+Severity Colors (color-coded badges):
+— Critical:           #FF3B5C  (red-pink glow)
+— High:               #FF6B2B  (saffron orange)
+— Medium:             #F5A623  (amber)
+— Low:                #34C759  (green)
+
+Text:
+— Primary:            #FFFFFF
+— Secondary:          rgba(255,255,255,0.65)
+— Muted:              rgba(255,255,255,0.35)
+— Accent:             #4F8EF7
+```
+
+### Typography
+
+```
+Font Stack:
+— Headings:    "Inter", system-ui  |  Weight: 700, 600
+— Body:        "Inter", system-ui  |  Weight: 400, 500
+— Code/Data:   "JetBrains Mono"   |  Weight: 400
+
+Scale (rem):
+— Hero:        3.5rem / 56px — line-height 1.1
+— H1:          2.25rem / 36px
+— H2:          1.5rem / 24px
+— H3:          1.125rem / 18px
+— Body:        0.9375rem / 15px
+— Small:       0.8125rem / 13px
+— Micro:       0.6875rem / 11px — uppercase tracking: 0.08em
+```
+
+### Glassmorphism Tokens
+
+```css
+/* Standard Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Elevated Glass (modals, dropdowns) */
+.glass-elevated {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Liquid Glass Button */
+.liquid-glass-btn {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.liquid-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.32);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+}
+```
+
+---
+
+## 📄 Page-by-Page UI Specifications
+
+---
+
+### PAGE 1 — Landing / Marketing Homepage
+
+**Layout:** Full-screen sections, vertical scroll, sticky nav
+
+#### Navigation Bar
+```
+[Logo: BharatQA — saffron "B" icon + wordmark]    [How it Works] [Pricing] [Docs]    [Sign In with Google →]
+
+Style: Glass nav — blur(20px), border-bottom 1px rgba(255,255,255,0.08)
+Position: Fixed top, 100% width
+Height: 64px
+Sign In button: Saffron orange, rounded-full, subtle shine animation on idle
+```
+
+#### Hero Section
+```
+Background: Animated mesh gradient — slow-moving radial blobs in indigo/purple/blue
+Center: 
+  Badge pill: [✦ Powered by Google Gemini AI]  — glass pill, electric blue glow
+  
+  Headline (H0 — 4rem bold):
+  "Get Your App Tested by 
+   Real Indians. Instantly."
+  
+  Subheadline:
+  "Upload your APK → Real testers across India test it on real Android devices 
+   → AI writes the bug reports. ₹50 per test session. No QA team needed."
+  
+  CTA Row:
+  [Get Started Free →]  (saffron, 52px height, rounded-xl, glowing pulse on hover)
+  [Watch Demo ▶]        (glass button, white text)
+  
+  Trust microcopy: "No credit card required · Free to start · First results in minutes"
+
+Below fold — Floating mockup cluster:
+  - Phone mockup (Android device) on left — rotating/floating
+  - Dashboard screenshot card on right — glass card floating
+  - Connecting lines with pulsing dots (showing data flow)
+  - Particle field background — tiny dots in Indian map silhouette shape
+```
+
+#### Social Proof Bar
+```
+[Tested on 50+ Device Models]  [12 Indian States Covered]  [AI Reports in <5 min]  [₹50 per Session]
+
+Style: Horizontal strip, glass-surface, icon + stat + label each cell
+Border-top and border-bottom: 1px rgba(255,255,255,0.08)
+```
+
+#### How It Works Section
+```
+Title: "Simple. Fast. Powerful."
+
+3-column glass card grid:
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│  01             │  │  02             │  │  03             │
+│  🔼 Upload      │  │  📱 Real Testers│  │  🤖 AI Reports  │
+│                 │  │                 │  │                 │
+│  Drop your APK  │  │  Testers across │  │  Gemini AI      │
+│  and describe   │  │  India test your│  │  analyzes screen│
+│  test steps.    │  │  app on their   │  │  recordings and │
+│  Done in 60s.   │  │  actual phones. │  │  writes QA docs │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+
+Cards: glass-card style, left-align, number in gradient text (saffron→blue),
+       icon in glass circle badge, hover lifts card + intensifies border glow
+Connector arrows between cards (SVG animated dashes)
+```
+
+#### Device Diversity Section
+```
+Background: Deep dark panel
+
+Title: "Your App, Tested Across Real India"
+Subtitle: "Different phones. Different networks. Different cities."
+
+Visual: India map outline (SVG, glowing indigo) with pulsing location pin dots
+        each dot = city name on hover tooltip
+
+Right panel: Scrolling ticker of device specs:
+  "Samsung Galaxy M32 · Android 12 · 4G LTE · Mumbai"
+  "Redmi Note 11 · Android 11 · WiFi · Bengaluru"  
+  "Realme 9 · Android 13 · 5G · Hyderabad"
+  [continuous scroll, glass card background, each line fades in/out]
+```
+
+#### Pricing Section
+```
+Single centered card — glass-elevated style, saffron glow border:
+
+┌────────────────────────────────────────────┐
+│              ⚡ Simple Pricing              │
+│                                            │
+│           ₹50  per test session            │
+│        [large, bold, saffron gradient]     │
+│                                            │
+│   ✓ Real device testing                   │
+│   ✓ AI-generated bug report               │
+│   ✓ Screen recording included             │
+│   ✓ Device telemetry & location data      │
+│   ✓ Free to create account & tests        │
+│                                            │
+│   [Create Your First Test — Free →]       │
+└────────────────────────────────────────────┘
+```
+
+#### Footer
+```
+3-column:
+Col 1: Logo + tagline + "Made in India 🇮🇳"
+Col 2: Links — Dashboard, How it Works, Pricing, Docs
+Col 3: Legal — Privacy Policy, Terms of Service, Contact
+
+Bottom bar: "© 2025 BharatQA · Powered by Google Gemini"
+Style: Dark, minimal, border-top glass line
+```
+
+---
+
+### PAGE 2 — Sign In / Auth Screen
+
+**Layout:** Fullscreen centered, no sidebar
+
+```
+Background: 
+  Same animated mesh gradient as homepage
+  Large frosted glass card centered (480px wide)
+  Soft ambient glow beneath card (saffron, low opacity)
+
+Card content:
+  ┌─────────────────────────────────────┐
+  │                                     │
+  │     [BharatQA Logo — centered]      │
+  │                                     │
+  │   Welcome to BharatQA              │
+  │   Sign in to your company account  │  ← secondary text
+  │                                     │
+  │   ┌─────────────────────────────┐  │
+  │   │  🔵 Continue with Google   │  │  ← White button, Google logo
+  │   └─────────────────────────────┘  │
+  │                                     │
+  │   ─────── or ───────               │
+  │                                     │
+  │   "By signing in, you agree to     │
+  │    our Terms of Service and         │
+  │    Privacy Policy"                  │
+  │                                     │
+  │   🔒 We only access your name,     │
+  │      email, and profile picture     │
+  └─────────────────────────────────────┘
+
+Button specs:
+  Google button: white background, #1A1A1A text, Google "G" logo left
+  Height: 52px, border-radius: 14px
+  Hover: slight scale(1.02), shadow deepens
+  Active: scale(0.98) — tactile press feel
+
+Trust badges below card (3 inline pills):
+  [🔐 SSL Secured]  [🛡 No Password Stored]  [🔵 Google OAuth]
+  Glass pill style, micro text
+```
+
+---
+
+### PAGE 3 — Onboarding (2-Step Flow)
+
+**Layout:** Fullscreen, centered, progress indicator
+
+#### Onboarding Shell
+```
+Top: Progress bar — thin line, saffron fill, "Step 1 of 2" label right-aligned
+Background: Same mesh gradient, no nav
+
+Glass card: 560px wide, centered
+
+Step indicators (top of card):
+  ●━━━━━━━━━━●
+  1          2
+  [filled]   [empty]
+  Company    About You
+```
+
+#### Step 1 — Company Info
+```
+┌──────────────────────────────────────────┐
+│                                          │
+│  Tell us about your company             │
+│  This helps us personalize your QA      │
+│  dashboard.                             │
+│                                          │
+│  Company Name *                         │
+│  ┌──────────────────────────────────┐   │
+│  │ e.g. Zomato, BYJU'S, Razorpay  │   │
+│  └──────────────────────────────────┘   │
+│                                          │
+│  Industry *                             │
+│  ┌──────────────────────────────────┐   │
+│  │ Fintech ▾                       │   │
+│  └──────────────────────────────────┘   │
+│                                          │
+│  Team Size *                            │
+│  ○ 1–10   ○ 11–50   ○ 51–200   ○ 200+ │
+│  [Segmented control, glass style]        │
+│                                          │
+│              [Next Step →]              │
+└──────────────────────────────────────────┘
+```
+
+#### Step 2 — Personal Info
+```
+┌──────────────────────────────────────────┐
+│                                          │
+│  Almost done, [Name] 👋                  │
+│                                          │
+│  Your Role *                            │
+│  [CTO] [QA Lead] [Developer] [Founder]  │
+│  [Pill toggle buttons, select one]       │
+│                                          │
+│  Phone Number *                         │
+│  ┌────┐  ┌──────────────────────────┐   │
+│  │+91 │  │ 98765 43210             │   │
+│  └────┘  └──────────────────────────┘   │
+│                                          │
+│  ← Back        [Complete Setup →]       │
+└──────────────────────────────────────────┘
+
+Completion animation: 
+  Confetti burst (saffron + blue particles)
+  "🎉 You're all set! Creating your dashboard..."
+  Smooth redirect with fade transition
+```
+
+#### Input Field Style (All Forms)
+```css
+.input-glass {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  color: #fff;
+  padding: 14px 16px;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-glass:focus {
+  border-color: rgba(79, 142, 247, 0.6);
+  box-shadow: 0 0 0 3px rgba(79, 142, 247, 0.15);
+  outline: none;
+}
+.input-glass::placeholder {
+  color: rgba(255,255,255,0.3);
+}
+```
+
+---
+
+### PAGE 4 — Dashboard (Main App Screen)
+
+**Layout:** Fixed sidebar + main content area
+
+#### Sidebar (Left — 240px fixed)
+```
+┌──────────────────────┐
+│  [B] BharatQA       │  ← Logo
+│                      │
+│  [Avatar] Zomato     │  ← Company avatar circle
+│  zomato@gmail.com   │  ← email micro text
+│                      │
+│  ─────────────────  │
+│                      │
+│  📊 Dashboard       │  ← Active: saffron left-border + bg glow
+│  🧪 My Tests        │
+│  📋 Reports         │
+│  ⚙️  Settings        │
+│                      │
+│  ─────────────────  │
+│                      │
+│  💡 Need Help?      │  ← Bottom link
+│  📖 Docs            │
+│                      │
+└──────────────────────┘
+
+Sidebar style: 
+  Background: rgba(255,255,255,0.03)
+  Right border: 1px solid rgba(255,255,255,0.08)
+  Nav items: 44px height, rounded-xl on hover (rgba(255,255,255,0.06))
+  Active state: rgba(255,107,43,0.12) background + left border 3px saffron
+```
+
+#### Dashboard Header
+```
+Main area top:
+  "Good morning, Rahul 👋"  ← H1, personalized
+  "You have 3 active tests · 12 bugs reported"  ← subtitle
+
+Right: [+ Create New Test]  ← Primary CTA, saffron, 44px height, rounded-xl
+                               Hover: glow pulse animation, scale(1.02)
+```
+
+#### Stats Row (4 glass stat cards)
+```
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│ Total Tests  │  │ Total Bugs   │  │ Critical     │  │ Avg Duration │
+│              │  │              │  │ Bugs         │  │              │
+│     7        │  │     34       │  │      5       │  │   8.3 min    │
+│              │  │              │  │              │  │              │
+│  ↑ 2 this   │  │  ↑ 8 today  │  │  🔴 urgent  │  │  ↓ vs last  │
+│    week      │  │              │  │              │  │    week      │
+└──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
+
+Card style: glass-card, 160px height
+Number: 2rem, bold, white
+Label: micro uppercase, muted
+Trend line: tiny sparkline SVG at bottom of each card
+Icon: top-right, in colored glass circle
+  — Total Tests: blue
+  — Total Bugs: orange  
+  — Critical: red (subtle red glow on card edge)
+  — Duration: green
+```
+
+#### Test Cards Grid
+```
+Section header: "Your Tests"  +  [Sort ▾] [Filter ▾]
+
+Grid: 3 columns, responsive → 2 → 1
+Card gap: 20px
+
+Each Test Card:
+┌─────────────────────────────────┐
+│  [App icon placeholder circle]  │  ← 48px, initials or icon
+│  MyApp v2.1                    │  ← H3
+│  Created Dec 14, 2025          │  ← muted text
+│                                 │
+│  ┌──────┐  ┌──────┐  ┌──────┐ │
+│  │ APK  │  │  5   │  │  2   │ │
+│  │ ✓    │  │ Bugs │  │ Crit │ │
+│  └──────┘  └──────┘  └──────┘ │
+│  [3 micro stat pills]           │
+│                                 │
+│  ────────────────────────────  │
+│  [View Reports →]              │
+└─────────────────────────────────┘
+
+Card hover: 
+  border brightens to rgba(255,255,255,0.25)
+  box-shadow deepens
+  translateY(-4px)
+  "View Reports →" text shifts right 4px
+
+APK indicator: green dot + "APK Uploaded" or orange dot + "No APK"
+Status badge: "Active" (green pill) / "Completed" (blue pill)
+
+Empty state (no tests):
+  Center of grid area:
+  [Illustration: empty phone + magnifying glass, clean line art]
+  "No tests yet"
+  "Create your first test and get results in minutes"
+  [+ Create New Test]  ← saffron CTA
+```
+
+---
+
+### PAGE 5 — Create New Test (Modal or Full Page)
+
+**Design choice:** Full-page form with glass panel centered, or slide-in right panel (720px)
+
+```
+Panel header:
+  "← Back to Dashboard"  (link)
+  "Create New Test"  (H1)
+  "Set up your app testing session in under 2 minutes."
+
+┌───────────────────────────────────────────────────────┐
+│                                                       │
+│  App Name *                                          │
+│  ┌─────────────────────────────────────────────┐    │
+│  │ e.g. MyApp v2.1                            │    │
+│  └─────────────────────────────────────────────┘    │
+│  "Give it a version-specific name for clarity"       │
+│                                                       │
+│  ─────────────────────────────────────────────────  │
+│                                                       │
+│  Test Instructions *                                 │
+│  ┌─────────────────────────────────────────────┐    │
+│  │                                             │    │
+│  │  1. Open the app and tap "Login"            │    │
+│  │  2. Enter test credentials: ...             │    │
+│  │  3. Navigate to checkout flow               │    │
+│  │  4. Try making a payment                    │    │
+│  │                                             │    │
+│  │  [4 rows min, expandable textarea]          │    │
+│  └─────────────────────────────────────────────┘    │
+│  Character count: 247 / 1000                        │
+│                                                       │
+│  ─────────────────────────────────────────────────  │
+│                                                       │
+│  APK File  (Optional)                               │
+│  ┌─────────────────────────────────────────────┐    │
+│  │                                             │    │
+│  │     ☁ Drag & drop your APK here            │    │
+│  │     or click to browse                      │    │
+│  │                                             │    │
+│  │     Max size: 500MB · .apk files only       │    │
+│  └─────────────────────────────────────────────┘    │
+│                                                       │
+│  [Upload progress bar — saffron fill, animated]      │
+│  "myapp-v2.1.apk — 47.2 MB ✓"                      │
+│                                                       │
+│  ─────────────────────────────────────────────────  │
+│                                                       │
+│  [Cancel]                [Create Test →]            │
+└───────────────────────────────────────────────────────┘
+
+APK Drop Zone style:
+  border: 2px dashed rgba(255,255,255,0.2)
+  border-radius: 16px
+  background: rgba(255,255,255,0.03)
+  
+  On drag-over:
+    border-color: saffron (#FF6B2B)
+    background: rgba(255,107,43,0.05)
+    inner glow: saffron
+    
+  On success:
+    border: solid, green
+    icon changes to ✓ checkmark
+    filename + size shown
+    [✕ Remove] button
+
+Create Test button states:
+  Default: saffron, rounded-xl
+  Loading: spinner animation, "Creating your test..."
+  Success: green flash → auto-redirect → "Test created! Waiting for testers 🎉"
+```
+
+---
+
+### PAGE 6 — Test Detail / Bug Reports View
+
+**Layout:** Full main area, sidebar persists
+
+#### Test Header
+```
+Back arrow ← 
+
+App name: "MyApp v2.1"  (H1)
+Created: Dec 14, 2025 · 5 testers · 34 bugs found
+
+Row of action buttons:
+  [🤖 Run AI Analysis]  [📥 Export Reports]  [⚙️ Test Settings]
+  
+  AI Analysis button: electric blue gradient, shimmer effect
+  Export: glass button
+  Settings: glass button icon-only
+```
+
+#### Stats Bar
+```
+4 metric pills in a horizontal row:
+[Total Bugs: 34]  [Testers: 5]  [Critical: 2]  [Avg Duration: 8.3 min]
+
+Pill style: glass, icon left, value bold, label muted
+Critical pill: red tinted background with subtle glow
+```
+
+#### Bug Reports Feed
+```
+Left panel (70%): Bug report cards, scrollable list
+Right panel (30%): Quick filter / summary sidebar
+
+FILTER BAR (above list):
+[All (34)] [Critical (2)] [High (8)] [Medium (16)] [Low (8)]
+
+Tabs style: pill-shaped, active = colored background matching severity
+Inactive: glass, muted text
+
+─────────────────────────────────────────────────────────
+
+BUG REPORT CARD:
+┌─────────────────────────────────────────────────────────┐
+│  🔴 CRITICAL          Bug #14                          │
+│  ─────────────────────────────────────────────────────  │
+│  App crashes on payment confirmation screen            │
+│  [Bold title, white]                                    │
+│                                                         │
+│  [Expand ▾] or card is clickable to open detail        │
+│                                                         │
+│  Device: Redmi Note 11 · Android 12 · 4G · Lucknow   │
+│  [Device icon] [Android icon] [Network icon] [Map pin] │
+│                                                         │
+│  ──────── ──────── ────────                           │
+│  🔋 67%      📶 4G LTE      ⏱ 4:32 min               │
+│  Battery     Network        Duration                    │
+│                                                         │
+│  ┌─────────────────────────────────┐  [▶ 4:32]        │
+│  │  📹 Screen Recording            │                    │
+│  │  [Video thumbnail — blurred    │  [View Full ↗]    │
+│  │   preview with play button]    │                    │
+│  └─────────────────────────────────┘                   │
+│                                                         │
+│  🤖 AI Analysis  [Google Gemini Badge]                 │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  Severity: CRITICAL                             │   │
+│  │  The app encounters a NullPointerException at   │   │
+│  │  the PaymentConfirmationActivity when...        │   │
+│  │  [Full AI text, scrollable if long]             │   │
+│  │                                      [Gemini ✦]│   │
+│  └─────────────────────────────────────────────────┘   │
+│                                                         │
+│  📍 Tester Location: Lucknow, Uttar Pradesh            │
+│  [View on Google Maps ↗]                              │
+└─────────────────────────────────────────────────────────┘
+
+Severity badge styles:
+  CRITICAL: background #FF3B5C, white text, subtle red glow box-shadow
+  HIGH:     background #FF6B2B, white text
+  MEDIUM:   background #F5A623, dark text
+  LOW:      background #34C759, dark text
+
+AI Analysis panel:
+  background: rgba(79,142,247,0.08)
+  border-left: 3px solid #4F8EF7
+  border-radius: 12px
+  Gemini badge: small gradient pill, "Gemini ✦" in blue
+
+No AI analysis yet:
+  Dashed border panel
+  "🤖 AI Analysis not yet generated"
+  [Generate AI Report →]  (blue button)
+  "Takes ~30 seconds with Google Gemini"
+```
+
+#### Right Summary Panel
+```
+┌───────────────────────┐
+│  Test Summary         │
+│                       │
+│  ●●●●● 34 bugs       │
+│                       │
+│  Severity split:      │
+│  [Donut chart — mini] │
+│  🔴 2  🟠 8  🟡 16  🟢 8 │
+│                       │
+│  ─────────────────── │
+│  Top Affected Areas   │
+│  • Payment Flow  (8)  │
+│  • Login         (5)  │
+│  • Home Screen   (3)  │
+│                       │
+│  ─────────────────── │
+│  Devices Used         │
+│  Redmi Note 11        │
+│  Samsung M32          │
+│  Realme 9 Pro         │
+│  +2 more              │
+│                       │
+│  [Export All →]       │
+└───────────────────────┘
+```
+
+---
+
+### PAGE 7 — Settings Page
+
+**Layout:** Sidebar persists + settings area (2-column: nav + content)
+
+#### Settings Navigation (inline left panel)
+```
+Profile           ← active
+Notifications
+Security
+Danger Zone
+```
+
+#### Profile Settings Panel
+```
+Section: "Company Profile"
+
+Avatar area:
+  [Company avatar — 80px circle]  [Company name]  [email — muted]
+
+Form:
+  Company Name      [editable input]
+  Industry          [dropdown]
+  Team Size         [segmented control]
+  Phone Number      [editable]
+  Website           [editable, optional]
+  
+  [Save Changes]  (saffron, right-aligned)
+  Success toast: "✓ Profile updated" — glass toast, bottom-right
+
+─────────────────────────────────────────
+
+Section: "Google Account"  [Google logo]
+
+  [Avatar] Rahul Sharma    rahul@gmail.com
+  
+  ⓘ This information is managed by Google and cannot be changed here.
+  
+  [Managed by Google →]  (external link, muted)
+
+─────────────────────────────────────────
+
+Section: "Danger Zone"
+  Background: rgba(255, 59, 92, 0.05)
+  Border: 1px solid rgba(255, 59, 92, 0.2)
+  Border-radius: 16px
+
+  Row 1: Sign Out
+    "End your current session"
+    [Sign Out]  (glass button, red text)
+  
+  ─────
+  
+  Row 2: Delete Account
+    "Permanently delete your account and all test data. 
+     This action cannot be undone."
+    [Delete Account]  (outlined red button)
+    
+    Clicking opens confirmation modal:
+    ┌─────────────────────────────────────┐
+    │  ⚠️  Delete Account                 │
+    │                                     │
+    │  This will permanently delete:     │
+    │  • All your test projects (7)      │
+    │  • All bug reports (34)            │
+    │  • Your company profile            │
+    │                                     │
+    │  Type DELETE to confirm:           │
+    │  ┌──────────────────────────────┐  │
+    │  │                              │  │
+    │  └──────────────────────────────┘  │
+    │                                     │
+    │  [Cancel]    [Delete Forever]      │
+    │  Delete button: disabled until     │
+    │  "DELETE" typed exactly            │
+    └─────────────────────────────────────┘
+    
+    Modal: glass-elevated, red glow border
+    Delete button: red, only enables when input === "DELETE"
+```
+
+---
+
+## 🔘 Button System
+
+```
+PRIMARY (Saffron):
+  bg: linear-gradient(135deg, #FF6B2B, #FF8C42)
+  color: white, bold
+  border-radius: 12px
+  height: 44px (default) / 52px (hero)
+  padding: 0 24px
+  box-shadow: 0 4px 24px rgba(255,107,43,0.35)
+  hover: brightness(1.1), translateY(-1px), shadow strengthens
+  active: scale(0.97), brightness(0.95)
+  disabled: opacity 0.4, cursor not-allowed
+
+SECONDARY (Glass):
+  bg: rgba(255,255,255,0.08)
+  border: 1px solid rgba(255,255,255,0.18)
+  color: white
+  hover: rgba(255,255,255,0.14), border brightens
+  
+DESTRUCTIVE (Red):
+  bg: rgba(255,59,92,0.15)
+  border: 1px solid rgba(255,59,92,0.4)
+  color: #FF3B5C
+  hover: rgba(255,59,92,0.25)
+  
+AI/BLUE (Electric):
+  bg: linear-gradient(135deg, #4F8EF7, #6B5CE7)
+  shimmer animation: moving light streak across button
+  
+ICON BUTTON:
+  40px × 40px, rounded-xl
+  glass style
+  tooltip on hover (glass tooltip, 200ms delay)
+```
+
+---
+
+## ✨ Micro-interactions & Animation Spec
+
+```
+PAGE TRANSITIONS:
+  Type: Fade + slight Y-translate (8px up)
+  Duration: 200ms ease-out
+  
+CARD HOVER:
+  translateY(-4px) + shadow deepen
+  Duration: 250ms cubic-bezier(0.34,1.56,0.64,1) [spring]
+  
+BUTTON PRESS:
+  scale(0.97) + brightness(0.9)
+  Duration: 100ms ease
+  Release: spring back 200ms
+
+GLASS CARD ENTRANCE:
+  opacity: 0 → 1
+  translateY: 16px → 0
+  Duration: 350ms ease-out
+  Stagger: 60ms per card
+
+SEVERITY BADGES:
+  Critical: pulse animation — box-shadow grows/shrinks (2s loop)
+  keyframes: 0% scale(1) → 50% scale(1.05) → 100% scale(1)
+
+SKELETON LOADING:
+  Cards show shimmer skeleton while data loads
+  bg: linear-gradient(90deg, glass → slightly lighter glass → glass)
+  animation: shimmer moving left to right, 1.5s loop
+  
+TOAST NOTIFICATIONS:
+  Slide in from bottom-right
+  Glass card, icon + message
+  Success: green left border
+  Error: red left border
+  Auto-dismiss: 4 seconds
+  
+NUMBER COUNTERS:
+  Stats animate from 0 → value on page enter
+  Duration: 1.2s ease-out
+  
+AI ANALYSIS LOADING:
+  Pulsing blue glow on panel
+  "Gemini is analyzing..." + rotating sparkle icon ✦
+  Typewriter-style text appearance when result arrives
+
+NAVIGATION ACTIVE STATE:
+  Left border slides in (200ms)
+  Background fades in (150ms)
+```
+
+---
+
+## 📱 Responsive Breakpoints
+
+```
+Desktop:  1440px — full sidebar + 3-col grid
+Laptop:   1024px — sidebar + 2-col grid
+Tablet:   768px  — sidebar collapses to icons (40px), 2-col → 1-col
+Mobile:   375px  — bottom tab nav replaces sidebar, 1-col everything
+
+Mobile nav tabs (bottom):
+  [🏠 Home] [🧪 Tests] [📋 Reports] [⚙️ Settings]
+  Glass frosted bar, 64px height, safe area aware
+```
+
+---
+
+## 🌐 Empty States Design
+
+```
+Each empty state has:
+  — Clean SVG illustration (line art, light colors)
+  — Friendly headline
+  — Helpful subtitle
+  — Action CTA
+
+No tests:      Phone + magnifying glass icon
+               "Start your first test"
+               [+ Create New Test]
+
+No bugs yet:   Checkmark shield icon
+               "No bugs reported yet"
+               "Testers are on it — reports appear here automatically"
+
+No APK:        Upload cloud icon
+               "No APK attached"
+               [+ Add APK] link in card
+```
+
+---
+
+## 🔒 Trust & Credibility Design Elements
+
+```
+Throughout the UI, reinforce trust with:
+
+1. Google branding — show Google logo next to OAuth, Gemini logo on AI panels
+2. Lock icon on all auth-related areas
+3. "Secure · Encrypted · Private" micro text near APK upload
+4. Tester location with Maps link = verifiable, real
+5. Device details in monospace font = technical credibility
+6. Timestamps on everything = accountability
+7. Bug count badges on nav = live data feeling
+8. "Made in India 🇮🇳" footer badge = brand identity
+```
+
+---
+
+## 🎬 Component Library Checklist
+
+```
+ATOMS:
+□ Glass Card (standard, elevated, subtle)
+□ Button (primary, secondary, destructive, AI, icon)
+□ Input field (glass, with label, with error, with helper)
+□ Badge / Pill (severity, status, tag)
+□ Avatar (circle, with ring, with online indicator)
+□ Tooltip (glass, arrow, 200ms delay)
+□ Spinner / Loader (saffron ring)
+□ Progress bar (glass track, saffron fill)
+□ Toggle switch (glass track, saffron thumb)
+□ Skeleton loader
+
+MOLECULES:
+□ Navigation item (icon + label + active state)
+□ Stat card (icon + number + trend)
+□ Test card (full spec above)
+□ Bug report card (full spec above)
+□ Severity badge + glow
+□ File drop zone
+□ Search bar (glass)
+□ Dropdown/Select (glass popover)
+□ Tab bar (pill-style)
+□ Toast notification
+
+ORGANISMS:
+□ Sidebar navigation
+□ Dashboard header
+□ Stats row
+□ Test card grid
+□ Bug report feed
+□ Settings sections
+□ Modal overlay (delete confirm)
+□ Onboarding stepper
+□ AI analysis panel
+□ India map component
+
+PAGES:
+□ Landing page
+□ Sign in
+□ Onboarding step 1 + 2
+□ Dashboard
+□ Create test
+□ Test detail / bug reports
+□ Settings
+□ 404 (glass card, friendly illustration)
+```
+
+---
+
+## 🖼️ Final Design Principles Summary
+
+```
+1. GLASS FIRST — Every surface has depth. No flat cards.
+
+2. DARK & PREMIUM — Dark background makes 
+   the saffron + blue palette pop dramatically.
+
+3. INDIAN IDENTITY — Saffron is intentional. 
+   India map. ₹ symbol. "Made in India."
+
+4. TRUSTABLE CLICKS — Every button has clear 
+   hover + active states. No mystery interactions.
+
+5. DATA FORWARD — Numbers, device specs, 
+   locations — show the data confidently.
+
+6. AI = BLUE — All AI/Gemini features use 
+   electric blue as a consistent visual language.
+
+7. SEVERITY = COLOR — Critical always red, 
+   never ambiguous. Color-blind accessible (use icons too).
+
+8. MOTION = MEANING — Animations are functional,
+   not decorative. They confirm actions.
+
+9. EMPTY STATES = HELPFUL — Never show a blank screen.
+   Always guide the user to the next action.
+
+10. MOBILE READY — Every screen works at 375px.
+    QA managers check dashboards on phones.
+```
+
+---
+
+*Design this as a complete Figma file / React + Tailwind implementation with the above tokens, components, and page specifications. Use Framer Motion for animations, Lucide React for icons, and Inter + JetBrains Mono for typography.*

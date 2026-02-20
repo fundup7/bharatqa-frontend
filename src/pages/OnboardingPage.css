@@ -1,0 +1,202 @@
+.onboarding-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.onboarding-card {
+  max-width: 600px;
+  width: 100%;
+  padding: 48px 40px;
+}
+
+.onboarding-progress {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.step-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--glass);
+  transition: all 0.3s;
+}
+
+.progress-step.active .step-dot {
+  border-color: var(--saffron);
+  color: var(--saffron);
+  background: var(--saffron-dim);
+}
+
+.progress-step.current .step-dot {
+  box-shadow: 0 0 0 4px rgba(255, 107, 43, 0.2);
+}
+
+.progress-step span {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.progress-step.active span {
+  color: var(--text-sec);
+}
+
+.onboarding-step {
+  animation: fadeSlideUp 0.3s ease both;
+}
+
+.onboarding-step h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.step-desc {
+  font-size: 14px;
+  color: var(--text-sec);
+  margin: 0 0 32px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sec);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 15px;
+  font-family: var(--font-body);
+  transition: border-color 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: var(--saffron);
+  box-shadow: 0 0 0 3px rgba(255, 107, 43, 0.15);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass);
+  color: var(--text-sec);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+
+.chip:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--glass-hover);
+}
+
+.chip-active {
+  border-color: var(--saffron);
+  background: var(--saffron-dim);
+  color: var(--saffron);
+  font-weight: 600;
+}
+
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.review-item {
+  padding: 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+.review-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.onboarding-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--glass-border);
+}
+
+@media (max-width: 600px) {
+  .onboarding-card {
+    padding: 32px 20px;
+  }
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+  .onboarding-progress {
+    gap: 24px;
+  }
+}
