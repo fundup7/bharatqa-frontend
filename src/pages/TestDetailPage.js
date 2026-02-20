@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft, Bug, Trash2, Play, Brain, ChevronDown, ChevronUp,
   Smartphone, Wifi, Battery, MapPin, Clock, AlertTriangle, Video
@@ -10,9 +10,7 @@ import './TestDetailPage.css';
 /* Helper: turn a relative recording_url into an absolute one */
 function getVideoUrl(bug) {
   if (!bug.recording_url) return null;
-  // Already absolute
   if (bug.recording_url.startsWith('http')) return bug.recording_url;
-  // Relative — prepend the API base (strip trailing /api)
   const base = API.replace(/\/api\/?$/, '');
   return base + bug.recording_url;
 }
@@ -28,22 +26,42 @@ function severityColor(sev) {
 export default function TestDetailPage({ test, onBack, showToast }) {
   const [bugs, setBugs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [expandedBug, setExpandedBug] = useState(null);
   const [analyzingBug, setAnalyzingBug] = useState(null);
+
+  // Use ref to avoid showToast in dependency arrays
+  const showToastRef = useRef(showToast);
+  showToastRef.current = showToast;
+
+  // Track if component is mounted to avoid state updates after unmount
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    return () => { mountedRef.current = false; };
+  }, []);
 
   const loadBugs = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await apiClient.getBugs(test.id);
-      setBugs(Array.isArray(data) ? data : []);
+      if (mountedRef.current) {
+        setBugs(Array.isArray(data) ? data : []);
+      }
     } catch (err) {
-      console.error(err);
-      showToast('Failed to load bug reports', 'error');
+      console.error('Failed to load bugs:', err);
+      if (mountedRef.current) {
+        setError(err.message || 'Failed to load bug reports');
+        // Don't call showToast here — it causes re-render loops
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [test.id, showToast]);
+  }, [test.id]); // Only depends on test.id — NOT showToast
 
+  // Load bugs once when component mounts or test.id changes
   useEffect(() => {
     loadBugs();
   }, [loadBugs]);
@@ -53,10 +71,10 @@ export default function TestDetailPage({ test, onBack, showToast }) {
     if (!window.confirm('Delete this bug report?')) return;
     try {
       await apiClient.deleteBug(bugId);
-      showToast('Bug deleted');
+      showToastRef.current('Bug deleted');
       loadBugs();
     } catch (err) {
-      showToast('Failed to delete bug', 'error');
+      showToastRef.current('Failed to delete bug', 'error');
     }
   };
 
@@ -64,13 +82,15 @@ export default function TestDetailPage({ test, onBack, showToast }) {
     e.stopPropagation();
     setAnalyzingBug(bugId);
     try {
-      const result = await apiClient.analyzeWithAI(bugId);
-      showToast('AI analysis complete! 🧠');
-      loadBugs(); // reload to get ai_analysis field
+      await apiClient.analyzeWithAI(bugId);
+      showToastRef.current('AI analysis complete! 🧠');
+      loadBugs();
     } catch (err) {
-      showToast('AI analysis failed', 'error');
+      showToastRef.current('AI analysis failed: ' + (err.message || 'Server error'), 'error');
     } finally {
-      setAnalyzingBug(null);
+      if (mountedRef.current) {
+        setAnalyzingBug(null);
+      }
     }
   };
 
@@ -126,7 +146,23 @@ export default function TestDetailPage({ test, onBack, showToast }) {
         </div>
       )}
 
-      {!loading && bugs.length === 0 && (
+      {/* Error state with retry */}
+      {!loading && error && (
+        <div className="error-state glass-card">
+          <div className="error-icon">⚠️</div>
+          <h3>Failed to load bug reports</h3>
+          <p>{error}</p>
+          <p className="error-hint">
+            This usually means the backend server is waking up (Render free tier sleeps after inactivity). 
+            Wait 30-60 seconds and try again.
+          </p>
+          <button className="btn-primary" onClick={loadBugs}>
+            🔄 Retry
+          </button>
+        </div>
+      )}
+
+      {!loading && !error && bugs.length === 0 && (
         <div className="empty-state glass-card">
           <div className="empty-icon">🔍</div>
           <h3>No bug reports yet</h3>
@@ -190,7 +226,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                   >
                     <Trash2 size={16} />
                   </button>
-                  <button className="action-btn expand-btn">
+                  <button className="action-btn expand-btn" onClick={() => toggleExpand(bug.id)}>
                     {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
                   </button>
                 </div>

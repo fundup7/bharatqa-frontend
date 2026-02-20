@@ -389,3 +389,34 @@
     gap: 8px;
   }
 }
+
+/* Error state */
+.error-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.error-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.error-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.error-state p {
+  font-size: 14px;
+  color: var(--text-sec);
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.error-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 20px !important;
+  font-style: italic;
+}
