@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   ArrowLeft, Bug, Trash2, Brain, ChevronDown, ChevronUp, Check,
-  Smartphone, Wifi, Battery, MapPin, Clock, Video
+  Smartphone, Wifi, Battery, MapPin, Clock, Video, List, Code, Share2
 } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import { API } from '../utils/constants';
@@ -21,7 +21,7 @@ function safeJsonParse(v) {
     if (!v) return null;
     if (typeof v === 'string') return JSON.parse(v);
     if (typeof v === 'object') return v;
-  } catch {}
+  } catch { }
   return null;
 }
 
@@ -136,32 +136,36 @@ export default function TestDetailPage({ test, onBack, showToast }) {
     <div className="test-detail-page">
       <div className="td-header">
         <button className="td-back" onClick={onBack}>
-          <ArrowLeft size={20} /> Back to Dashboard
+          <ArrowLeft size={18} /> Back to Projects
         </button>
       </div>
 
-      <div className="td-info glass-card">
+      <div className="td-info-hero">
         <div className="td-info-main">
           <div className="td-app-icon">📱</div>
-          <div>
+          <div className="td-app-details">
             <h1>{test.app_name}</h1>
             <p className="td-meta">
-              Created {new Date(test.created_at).toLocaleDateString()} · {bugs.length} report{bugs.length !== 1 ? 's' : ''}
+              <Clock size={14} /> Created {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} <span className="td-meta-dot">•</span> <Bug size={14} /> {bugs.length} Issue{bugs.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
         {test.test_instructions && (
           <div className="td-instructions">
-            <h3>Test Instructions</h3>
-            <pre>{test.test_instructions}</pre>
+            <h3 className="section-subtitle"><List size={16} /> Testing Instructions</h3>
+            <div className="td-instruction-box">
+              <pre>{test.test_instructions}</pre>
+            </div>
           </div>
         )}
       </div>
 
-      <h2 className="td-section-title">
-        <Bug size={20} /> Bug Reports ({bugs.length})
-      </h2>
+      <div className="td-section-header">
+        <h2 className="td-section-title">
+          <Bug size={24} color={API.saffron || '#FF6B2B'} /> Reported Issues <span className="badge-count">{bugs.length}</span>
+        </h2>
+      </div>
 
       {loading && (
         <div className="loading-state">
@@ -194,19 +198,19 @@ export default function TestDetailPage({ test, onBack, showToast }) {
           const screenshots = parseScreenshots(bug);
           const testerNotes = extractTesterNotes(bug);
 
-          const deviceModel = pick(stats, ['device_model','deviceModel','model']);
-          const androidVersion = pick(stats, ['android_version','androidVersion','osVersion']);
-          const screenRes = pick(stats, ['screen_resolution','screenResolution','resolution']);
-          const networkType = pick(stats, ['network_type','networkType']);
-          const networkSpeed = pick(stats, ['network_speed_mbps','networkSpeedMbps','networkSpeed']);
-          const batteryStart = pick(stats, ['battery_start','batteryStart']);
-          const batteryEnd = pick(stats, ['battery_end','batteryEnd']);
-          const batteryDrain = pick(stats, ['battery_drain','batteryDrain']);
-          const durationSec = pick(stats, ['duration_seconds','testDuration','durationSeconds','duration']);
-          const locationAddr = pick(stats, ['location_address','fullAddress','locationAddress','address']);
-          const lat = pick(stats, ['location_lat','latitude','locationLat','lat']);
-          const lng = pick(stats, ['location_lng','longitude','locationLng','lng']);
-          const accuracy = pick(stats, ['location_accuracy','locationAccuracy','accuracy']);
+          const deviceModel = pick(stats, ['device_model', 'deviceModel', 'model']);
+          const androidVersion = pick(stats, ['android_version', 'androidVersion', 'osVersion']);
+          const screenRes = pick(stats, ['screen_resolution', 'screenResolution', 'resolution']);
+          const networkType = pick(stats, ['network_type', 'networkType']);
+          const networkSpeed = pick(stats, ['network_speed_mbps', 'networkSpeedMbps', 'networkSpeed']);
+          const batteryStart = pick(stats, ['battery_start', 'batteryStart']);
+          const batteryEnd = pick(stats, ['battery_end', 'batteryEnd']);
+          const batteryDrain = pick(stats, ['battery_drain', 'batteryDrain']);
+          const durationSec = pick(stats, ['duration_seconds', 'testDuration', 'durationSeconds', 'duration']);
+          const locationAddr = pick(stats, ['location_address', 'fullAddress', 'locationAddress', 'address']);
+          const lat = pick(stats, ['location_lat', 'latitude', 'locationLat', 'lat']);
+          const lng = pick(stats, ['location_lng', 'longitude', 'locationLng', 'lng']);
+          const accuracy = pick(stats, ['location_accuracy', 'locationAccuracy', 'accuracy']);
 
           const mapsUrl = (lat && lng) ? `https://www.google.com/maps?q=${encodeURIComponent(`${lat},${lng}`)}` : null;
 
@@ -232,12 +236,12 @@ export default function TestDetailPage({ test, onBack, showToast }) {
             <div key={bug.id} className={`bug-card glass-card ${isExpanded ? 'bug-expanded' : ''}`}>
               <div className="bug-header" onClick={() => toggleExpand(bug.id)}>
                 <div className="bug-summary">
-                  <h3>{bug.bug_title || 'Untitled'}</h3>
+                  <h3>{bug.bug_title || 'Untitled Issue'}</h3>
                   <div className="bug-meta-row">
-                    <span className="bug-tester">👤 {bug.tester_name || 'Anonymous'}</span>
-                    <span className="bug-time"><Clock size={12} /> {new Date(bug.created_at).toLocaleString()}</span>
-                    {videoUrl && <span className="bug-has-video"><Video size={12} /> Recording</span>}
-                    {aiDone && <span className="bug-ai-badge"><Check size={12} /> AI Done</span>}
+                    <span className="bug-tester-badge">👤 {bug.tester_name || 'Anonymous'}</span>
+                    <span className="bug-time"><Clock size={12} /> {new Date(bug.created_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' })}</span>
+                    {videoUrl && <span className="bug-has-video"><Video size={12} /> Recording Available</span>}
+                    {aiDone && <span className="bug-ai-badge"><Check size={12} /> AI Analyzed</span>}
                   </div>
                 </div>
 
@@ -251,7 +255,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                     {aiBusy ? <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> : (aiDone ? <Check size={16} /> : <Brain size={16} />)}
                   </button>
 
-                  <button className="action-btn delete-action" onClick={(e) => deleteBug(bug.id, e)} title="Delete">
+                  <button className="action-btn delete-action" onClick={(e) => deleteBug(bug.id, e)} title="Delete Issue">
                     <Trash2 size={16} />
                   </button>
 
@@ -271,17 +275,19 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                     {/* LEFT */}
                     <div className="bug-col">
                       <div className="bug-panel">
-                        <h4>Tester Notes</h4>
+                        <h4><List size={14} /> Tester Notes</h4>
                         {testerNotes ? (
-                          <p className="bug-description">{testerNotes}</p>
+                          <div className="bug-description-box">
+                            <p className="bug-description">{testerNotes}</p>
+                          </div>
                         ) : (
-                          <p className="bug-description bug-description--muted">No tester feedback.</p>
+                          <p className="bug-description bug-description--muted">No tester feedback provided.</p>
                         )}
                       </div>
 
                       {bug.steps_to_reproduce && (
                         <div className="bug-panel">
-                          <h4>Steps to Reproduce</h4>
+                          <h4><Code size={14} /> Steps to Reproduce</h4>
                           <pre className="bug-steps">{bug.steps_to_reproduce}</pre>
                         </div>
                       )}
@@ -323,31 +329,14 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                     {/* RIGHT */}
                     <div className="bug-col">
                       {videoUrl && (
-                        <div className="bug-panel">
-                          <h4>Screen Recording</h4>
+                        <div className="bug-panel highlight-panel">
+                          <h4><Video size={14} /> Screen Recording</h4>
                           <div className="video-container">
                             <video controls preload="metadata" className="bug-video" src={videoUrl} />
                           </div>
                           <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="download-link">
-                            Download Recording
+                            <Share2 size={14} /> Download Recording
                           </a>
-                        </div>
-                      )}
-
-                      {screenshots.length > 0 && (
-                        <div className="bug-panel">
-                          <h4>Screenshots</h4>
-                          <div className="screenshots-grid">
-                            {screenshots.map((u, i) => (
-                              <img
-                                key={i}
-                                src={u}
-                                alt={`Screenshot ${i + 1}`}
-                                className="bug-screenshot"
-                                onClick={() => window.open(u, '_blank')}
-                              />
-                            ))}
-                          </div>
                         </div>
                       )}
                     </div>
@@ -355,7 +344,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
 
                   {bug.ai_analysis && (
                     <div className="bug-panel ai-section">
-                      <h4>AI Analysis</h4>
+                      <h4><Brain size={16} color="#4F8EF7" /> AI Analysis Insight</h4>
                       {typeof bug.ai_analysis === 'string' ? (
                         <div className="ai-markdown">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>

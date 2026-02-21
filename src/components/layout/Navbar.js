@@ -13,7 +13,6 @@ export default function Navbar({ company, onNavigate, onLogout }) {
           <img src={logo} alt="BharatQA" className="navbar-logo-img" />
         </div>
 
-// Navbar links removed; navigation handled by sidebar
 
         <div className="navbar-auth">
           {company ? (
