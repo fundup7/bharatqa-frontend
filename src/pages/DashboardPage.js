@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Bug, AlertCircle, Users, TestTube, Trash2 } from 'lucide-react';
+import { Plus, Bug, AlertCircle, Users, Trash2, Calendar, FolderGit2, ArrowRight, Activity } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import { colors } from '../utils/constants';
 import './DashboardPage.css';
@@ -30,7 +30,7 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
   }, [company.id, showToast]);
 
   useEffect(() => {
-    
+
     loadTests();
   }, [loadTests]);
 
@@ -55,60 +55,64 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">
-        <div>
-          <h1>Good morning, {company.name.split(' ')[0]} 👋</h1>
-          <p>You have {tests.length} active test{tests.length !== 1 ? 's' : ''}</p>
+        <div className="header-greeting">
+          <h1>Good morning, {company.name.split(' ')[0]}</h1>
+          <p>Here's what's happening with your projects today.</p>
         </div>
         <button
-          className="btn-primary"
+          className="create-btn"
           onClick={() => onViewChange('create-test')}
         >
-          <Plus size={20} /> Create New Test
+          <Plus size={20} /> New Project
         </button>
       </div>
 
       <div className="stats-row">
         {[
-          { label: 'Total Tests', value: tests.length, icon: TestTube, color: colors.saffron },
-          { label: 'Total Bugs', value: totalBugs, icon: Bug, color: colors.critical },
-          { label: 'Critical', value: criticalBugs, icon: AlertCircle, color: colors.high },
-          { label: 'Testers', value: totalTesters, icon: Users, color: colors.electricBlue },
+          { label: 'Active Projects', value: tests.length, icon: FolderGit2, color: colors.saffron },
+          { label: 'Total Issues', value: totalBugs, icon: Bug, color: colors.critical },
+          { label: 'Critical Bugs', value: criticalBugs, icon: AlertCircle, color: colors.high },
+          { label: 'Active Testers', value: totalTesters, icon: Users, color: colors.electricBlue },
         ].map((stat, i) => (
-          <div key={i} className="stat-card glass-card">
+          <div key={i} className="stat-card">
             <div
               className="stat-icon"
               style={{
-                backgroundColor: `${stat.color}20`,
-                color: stat.color
+                backgroundColor: `${stat.color}15`,
+                color: stat.color,
+                border: `1px solid ${stat.color}30`
               }}
             >
-              <stat.icon size={24} />
+              <stat.icon size={26} strokeWidth={2} />
             </div>
-            <div className="stat-value">{stat.value}</div>
-            <div className="stat-label">{stat.label}</div>
+            <div className="stat-info">
+              <div className="stat-value">{stat.value}</div>
+              <div className="stat-label">{stat.label}</div>
+            </div>
           </div>
         ))}
       </div>
 
-      <h2 className="tests-heading">Your Tests ({tests.length})</h2>
+      <h2 className="tests-heading">Your Projects</h2>
 
       {loading && (
         <div className="loading-state">
           <div className="spinner" />
-          <p>Loading tests...</p>
+          <p>Loading projects...</p>
         </div>
       )}
 
       {!loading && tests.length === 0 && (
-        <div className="empty-state glass-card">
-          <div className="empty-icon">📋</div>
-          <h3>No tests yet</h3>
-          <p>Create your first test to start getting real device bug reports</p>
+        <div className="empty-state">
+          <div className="empty-icon">🚀</div>
+          <h3>No projects yet</h3>
+          <p>Create your first project to start tracking bug reports from real devices.</p>
           <button
-            className="btn-primary"
+            className="create-btn"
+            style={{ margin: '0 auto' }}
             onClick={() => onViewChange('create-test')}
           >
-            + Create Your First Test
+            <Plus size={20} /> Create Your First Project
           </button>
         </div>
       )}
@@ -117,41 +121,52 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
         {tests.map(test => (
           <div
             key={test.id}
-            className="test-card glass-card"
+            className="test-card"
             onClick={() => {
               onSelectTest(test);
               onViewChange('test-detail');
             }}
           >
             <div className="test-card-header">
-              <div className="app-icon">📱</div>
+              <div className="app-icon"><Activity size={24} /></div>
               <button
                 className="delete-btn"
+                title="Delete Project"
                 onClick={(e) => deleteTest(test.id, e)}
               >
-                <Trash2 size={16} />
+                <Trash2 size={18} />
               </button>
             </div>
 
             <h3 className="test-name">{test.app_name}</h3>
             <p className="test-date">
-              Created {new Date(test.created_at).toLocaleDateString()}
+              <Calendar size={14} /> {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </p>
 
             <div className="test-stats">
-              <div className={test.apk_file_url ? 'status-good' : 'status-warning'}>
-                {test.apk_file_url ? '✅ APK' : '⚠️ No APK'}
+              <div className={test.apk_file_url ? 'status-good test-stat' : 'status-warning test-stat'}>
+                <div className="test-stat-val">
+                  {test.apk_file_url ? 'Active' : 'Pending'}
+                </div>
+                <div className="test-stat-label">Build</div>
               </div>
               <div className="test-stat">
-                <Bug size={14} /> {test.bug_count || 0}
+                <div className="test-stat-val">
+                  <Bug size={16} color={colors.critical} /> {test.bug_count || 0}
+                </div>
+                <div className="test-stat-label">Issues</div>
               </div>
               <div className="test-stat">
-                <AlertCircle size={14} /> {test.critical_count || 0}
+                <div className="test-stat-val">
+                  <AlertCircle size={16} color={colors.high} /> {test.critical_count || 0}
+                </div>
+                <div className="test-stat-label">Critical</div>
               </div>
             </div>
 
             <div className="test-card-footer">
-              <span>View Reports →</span>
+              <span>View Dashboard</span>
+              <span className="arrow"><ArrowRight size={18} /></span>
             </div>
           </div>
         ))}

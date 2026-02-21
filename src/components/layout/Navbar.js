@@ -1,16 +1,10 @@
 import React from 'react';
-import { Home, TestTube, FileText, Settings } from 'lucide-react';
+// Icon imports removed as navbar buttons are no longer needed
 import logo from '../../Logo/logo.png';
 import './Navbar.css';
 
-export default function Navbar({ view, company, onNavigate, onLogout }) {
-  const navItems = [
-    { key: 'home', label: 'Home', icon: Home },
-    ...(company ? [
-      { key: 'dashboard', label: 'Dashboard', icon: TestTube },
-      { key: 'settings', label: 'Settings', icon: Settings },
-    ] : []),
-  ];
+export default function Navbar({ company, onNavigate, onLogout }) {
+  // Navigation items removed; sidebar provides navigation
 
   return (
     <nav className="navbar">
@@ -19,18 +13,7 @@ export default function Navbar({ view, company, onNavigate, onLogout }) {
           <img src={logo} alt="BharatQA" className="navbar-logo-img" />
         </div>
 
-        <div className="navbar-links">
-          {navItems.map(item => (
-            <button
-              key={item.key}
-              className={`nav-btn ${view === item.key ? 'active' : ''}`}
-              onClick={() => onNavigate(item.key)}
-            >
-              <item.icon size={18} />
-              <span className="nav-label">{item.label}</span>
-            </button>
-          ))}
-        </div>
+// Navbar links removed; navigation handled by sidebar
 
         <div className="navbar-auth">
           {company ? (

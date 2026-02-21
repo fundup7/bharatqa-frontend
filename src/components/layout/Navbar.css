@@ -5,7 +5,7 @@
   right: 0;
   height: 64px;
   z-index: 1000;
-  background: rgba(11,13,26,0.8);
+  background: rgba(11, 13, 26, 0.8);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border-bottom: 1px solid var(--glass-border);
@@ -38,44 +38,14 @@
   opacity: 0.92;
   transition: opacity 0.2s;
 }
+
 .navbar-logo:hover .navbar-logo-img {
   opacity: 1;
 }
 
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-  justify-content: center;
-}
+/* Navbar links removed; navigation handled by sidebar */
 
-.nav-btn {
-  background: none;
-  border: none;
-  color: var(--text-sec);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 14px;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  transition: all 0.15s;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.nav-btn:hover {
-  color: var(--text);
-  background: var(--glass);
-}
-
-.nav-btn.active {
-  color: var(--saffron);
-  background: var(--saffron-dim);
-  font-weight: 600;
-}
+/* Nav button styles removed; navigation handled by sidebar */
 
 .navbar-auth {
   display: flex;
@@ -121,11 +91,11 @@
   .navbar-links {
     justify-content: flex-end;
   }
-  
+
   .nav-label {
     display: none;
   }
-  
+
   .user-info {
     display: none;
   }
