@@ -17,6 +17,7 @@ import DashboardPage from './pages/DashboardPage';
 import CreateTestPage from './pages/CreateTestPage';
 import TestDetailPage from './pages/TestDetailPage';
 import SettingsPage from './pages/SettingsPage';
+import ReportsPage from './pages/ReportsPage';
 
 // Styles
 import './styles/tokens.css';
@@ -47,7 +48,7 @@ function AppContent() {
         if (parsed.onboarding_complete) {
           setView('dashboard');
         }
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -95,7 +96,7 @@ function AppContent() {
   return (
     <div className="app-container">
       <AnimatedBackground />
-      
+
       {toast && (
         <Toast
           key={toast.key}
@@ -145,7 +146,7 @@ function AppContent() {
           />
         )}
 
-        {view === 'dashboard' && company && company.onboarding_complete && (
+        {(view === 'dashboard' || view === 'tests') && company && company.onboarding_complete && (
           <DashboardPage
             company={company}
             onSelectTest={setSelectedTest}
@@ -157,7 +158,7 @@ function AppContent() {
         {view === 'create-test' && company && (
           <CreateTestPage
             company={company}
-            onClose={() => navigate('dashboard')}
+            onClose={() => navigate('tests')}
             showToast={showToast}
           />
         )}
@@ -165,7 +166,14 @@ function AppContent() {
         {view === 'test-detail' && selectedTest && (
           <TestDetailPage
             test={selectedTest}
-            onBack={() => navigate('dashboard')}
+            onBack={() => navigate('tests')}
+            showToast={showToast}
+          />
+        )}
+
+        {view === 'reports' && company && (
+          <ReportsPage
+            company={company}
             showToast={showToast}
           />
         )}

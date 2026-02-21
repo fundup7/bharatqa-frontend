@@ -1,48 +1,179 @@
 .create-test-page {
-  max-width: 1100px;
+  max-width: 1080px;
   margin: 0 auto;
+  animation: fadeSlideUp 0.6s ease-out;
+  padding-bottom: 64px;
 }
 
-.create-test-header {
+/* Hero Section (Matching TestDetailPage) */
+.ct-info-hero {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 16px;
+  justify-content: space-between;
+  padding: 32px 36px;
+  margin-bottom: 40px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.create-test-header h1 {
+.ct-info-main {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ct-app-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: rgba(255, 107, 43, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 107, 43, 0.2);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.1);
+}
+
+.ct-app-details h1 {
   font-size: 28px;
-  font-weight: 700;
-  margin: 0 0 4px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  background: linear-gradient(90deg, #fff, var(--text-sec));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.01em;
 }
 
-.create-test-header p {
+.ct-meta {
   font-size: 14px;
-  color: var(--text-sec);
+  color: var(--text-muted);
   margin: 0;
+  font-weight: 500;
 }
 
+.ct-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-sec);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 16px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-body);
+}
+
+.ct-back:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(-2px);
+}
+
+/* Grid Layout */
 .create-test-grid {
   display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 24px;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 28px;
   align-items: start;
 }
 
-.create-test-form {
-  padding: 32px;
+.create-test-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.form-row {
+/* Sections */
+.ct-section-header {
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 12px;
+  margin-bottom: 4px;
+}
+
+.ct-section-title {
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+/* Form Styling within Glass Cards */
+.create-test-form {
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.create-test-form:hover,
+.create-test-upload:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sec);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.form-group .required {
+  color: var(--saffron);
+}
+
+.form-group .optional {
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.ct-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-size: 14px;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.ct-input:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 107, 43, 0.4);
+  box-shadow: 0 0 0 3px rgba(255, 107, 43, 0.1);
+  outline: none;
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 160px;
+  min-height: 140px;
   line-height: 1.6;
   font-family: var(--font-body);
 }
@@ -50,42 +181,77 @@
 .form-hint {
   font-size: 12px;
   color: var(--text-muted);
-  margin-top: 6px;
-  display: block;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-select.form-input {
-  cursor: pointer;
-  appearance: none;
+.form-row {
+  display: flex;
+  gap: 20px;
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px;
+  pointer-events: none;
+}
+
+select.ct-input {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 40px;
+}
+
+/* Right Panel */
+.create-test-upload {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* APK Dropzone */
 .apk-dropzone {
-  padding: 48px 32px;
+  padding: 40px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.25s;
-  border: 2px dashed var(--glass-border);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.02);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .apk-dropzone:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .apk-dropzone.drag-active {
   border-color: var(--saffron);
-  background: var(--saffron-dim);
+  background: rgba(255, 107, 43, 0.08);
 }
 
 .apk-dropzone.has-file {
   border-style: solid;
+  border-color: rgba(52, 199, 89, 0.3);
+  background: rgba(52, 199, 89, 0.05);
   cursor: default;
 }
 
@@ -97,9 +263,28 @@ select.form-input {
   color: var(--text-sec);
 }
 
+.apk-upload-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  transition: all 0.2s;
+}
+
+.apk-dropzone:hover .apk-upload-icon {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+  transform: translateY(-2px);
+}
+
 .apk-placeholder h3 {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0;
   color: var(--text);
 }
@@ -111,16 +296,19 @@ select.form-input {
 }
 
 .apk-hint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   margin-top: 4px;
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 100px;
 }
 
 .apk-selected {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .apk-icon-wrap {
@@ -137,38 +325,96 @@ select.form-input {
 .apk-file-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .apk-file-info strong {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--text);
   word-break: break-all;
 }
 
 .apk-file-info span {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 
 .apk-remove {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   background: var(--red-dim);
   border: 1px solid rgba(255, 59, 92, 0.3);
   color: var(--red);
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s;
   font-family: var(--font-body);
+  margin-top: 8px;
 }
 
 .apk-remove:hover {
   background: rgba(255, 59, 92, 0.2);
+  border-color: rgba(255, 59, 92, 0.4);
+}
+
+/* Action Box */
+.ct-action-box {
+  background: linear-gradient(135deg, rgba(255, 107, 43, 0.05) 0%, rgba(0, 0, 0, 0.15) 100%);
+  border: 1px solid rgba(255, 107, 43, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ct-bg-icon {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  color: rgba(255, 107, 43, 0.05);
+  transform: rotate(-15deg) scale(2);
+}
+
+.ct-action-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ct-action-content h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.ct-action-content p {
+  font-size: 13px;
+  color: var(--text-sec);
+  margin: 0 0 20px;
+}
+
+.ct-submit-btn {
+  font-weight: 700;
+  font-size: 15px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(255, 107, 43, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ct-submit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 107, 43, 0.4);
+}
+
+.ct-submit-btn:disabled {
+  box-shadow: none;
+  opacity: 0.6;
 }
 
 .full-width {
@@ -179,7 +425,13 @@ select.form-input {
   .create-test-grid {
     grid-template-columns: 1fr;
   }
+
   .form-row {
     flex-direction: column;
+  }
+
+  .ct-info-hero {
+    flex-direction: column;
+    gap: 20px;
   }
 }

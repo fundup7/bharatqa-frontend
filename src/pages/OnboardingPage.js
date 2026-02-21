@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Building2, User, CheckCircle2, ArrowRight, ArrowLeft, Rocket } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import { industries, companySizes, roles } from '../utils/constants';
 import './OnboardingPage.css';
@@ -46,19 +47,25 @@ export default function OnboardingPage({ company, onComplete }) {
         <div className="onboarding-progress">
           {[1, 2, 3].map(s => (
             <div key={s} className={`progress-step ${step >= s ? 'active' : ''} ${step === s ? 'current' : ''}`}>
-              <div className="step-dot">{step > s ? '✓' : s}</div>
+              <div className="step-dot">
+                {step > s ? <CheckCircle2 size={16} /> : s}
+              </div>
               <span>{s === 1 ? 'Company' : s === 2 ? 'Your Role' : 'Finish'}</span>
             </div>
           ))}
+          <div className="progress-line" style={{ width: `${((step - 1) / 2) * 100}%` }} />
         </div>
 
         {step === 1 && (
           <div className="onboarding-step">
+            <div className="step-icon-wrapper">
+              <Building2 size={24} color="var(--saffron)" />
+            </div>
             <h2>Tell us about your company</h2>
             <p className="step-desc">This helps us match you with the right testers.</p>
 
             <div className="form-group">
-              <label>Company Name</label>
+              <label>Company Name <span className="required">*</span></label>
               <input
                 type="text"
                 className="form-input"
@@ -69,7 +76,7 @@ export default function OnboardingPage({ company, onComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Industry</label>
+              <label>Industry <span className="required">*</span></label>
               <div className="chip-grid">
                 {industries.map(ind => (
                   <button
@@ -84,7 +91,7 @@ export default function OnboardingPage({ company, onComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Website (optional)</label>
+              <label>Website <span className="optional">(optional)</span></label>
               <input
                 type="url"
                 className="form-input"
@@ -98,11 +105,14 @@ export default function OnboardingPage({ company, onComplete }) {
 
         {step === 2 && (
           <div className="onboarding-step">
+            <div className="step-icon-wrapper">
+              <User size={24} color="var(--saffron)" />
+            </div>
             <h2>About you</h2>
             <p className="step-desc">So we can tailor your dashboard experience.</p>
 
             <div className="form-group">
-              <label>Company Size</label>
+              <label>Company Size <span className="required">*</span></label>
               <div className="chip-grid">
                 {companySizes.map(size => (
                   <button
@@ -117,7 +127,7 @@ export default function OnboardingPage({ company, onComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Your Role</label>
+              <label>Your Role <span className="required">*</span></label>
               <div className="chip-grid">
                 {roles.map(role => (
                   <button
@@ -132,7 +142,7 @@ export default function OnboardingPage({ company, onComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Phone (optional)</label>
+              <label>Phone <span className="optional">(optional)</span></label>
               <input
                 type="tel"
                 className="form-input"
@@ -146,8 +156,11 @@ export default function OnboardingPage({ company, onComplete }) {
 
         {step === 3 && (
           <div className="onboarding-step onboarding-review">
-            <h2>You're all set! 🎉</h2>
-            <p className="step-desc">Here's what you told us:</p>
+            <div className="step-icon-wrapper success">
+              <Rocket size={24} color="#34C759" />
+            </div>
+            <h2>You're all set!</h2>
+            <p className="step-desc">Here's a quick summary of what you told us.</p>
 
             <div className="review-grid">
               <div className="review-item">
@@ -172,26 +185,35 @@ export default function OnboardingPage({ company, onComplete }) {
 
         <div className="onboarding-actions">
           {step > 1 && (
-            <button className="btn-secondary" onClick={() => setStep(s => s - 1)}>
-              ← Back
+            <button className="btn-secondary onboarding-btn" onClick={() => setStep(s => s - 1)}>
+              <ArrowLeft size={16} /> Back
             </button>
           )}
           <div style={{ flex: 1 }} />
           {step < 3 ? (
             <button
-              className="btn-primary"
+              className="btn-primary onboarding-btn"
               disabled={!canNext()}
               onClick={() => setStep(s => s + 1)}
             >
-              Continue →
+              Continue <ArrowRight size={16} />
             </button>
           ) : (
             <button
-              className="btn-primary"
+              className="btn-primary onboarding-btn submit-btn"
               disabled={saving}
               onClick={handleSubmit}
             >
-              {saving ? 'Setting up…' : 'Launch Dashboard 🚀'}
+              {saving ? (
+                <>
+                  <div className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                  Setting up…
+                </>
+              ) : (
+                <>
+                  Launch Dashboard <Rocket size={16} />
+                </>
+              )}
             </button>
           )}
         </div>
