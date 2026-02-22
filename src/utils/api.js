@@ -96,6 +96,16 @@ export const apiClient = {
   analyzeWithAI: (bugId) =>
     apiFetch(API + `/bugs/${bugId}/analyze`, { method: 'POST' }).then(handleResponse),
 
+  // Video
+  getVideoBlobUrl: async (url) => {
+    const response = await fetch(url, {
+      headers: { 'x-api-key': API_KEY },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    return URL.createObjectURL(blob);
+  },
+
   // Health (no API key — public endpoint)
   getHealth: () =>
     fetch(API + '/health').then(handleResponse),

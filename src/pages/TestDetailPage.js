@@ -70,6 +70,71 @@ function parseScreenshots(bug) {
   return String(s).split(',').map(x => x.trim()).filter(Boolean);
 }
 
+function AuthorizedVideo({ url, title }) {
+  const [blobUrl, setBlobUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let objectUrl = null;
+    let isMounted = true;
+
+    async function loadVideo() {
+      const isBackendUrl = url && (url.includes('/api/videos') || url.includes('/recordings/'));
+      if (!isBackendUrl) {
+        if (isMounted) setBlobUrl(url);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const fetchedBlobUrl = await apiClient.getVideoBlobUrl(url);
+        if (isMounted) {
+          setBlobUrl(fetchedBlobUrl);
+          objectUrl = fetchedBlobUrl; // Save for cleanup
+        }
+      } catch (err) {
+        if (isMounted) setError(err.message);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    if (url) loadVideo();
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [url]);
+
+  if (loading) return (
+    <div className="bug-video-placeholder" style={{ padding: '40px 20px', textAlign: 'center', background: 'rgba(0,0,0,0.02)', borderRadius: '12px', border: '1px dashed #ccc' }}>
+      <div className="spinner" style={{ margin: '0 auto 10px auto' }} />
+      <span style={{ fontSize: '13px', color: '#666' }}>Securely fetching recording...</span>
+    </div>
+  );
+  if (error) return (
+    <div className="bug-video-placeholder error-state" style={{ padding: '40px 20px', textAlign: 'center', background: '#fff0f0', borderRadius: '12px', color: '#d32f2f', border: '1px dashed #ffa6a6' }}>
+      <div style={{ fontSize: '24px', marginBottom: '8px' }}>⚠️</div>
+      <span style={{ fontSize: '13px', fontWeight: 'bold' }}>Failed to load recording:</span><br />
+      <span style={{ fontSize: '12px', opacity: 0.8 }}>{error}</span>
+    </div>
+  );
+  if (!blobUrl) return null;
+
+  return (
+    <>
+      <div className="video-container">
+        <video controls preload="metadata" className="bug-video" src={blobUrl} />
+      </div>
+      <a href={blobUrl} download={title ? `${title}.mp4` : "recording.mp4"} target="_blank" rel="noopener noreferrer" className="download-link">
+        <Share2 size={14} /> Download Recording
+      </a>
+    </>
+  );
+}
+
 export default function TestDetailPage({ test, onBack, showToast }) {
   const [bugs, setBugs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -331,12 +396,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
                       {videoUrl && (
                         <div className="bug-panel highlight-panel">
                           <h4><Video size={14} /> Screen Recording</h4>
-                          <div className="video-container">
-                            <video controls preload="metadata" className="bug-video" src={videoUrl} />
-                          </div>
-                          <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="download-link">
-                            <Share2 size={14} /> Download Recording
-                          </a>
+                          <AuthorizedVideo url={videoUrl} title={`recording-${bug.id}`} />
                         </div>
                       )}
                     </div>
