@@ -18,7 +18,7 @@ import CreateTestPage from './pages/CreateTestPage';
 import TestDetailPage from './pages/TestDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
-import AdminPage from './pages/AdminPage';
+// AdminPage is restricted to BharatQA internal team only — not imported here
 
 // Styles
 import './styles/tokens.css';
@@ -188,12 +188,6 @@ function AppContent() {
           />
         )}
 
-        {view === 'admin' && company && (
-          <AdminPage
-            company={company}
-            showToast={showToast}
-          />
-        )}
       </main>
     </div>
   );
