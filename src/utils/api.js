@@ -1,5 +1,24 @@
 import { API } from './constants';
 
+// API key read from environment variable
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+/**
+ * Shared fetch wrapper that injects the x-api-key header on every request.
+ * The /health endpoint intentionally omits the key (it is public).
+ */
+function apiFetch(url, options = {}) {
+  const isHealth = url.includes('/health');
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(isHealth ? {} : { 'x-api-key': API_KEY }),
+      ...(options.headers || {}),
+    },
+  });
+}
+
 async function handleResponse(response) {
   // If the server returned an error status
   if (!response.ok) {
@@ -22,61 +41,62 @@ async function handleResponse(response) {
 export const apiClient = {
   // Auth
   googleAuth: (credential) =>
-    fetch(API + '/auth/google', {
+    apiFetch(API + '/auth/google', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential })
+      body: JSON.stringify({ credential }),
     }).then(handleResponse),
 
   getCompany: (id) =>
-    fetch(API + `/auth/company/${id}`).then(handleResponse),
+    apiFetch(API + `/auth/company/${id}`).then(handleResponse),
 
   updateCompany: (id, data) =>
-    fetch(API + `/auth/company/${id}`, {
+    apiFetch(API + `/auth/company/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     }).then(handleResponse),
 
   deleteCompany: (id) =>
-    fetch(API + `/auth/company/${id}`, { method: 'DELETE' }).then(handleResponse),
+    apiFetch(API + `/auth/company/${id}`, { method: 'DELETE' }).then(handleResponse),
 
   onboardCompany: (id, data) =>
-    fetch(API + `/auth/onboarding/${id}`, {
+    apiFetch(API + `/auth/onboarding/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
     }).then(handleResponse),
 
-
   getCompanyUniqueTesters: (companyId) =>
-    fetch(API + `/company/${companyId}/unique-testers`).then(handleResponse),
+    apiFetch(API + `/company/${companyId}/unique-testers`).then(handleResponse),
 
   // Tests
   getTests: (companyId) =>
-    fetch(API + `/company/${companyId}/tests`).then(handleResponse),
+    apiFetch(API + `/company/${companyId}/tests`).then(handleResponse),
 
   createTest: (formData) =>
-    fetch(API + '/tests', { method: 'POST', body: formData }),
+    // FormData: don't set Content-Type so browser sets multipart boundary automatically
+    fetch(API + '/tests', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY },
+      body: formData,
+    }),
   // Note: createTest returns raw Response so caller can check res.ok
 
   deleteTest: (testId) =>
-    fetch(API + `/tests/${testId}`, { method: 'DELETE' }).then(handleResponse),
+    apiFetch(API + `/tests/${testId}`, { method: 'DELETE' }).then(handleResponse),
 
   getTestStats: (testId) =>
-    fetch(API + `/tests/${testId}/stats`).then(handleResponse),
+    apiFetch(API + `/tests/${testId}/stats`).then(handleResponse),
 
   // Bugs
   getBugs: (testId) =>
-    fetch(API + `/tests/${testId}/bugs`).then(handleResponse),
+    apiFetch(API + `/tests/${testId}/bugs`).then(handleResponse),
 
   deleteBug: (bugId) =>
-    fetch(API + `/bugs/${bugId}`, { method: 'DELETE' }).then(handleResponse),
+    apiFetch(API + `/bugs/${bugId}`, { method: 'DELETE' }).then(handleResponse),
 
   analyzeWithAI: (bugId) =>
-    fetch(API + `/bugs/${bugId}/analyze`, { method: 'POST' }).then(handleResponse),
+    apiFetch(API + `/bugs/${bugId}/analyze`, { method: 'POST' }).then(handleResponse),
 
-  // Health
+  // Health (no API key — public endpoint)
   getHealth: () =>
     fetch(API + '/health').then(handleResponse),
 };
