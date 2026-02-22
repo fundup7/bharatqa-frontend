@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, CheckCircle, Smartphone, ListPlus, Settings2, AlertCircle, FileText } from 'lucide-react';
+import { Upload, X, CheckCircle, Smartphone, ListPlus, Settings2, AlertCircle, FileText, Target } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './CreateTestPage.css';
 
@@ -8,15 +8,25 @@ export default function CreateTestPage({ company, onClose, showToast }) {
     app_name: '',
     app_package: '',
     test_instructions: '',
-    target_devices: 'all',
     priority: 'normal',
   });
+
+  // Targeting criteria (all optional — empty = open to all)
+  const [criteria, setCriteria] = useState({
+    device_tier: '',
+    network_type: '',
+    max_ram_gb: '',
+    allowed_states: '',
+    allowed_cities: '',
+  });
+
   const [apkFile, setApkFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef(null);
 
   const update = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
+  const updateCriteria = (key, value) => setCriteria(prev => ({ ...prev, [key]: value }));
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -48,23 +58,43 @@ export default function CreateTestPage({ company, onClose, showToast }) {
     try {
       const formData = new FormData();
       formData.append('company_id', company.id);
+      formData.append('company_name', company.company_name || company.name);
       formData.append('app_name', form.app_name.trim());
       formData.append('app_package', form.app_package.trim());
-      formData.append('test_instructions', form.test_instructions.trim());
-      formData.append('target_devices', form.target_devices);
+      formData.append('instructions', form.test_instructions.trim());
       formData.append('priority', form.priority);
       if (apkFile) {
         formData.append('apk', apkFile);
       }
 
       const res = await apiClient.createTest(formData);
-      if (res.ok) {
-        showToast('Test created successfully! 🎉');
-        onClose();
-      } else {
+      if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         showToast('Failed to create test: ' + (data.error || 'Unknown error'), 'error');
+        return;
       }
+
+      const created = await res.json();
+
+      // Apply targeting criteria if any field was set
+      const hasAnyCriteria = Object.values(criteria).some(v => v !== '');
+      if (hasAnyCriteria && created.id) {
+        const criteriaPayload = {};
+        if (criteria.device_tier) criteriaPayload.device_tier = criteria.device_tier;
+        if (criteria.network_type) criteriaPayload.network_type = criteria.network_type;
+        if (criteria.max_ram_gb) criteriaPayload.max_ram_gb = Number(criteria.max_ram_gb);
+        if (criteria.allowed_states.trim()) criteriaPayload.allowed_states = criteria.allowed_states.trim();
+        if (criteria.allowed_cities.trim()) criteriaPayload.allowed_cities = criteria.allowed_cities.trim();
+
+        try {
+          await apiClient.setTestCriteria(created.id, criteriaPayload);
+        } catch (criteriaErr) {
+          console.warn('Criteria set failed (non-fatal):', criteriaErr.message);
+        }
+      }
+
+      showToast('Test created successfully! 🎉');
+      onClose();
     } catch (err) {
       console.error(err);
       showToast('Failed to create test: ' + err.message, 'error');
@@ -77,6 +107,8 @@ export default function CreateTestPage({ company, onClose, showToast }) {
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
+
+  const hasCriteria = Object.values(criteria).some(v => v !== '');
 
   return (
     <div className="create-test-page">
@@ -156,22 +188,98 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                   </select>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Targeting Criteria */}
+          <div className="ct-section-header" style={{ marginTop: '24px' }}>
+            <h2 className="ct-section-title">
+              <Target size={20} color="var(--saffron)" /> Tester Targeting
+              {hasCriteria && <span className="ct-criteria-badge">Active</span>}
+            </h2>
+            <p className="ct-section-hint">Leave all blank to accept testers on any device.</p>
+          </div>
+
+          <div className="create-test-form glass-card">
+            <div className="form-row">
               <div className="form-group" style={{ flex: 1 }}>
-                <label>Target Devices</label>
+                <label>Device Tier</label>
                 <div className="select-wrapper">
                   <select
                     className="form-input ct-input"
-                    value={form.target_devices}
-                    onChange={e => update('target_devices', e.target.value)}
+                    value={criteria.device_tier}
+                    onChange={e => updateCriteria('device_tier', e.target.value)}
                   >
-                    <option value="all">All devices</option>
-                    <option value="budget">Budget phones only</option>
-                    <option value="midrange">Mid-range</option>
-                    <option value="flagship">Flagship</option>
+                    <option value="">Any device</option>
+                    <option value="low">Low-end (budget)</option>
+                    <option value="mid">Mid-range</option>
+                    <option value="high">Flagship</option>
+                  </select>
+                </div>
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Network Type</label>
+                <div className="select-wrapper">
+                  <select
+                    className="form-input ct-input"
+                    value={criteria.network_type}
+                    onChange={e => updateCriteria('network_type', e.target.value)}
+                  >
+                    <option value="">Any network</option>
+                    <option value="2g">2G (very slow)</option>
+                    <option value="3g">3G (slow)</option>
+                    <option value="4g">4G / LTE</option>
+                    <option value="5g">5G</option>
+                    <option value="wifi">WiFi only</option>
                   </select>
                 </div>
               </div>
             </div>
+
+            <div className="form-row">
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Max RAM (GB) <span className="optional">(optional)</span></label>
+                <input
+                  type="number"
+                  min="1"
+                  max="16"
+                  step="1"
+                  className="form-input ct-input"
+                  value={criteria.max_ram_gb}
+                  onChange={e => updateCriteria('max_ram_gb', e.target.value)}
+                  placeholder="e.g., 4 — limits to ≤ 4 GB RAM"
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>States <span className="optional">(comma-separated)</span></label>
+                <input
+                  type="text"
+                  className="form-input ct-input"
+                  value={criteria.allowed_states}
+                  onChange={e => updateCriteria('allowed_states', e.target.value)}
+                  placeholder="e.g., Maharashtra, Bihar, Uttar Pradesh"
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Cities <span className="optional">(comma-separated)</span></label>
+                <input
+                  type="text"
+                  className="form-input ct-input"
+                  value={criteria.allowed_cities}
+                  onChange={e => updateCriteria('allowed_cities', e.target.value)}
+                  placeholder="e.g., Mumbai, Patna, Lucknow"
+                />
+              </div>
+            </div>
+
+            {hasCriteria && (
+              <div className="ct-criteria-summary">
+                🎯 Only testers matching these criteria will see this test.
+              </div>
+            )}
           </div>
         </div>
 
@@ -220,7 +328,7 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                     <Upload size={32} strokeWidth={1.5} />
                   </div>
                   <h3>Upload APK File</h3>
-                  <p>Drag & drop or click to browse</p>
+                  <p>Drag &amp; drop or click to browse</p>
                   <span className="apk-hint">Max 500 MB · .apk files only</span>
                 </div>
               )}

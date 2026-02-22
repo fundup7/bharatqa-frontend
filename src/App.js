@@ -18,6 +18,7 @@ import CreateTestPage from './pages/CreateTestPage';
 import TestDetailPage from './pages/TestDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
+import AdminPage from './pages/AdminPage';
 
 // Styles
 import './styles/tokens.css';
@@ -183,6 +184,13 @@ function AppContent() {
             company={company}
             onUpdate={updateCompany}
             onLogout={handleLogout}
+            showToast={showToast}
+          />
+        )}
+
+        {view === 'admin' && company && (
+          <AdminPage
+            company={company}
             showToast={showToast}
           />
         )}

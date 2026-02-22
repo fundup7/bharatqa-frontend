@@ -67,6 +67,7 @@
   margin: 0 0 8px;
   background: linear-gradient(90deg, #fff, var(--text-sec));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.01em;
 }
@@ -592,4 +593,154 @@
   .specs-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Targeting Section ──────────────────────────────────── */
+.td-targeting {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px dashed var(--glass-border);
+}
+
+.td-targeting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.td-targeting-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.td-eligible-count {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-sec);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--glass-border);
+}
+
+.td-criteria-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-sec);
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: var(--font-body);
+}
+
+.td-criteria-edit-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Chips */
+.td-criteria-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.td-criteria-chip {
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 107, 43, 0.1);
+  color: var(--saffron);
+  border: 1px solid rgba(255, 107, 43, 0.25);
+}
+
+.td-criteria-chip.open {
+  background: rgba(52, 199, 89, 0.08);
+  color: #34c759;
+  border-color: rgba(52, 199, 89, 0.2);
+}
+
+/* Inline Edit Form */
+.td-criteria-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
+  animation: fadeSlideUp 0.25s ease-out;
+}
+
+.td-criteria-row {
+  display: flex;
+  gap: 14px;
+}
+
+.td-criteria-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.td-criteria-field label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.td-criteria-field input,
+.td-criteria-field select {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font-body);
+  transition: border-color 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.td-criteria-field input:focus,
+.td-criteria-field select:focus {
+  outline: none;
+  border-color: rgba(255, 107, 43, 0.4);
+  box-shadow: 0 0 0 2px rgba(255, 107, 43, 0.1);
+}
+
+.td-criteria-clear-btn {
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: var(--font-body);
+}
+
+.td-criteria-clear-btn:hover:not(:disabled) {
+  background: rgba(255, 59, 92, 0.1);
+  border-color: rgba(255, 59, 92, 0.3);
+  color: #ff6b6b;
 }

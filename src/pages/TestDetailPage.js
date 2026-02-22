@@ -3,7 +3,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
   ArrowLeft, Bug, Trash2, Brain, ChevronDown, ChevronUp, Check,
-  Smartphone, Wifi, Battery, MapPin, Clock, Video, List, Code, Share2
+  Smartphone, Wifi, Battery, MapPin, Clock, Video, List, Code, Share2,
+  Target, Pencil, X as XIcon, Users
 } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import { API } from '../utils/constants';
@@ -142,11 +143,62 @@ export default function TestDetailPage({ test, onBack, showToast }) {
   const [expandedBug, setExpandedBug] = useState(null);
   const [analyzingBug, setAnalyzingBug] = useState(null);
 
+  // Targeting state
+  const [criteria, setCriteria] = useState(null);      // loaded from backend
+  const [eligibleCount, setEligibleCount] = useState(null);
+  const [editingCriteria, setEditingCriteria] = useState(false);
+  const [criteriaForm, setCriteriaForm] = useState({
+    device_tier: '', network_type: '', max_ram_gb: '', allowed_states: '', allowed_cities: ''
+  });
+  const [savingCriteria, setSavingCriteria] = useState(false);
+
   const showToastRef = useRef(showToast);
   showToastRef.current = showToast;
 
   const mountedRef = useRef(true);
   useEffect(() => () => { mountedRef.current = false; }, []);
+
+  const loadCriteria = useCallback(async () => {
+    try {
+      const res = await apiClient.getTestCriteria(test.id);
+      const c = res.test?.criteria || null;
+      if (mountedRef.current) {
+        setCriteria(c);
+        // Pre-fill edit form
+        setCriteriaForm({
+          device_tier: c?.device_tier || '',
+          network_type: c?.network_type || '',
+          max_ram_gb: c?.max_ram_gb != null ? String(c.max_ram_gb) : '',
+          allowed_states: c?.allowed_states || '',
+          allowed_cities: c?.allowed_cities || '',
+        });
+      }
+    } catch { /* non-fatal */ }
+    try {
+      const er = await apiClient.getEligibleTesters(test.id);
+      if (mountedRef.current) setEligibleCount(er.count ?? null);
+    } catch { /* non-fatal */ }
+  }, [test.id]);
+
+  const saveCriteria = async () => {
+    setSavingCriteria(true);
+    try {
+      const payload = {};
+      if (criteriaForm.device_tier) payload.device_tier = criteriaForm.device_tier;
+      if (criteriaForm.network_type) payload.network_type = criteriaForm.network_type;
+      if (criteriaForm.max_ram_gb) payload.max_ram_gb = Number(criteriaForm.max_ram_gb);
+      if (criteriaForm.allowed_states.trim()) payload.allowed_states = criteriaForm.allowed_states.trim();
+      if (criteriaForm.allowed_cities.trim()) payload.allowed_cities = criteriaForm.allowed_cities.trim();
+      await apiClient.setTestCriteria(test.id, payload);
+      showToastRef.current('🎯 Targeting criteria saved!');
+      setEditingCriteria(false);
+      loadCriteria();
+    } catch (err) {
+      showToastRef.current('Failed to save criteria: ' + err.message, 'error');
+    } finally {
+      setSavingCriteria(false);
+    }
+  };
 
   const loadBugs = useCallback(async () => {
     try {
@@ -161,7 +213,7 @@ export default function TestDetailPage({ test, onBack, showToast }) {
     }
   }, [test.id]);
 
-  useEffect(() => { loadBugs(); }, [loadBugs]);
+  useEffect(() => { loadBugs(); loadCriteria(); }, [loadBugs, loadCriteria]);
 
   const toggleExpand = (bugId) => {
     setExpandedBug(prev => (prev === bugId ? null : bugId));
@@ -224,6 +276,127 @@ export default function TestDetailPage({ test, onBack, showToast }) {
             </div>
           </div>
         )}
+
+        {/* Targeting Section */}
+        <div className="td-targeting">
+          <div className="td-targeting-header">
+            <h3 className="section-subtitle"><Target size={16} /> Targeting</h3>
+            <div className="td-targeting-meta">
+              {eligibleCount !== null && (
+                <span className="td-eligible-count"><Users size={13} /> {eligibleCount} eligible testers</span>
+              )}
+              <button
+                className="td-criteria-edit-btn"
+                onClick={() => setEditingCriteria(e => !e)}
+              >
+                {editingCriteria ? <><XIcon size={13} /> Cancel</> : <><Pencil size={13} /> Edit</>}
+              </button>
+            </div>
+          </div>
+
+          {!editingCriteria && (
+            <div className="td-criteria-chips">
+              {!criteria || Object.keys(criteria).length === 0 ? (
+                <span className="td-criteria-chip open">🌐 Open to all testers</span>
+              ) : (
+                <>
+                  {criteria.device_tier && <span className="td-criteria-chip">📱 {criteria.device_tier} devices</span>}
+                  {criteria.network_type && <span className="td-criteria-chip">📶 {criteria.network_type.toUpperCase()}</span>}
+                  {criteria.max_ram_gb != null && <span className="td-criteria-chip">💾 ≤{criteria.max_ram_gb} GB RAM</span>}
+                  {criteria.allowed_states && <span className="td-criteria-chip">📍 {criteria.allowed_states}</span>}
+                  {criteria.allowed_cities && <span className="td-criteria-chip">🏙️ {criteria.allowed_cities}</span>}
+                </>
+              )}
+            </div>
+          )}
+
+          {editingCriteria && (
+            <div className="td-criteria-form">
+              <div className="td-criteria-row">
+                <div className="td-criteria-field">
+                  <label>Device Tier</label>
+                  <select
+                    value={criteriaForm.device_tier}
+                    onChange={e => setCriteriaForm(f => ({ ...f, device_tier: e.target.value }))}
+                  >
+                    <option value="">Any device</option>
+                    <option value="low">Low-end</option>
+                    <option value="mid">Mid-range</option>
+                    <option value="high">Flagship</option>
+                  </select>
+                </div>
+                <div className="td-criteria-field">
+                  <label>Network</label>
+                  <select
+                    value={criteriaForm.network_type}
+                    onChange={e => setCriteriaForm(f => ({ ...f, network_type: e.target.value }))}
+                  >
+                    <option value="">Any network</option>
+                    <option value="2g">2G</option>
+                    <option value="3g">3G</option>
+                    <option value="4g">4G / LTE</option>
+                    <option value="5g">5G</option>
+                    <option value="wifi">WiFi</option>
+                  </select>
+                </div>
+                <div className="td-criteria-field">
+                  <label>Max RAM (GB)</label>
+                  <input
+                    type="number" min="1" max="16"
+                    placeholder="Any"
+                    value={criteriaForm.max_ram_gb}
+                    onChange={e => setCriteriaForm(f => ({ ...f, max_ram_gb: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="td-criteria-row">
+                <div className="td-criteria-field" style={{ flex: 2 }}>
+                  <label>States (comma-separated)</label>
+                  <input
+                    type="text" placeholder="e.g. Maharashtra, Bihar"
+                    value={criteriaForm.allowed_states}
+                    onChange={e => setCriteriaForm(f => ({ ...f, allowed_states: e.target.value }))}
+                  />
+                </div>
+                <div className="td-criteria-field" style={{ flex: 2 }}>
+                  <label>Cities (comma-separated)</label>
+                  <input
+                    type="text" placeholder="e.g. Mumbai, Patna"
+                    value={criteriaForm.allowed_cities}
+                    onChange={e => setCriteriaForm(f => ({ ...f, allowed_cities: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button
+                  className="btn-primary"
+                  style={{ padding: '8px 20px', fontSize: 13 }}
+                  disabled={savingCriteria}
+                  onClick={saveCriteria}
+                >
+                  {savingCriteria ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : '💾 Save Criteria'}
+                </button>
+                <button
+                  className="td-criteria-clear-btn"
+                  disabled={savingCriteria}
+                  onClick={async () => {
+                    setSavingCriteria(true);
+                    try {
+                      await apiClient.setTestCriteria(test.id, {});
+                      showToastRef.current('Criteria cleared — open to all testers');
+                      setEditingCriteria(false);
+                      loadCriteria();
+                    } catch (err) {
+                      showToastRef.current('Failed: ' + err.message, 'error');
+                    } finally { setSavingCriteria(false); }
+                  }}
+                >
+                  Clear (open to all)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="td-section-header">

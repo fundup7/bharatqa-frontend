@@ -109,4 +109,32 @@ export const apiClient = {
   // Health (no API key — public endpoint)
   getHealth: () =>
     fetch(API + '/health').then(handleResponse),
+
+  // ── Targeting Criteria ──────────────────────────────────────
+  getTestCriteria: (testId) =>
+    apiFetch(API + `/tests/${testId}/criteria`).then(handleResponse),
+
+  setTestCriteria: (testId, data) =>
+    apiFetch(API + `/tests/${testId}/criteria`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  getEligibleTesters: (testId) =>
+    apiFetch(API + `/tests/${testId}/eligible-testers`).then(handleResponse),
+
+  // ── Admin: Testers ───────────────────────────────────────────
+  getAllTesters: () =>
+    apiFetch(API + '/admin/testers').then(handleResponse),
+
+  banTester: (testerId, banReason) =>
+    apiFetch(API + `/admin/testers/${testerId}/ban`, {
+      method: 'POST',
+      body: JSON.stringify({ ban_reason: banReason }),
+    }).then(handleResponse),
+
+  unbanTester: (testerId) =>
+    apiFetch(API + `/admin/testers/${testerId}/ban`, {
+      method: 'DELETE',
+    }).then(handleResponse),
 };

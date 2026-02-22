@@ -1,0 +1,296 @@
+.admin-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-bottom: 64px;
+    animation: fadeSlideUp 0.5s ease-out;
+}
+
+/* Hero */
+.admin-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+}
+
+.admin-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.admin-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(255, 107, 43, 0.1);
+    border: 1px solid rgba(255, 107, 43, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.admin-hero h1 {
+    font-size: 26px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    background: linear-gradient(90deg, #fff, var(--text-sec));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.admin-hero-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.admin-refresh-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-sec);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+.admin-refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+/* Stats Row */
+.admin-stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-stat-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+}
+
+.admin-stat-val {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+}
+
+.admin-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Filter Tabs */
+.admin-filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.admin-filter-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-sec);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+}
+
+.admin-filter-tab:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text);
+}
+
+.admin-filter-tab.active {
+    background: rgba(255, 107, 43, 0.12);
+    border-color: rgba(255, 107, 43, 0.35);
+    color: var(--saffron);
+}
+
+.admin-filter-count {
+    background: rgba(255, 59, 92, 0.2);
+    color: #ff6b6b;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+}
+
+/* Table */
+.admin-table-wrap {
+    padding: 0;
+    overflow: hidden;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-table th {
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--glass-border);
+    background: rgba(0, 0, 0, 0.15);
+    display: table-cell;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 14px 18px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: top;
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tbody tr {
+    transition: background 0.15s;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.admin-row-banned {
+    background: rgba(255, 59, 92, 0.04) !important;
+}
+
+.admin-row-banned:hover {
+    background: rgba(255, 59, 92, 0.07) !important;
+}
+
+.admin-tester-name {
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 3px;
+}
+
+.admin-tester-email {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.admin-ban-reason {
+    font-size: 11px;
+    color: #ff6b6b;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+.admin-tier-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-top: 4px;
+}
+
+/* Status badges */
+.admin-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.admin-status-badge.active {
+    background: rgba(52, 199, 89, 0.12);
+    color: #34c759;
+    border: 1px solid rgba(52, 199, 89, 0.25);
+}
+
+.admin-status-badge.banned {
+    background: rgba(255, 59, 92, 0.12);
+    color: #ff6b6b;
+    border: 1px solid rgba(255, 59, 92, 0.25);
+}
+
+/* Action buttons */
+.admin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    font-family: var(--font-body);
+}
+
+.admin-action-btn.ban {
+    background: rgba(255, 59, 92, 0.1);
+    border-color: rgba(255, 59, 92, 0.25);
+    color: #ff6b6b;
+}
+
+.admin-action-btn.ban:hover:not(:disabled) {
+    background: rgba(255, 59, 92, 0.2);
+    border-color: rgba(255, 59, 92, 0.4);
+}
+
+.admin-action-btn.unban {
+    background: rgba(52, 199, 89, 0.1);
+    border-color: rgba(52, 199, 89, 0.25);
+    color: #34c759;
+}
+
+.admin-action-btn.unban:hover:not(:disabled) {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.4);
+}
+
+.admin-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+    .admin-stats-row {
+        flex-direction: column;
+    }
+
+    .admin-table-wrap {
+        overflow-x: auto;
+    }
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, TestTube, FileText, Settings, LogOut } from 'lucide-react';
+import { Home, TestTube, FileText, Settings, LogOut, ShieldAlert } from 'lucide-react';
 import './Sidebar.css';
 
 export default function Sidebar({ view, company, onNavigate, onLogout }) {
@@ -8,6 +8,7 @@ export default function Sidebar({ view, company, onNavigate, onLogout }) {
     { key: 'tests', label: 'My Tests', icon: TestTube },
     { key: 'reports', label: 'Reports', icon: FileText },
     { key: 'settings', label: 'Settings', icon: Settings },
+    { key: 'admin', label: 'Admin', icon: ShieldAlert },
   ];
 
   return (

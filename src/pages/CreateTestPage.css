@@ -43,6 +43,7 @@
   margin: 0 0 8px;
   background: linear-gradient(90deg, #fff, var(--text-sec));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.01em;
 }
@@ -434,4 +435,35 @@ select.ct-input {
     flex-direction: column;
     gap: 20px;
   }
+}
+
+/* Targeting Criteria extras */
+.ct-section-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+
+.ct-criteria-badge {
+  margin-left: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: rgba(255, 107, 43, 0.15);
+  color: var(--saffron);
+  border: 1px solid rgba(255, 107, 43, 0.3);
+}
+
+.ct-criteria-summary {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 107, 43, 0.08);
+  border: 1px solid rgba(255, 107, 43, 0.2);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--saffron);
 }
