@@ -234,20 +234,52 @@ export default function TestDetailPage({ test, onBack, showToast }) {
   const analyzeBug = async (bug, e) => {
     e.stopPropagation();
     if (bug.ai_analysis) {
-      showToastRef.current('AI already done for this bug', 'error');
+      showToastRef.current('AI analysis already done for this bug ✅');
       return;
     }
     setAnalyzingBug(bug.id);
     try {
       await apiClient.analyzeWithAI(bug.id);
-      showToastRef.current('AI analysis started/completed');
-      loadBugs();
+      showToastRef.current('🤖 AI analysis running… this takes 30-60s');
+
+      // Poll /api/bugs/:id/analysis every 5s for up to 2 min
+      let attempts = 0;
+      const maxAttempts = 24; // 24 × 5s = 120s
+      const pollInterval = setInterval(async () => {
+        if (!mountedRef.current) { clearInterval(pollInterval); return; }
+        attempts++;
+        try {
+          const result = await apiClient.getAnalysis(bug.id);
+          if (result.success && result.analysis) {
+            clearInterval(pollInterval);
+            // Patch the bug in-place so the analysis shows immediately
+            setBugs(prev => prev.map(b =>
+              b.id === bug.id
+                ? { ...b, ai_analysis: result.analysis, ai_model: result.model }
+                : b
+            ));
+            showToastRef.current('✅ AI analysis complete!');
+            if (mountedRef.current) setAnalyzingBug(null);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            showToastRef.current('⚠️ Analysis timed out — check logs or retry', 'error');
+            if (mountedRef.current) setAnalyzingBug(null);
+          }
+        } catch {
+          if (attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            showToastRef.current('⚠️ AI analysis failed — retry later', 'error');
+            if (mountedRef.current) setAnalyzingBug(null);
+          }
+        }
+      }, 5000);
+
     } catch (err) {
-      showToastRef.current('AI failed: ' + (err.message || 'server'), 'error');
-    } finally {
+      showToastRef.current('AI failed: ' + (err.message || 'server error'), 'error');
       if (mountedRef.current) setAnalyzingBug(null);
     }
   };
+
 
   return (
     <div className="test-detail-page">

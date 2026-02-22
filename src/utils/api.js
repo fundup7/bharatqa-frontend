@@ -96,6 +96,9 @@ export const apiClient = {
   analyzeWithAI: (bugId) =>
     apiFetch(API + `/bugs/${bugId}/analyze`, { method: 'POST' }).then(handleResponse),
 
+  getAnalysis: (bugId) =>
+    apiFetch(API + `/bugs/${bugId}/analysis`).then(handleResponse),
+
   // Video
   getVideoBlobUrl: async (url) => {
     const response = await fetch(url, {
@@ -136,5 +139,27 @@ export const apiClient = {
   unbanTester: (testerId) =>
     apiFetch(API + `/admin/testers/${testerId}/ban`, {
       method: 'DELETE',
+    }).then(handleResponse),
+
+  // ── Payments ─────────────────────────────────────────────────────────────
+  getTesterWallet: (testerId) =>
+    apiFetch(API + `/testers/${testerId}/wallet`).then(handleResponse),
+
+  getTesterPayments: (testerId) =>
+    apiFetch(API + `/testers/${testerId}/payments`).then(handleResponse),
+
+  updateTesterUpi: (testerId, upi_id) =>
+    apiFetch(API + `/testers/${testerId}/upi`, {
+      method: 'PUT',
+      body: JSON.stringify({ upi_id }),
+    }).then(handleResponse),
+
+  getPendingPayments: () =>
+    apiFetch(API + '/admin/payments/pending').then(handleResponse),
+
+  batchPay: (testerIds = [], note = '') =>
+    apiFetch(API + '/admin/payments/batch', {
+      method: 'POST',
+      body: JSON.stringify({ tester_ids: testerIds, note }),
     }).then(handleResponse),
 };

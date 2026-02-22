@@ -294,3 +294,122 @@
         overflow-x: auto;
     }
 }
+
+/* ── Main section tabs (Testers / Payments) ── */
+.admin-main-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 24px;
+}
+
+.admin-main-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-sec);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: var(--font-body);
+}
+
+.admin-main-tab:hover {
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text);
+}
+
+.admin-main-tab.active {
+    background: rgba(255, 107, 43, 0.12);
+    border-color: rgba(255, 107, 43, 0.35);
+    color: var(--saffron);
+}
+
+/* ── Payments toolbar ── */
+.admin-payments-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 14px 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-sm);
+}
+
+.admin-payments-info {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.admin-pay-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #34c759, #248a3d);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+    box-shadow: 0 4px 16px rgba(52, 199, 89, 0.25);
+}
+
+.admin-pay-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(52, 199, 89, 0.35);
+}
+
+.admin-pay-btn.partial {
+    background: linear-gradient(135deg, #ff9f43, #e17e2a);
+    box-shadow: 0 4px 16px rgba(255, 159, 67, 0.25);
+}
+
+.admin-pay-btn.partial:hover:not(:disabled) {
+    box-shadow: 0 6px 20px rgba(255, 159, 67, 0.35);
+}
+
+.admin-pay-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* UPI chip */
+.admin-upi-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: rgba(84, 160, 255, 0.1);
+    color: #54a0ff;
+    border: 1px solid rgba(84, 160, 255, 0.25);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.admin-upi-missing {
+    font-size: 12px;
+    color: #ff9f43;
+}
+
+/* Pending amount highlight */
+.admin-pending-amount {
+    font-size: 15px;
+    font-weight: 800;
+    color: #34c759;
+}
+
+/* Selected row */
+.admin-row-selected {
+    background: rgba(52, 199, 89, 0.05) !important;
+    outline: 1px solid rgba(52, 199, 89, 0.15);
+}
