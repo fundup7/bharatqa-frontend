@@ -18,7 +18,12 @@ import CreateTestPage from './pages/CreateTestPage';
 import TestDetailPage from './pages/TestDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
-// AdminPage is restricted to BharatQA internal team only — not imported here
+import AdminPage from './pages/AdminPage';
+
+// List of allowed admin emails
+export const ADMIN_EMAILS = [
+  'fundup3@gmail.com' // Replace or add your emails here
+];
 
 // Styles
 import './styles/tokens.css';
@@ -184,6 +189,13 @@ function AppContent() {
             company={company}
             onUpdate={updateCompany}
             onLogout={handleLogout}
+            showToast={showToast}
+          />
+        )}
+
+        {view === 'admin' && company && ADMIN_EMAILS.includes(company.email) && (
+          <AdminPage
+            company={company}
             showToast={showToast}
           />
         )}

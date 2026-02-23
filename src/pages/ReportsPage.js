@@ -4,6 +4,66 @@ import { apiClient } from '../utils/api';
 import { colors } from '../utils/constants';
 import './ReportsPage.css';
 
+function safeJsonParse(v) {
+    try {
+        if (!v) return null;
+        if (typeof v === 'string') return JSON.parse(v);
+        if (typeof v === 'object') return v;
+    } catch { }
+    return null;
+}
+
+function pick(obj, keys) {
+    if (!obj) return null;
+    for (const k of keys) {
+        const v = obj[k];
+        if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return null;
+}
+
+function normalizeMbps(v) {
+    if (v === null || v === undefined || v === '') return null;
+    const s = String(v).trim();
+    const cleaned = s.replace(/mbps/ig, '').trim();
+    return cleaned ? `${cleaned} Mbps` : null;
+}
+
+function extractTesterNotes(bug) {
+    const raw = (bug.bug_description || bug.description || '').trim();
+    if (!raw) return null;
+
+    const idx = raw.toLowerCase().indexOf('tester feedback');
+    if (idx !== -1) {
+        let after = raw.slice(idx);
+        after = after.replace(/tester feedback\s*:\s*/i, '');
+        after = after.replace(/rating\s*:\s*\d+(\.\d+)?\s*\/\s*\d+/ig, '');
+        after = after.replace(/[_═—-]{5,}/g, ' ');
+        after = after.replace(/⭐/g, '').trim();
+        return after.length ? after : null;
+    }
+
+    const tokens = ['Device:', 'Android:', 'Screen:', 'Battery:', 'Network:', 'Duration:', 'Coordinates:', 'Accuracy:', 'Address:'];
+    const hits = tokens.reduce((a, t) => a + (raw.includes(t) ? 1 : 0), 0);
+    if (hits >= 5) return null;
+
+    return raw;
+}
+
+function parseScreenshots(bug) {
+    const s = bug.screenshots || bug.screenshot_url || '';
+    if (!s) return '';
+    return String(s).split(',').map(x => x.trim()).filter(Boolean).join(' | ');
+}
+
+function getVideoUrl(bug) {
+    if (!bug.recording_url) return '';
+    if (bug.recording_url.startsWith('http')) return bug.recording_url;
+    // Assuming API points to backend
+    const base = 'https://bharatqa-backend.onrender.com';
+    return base + bug.recording_url;
+}
+
 function exportToCSV(reports, company) {
     if (reports.length === 0) return;
 
@@ -14,12 +74,21 @@ function exportToCSV(reports, company) {
         'Severity',
         'Device',
         'OS Version',
+        'Screen Type',
         'Network',
+        'Network Speed',
+        'Battery Drain',
+        'Duration',
+        'Location',
         'Date',
         'Status',
+        'AI Analysis',
+        'Tester Notes',
         'Steps to Reproduce',
         'Expected Result',
         'Actual Result',
+        'Media (Video)',
+        'Screenshots'
     ];
 
     const escape = (val) => {
@@ -28,20 +97,45 @@ function exportToCSV(reports, company) {
         return `"${str}"`;
     };
 
-    const rows = reports.map(r => [
-        escape(r.bug_title || 'Untitled Issue'),
-        escape(r.app_name || ''),
-        escape(r.tester_name || 'Anonymous'),
-        escape(r.severity || ''),
-        escape(r.device_model || ''),
-        escape(r.os_version || ''),
-        escape(r.network_type || ''),
-        escape(r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : ''),
-        escape(r.ai_analysis ? 'Analyzed' : 'New'),
-        escape(r.steps_to_reproduce || ''),
-        escape(r.expected_result || ''),
-        escape(r.actual_result || ''),
-    ]);
+    const rows = reports.map(r => {
+        const stats = safeJsonParse(r.device_stats);
+        const deviceModel = pick(stats, ['device_model', 'deviceModel', 'model']) || r.device_model || '';
+        const androidVersion = pick(stats, ['android_version', 'androidVersion', 'osVersion']) || r.os_version || '';
+        const screenRes = pick(stats, ['screen_resolution', 'screenResolution', 'resolution']) || '';
+        const networkType = pick(stats, ['network_type', 'networkType']) || r.network_type || '';
+        const networkSpeed = pick(stats, ['network_speed_mbps', 'networkSpeedMbps', 'networkSpeed']);
+        const batteryDrain = pick(stats, ['battery_drain', 'batteryDrain']);
+        const durationSec = pick(stats, ['duration_seconds', 'testDuration', 'durationSeconds', 'duration']);
+        const locationAddr = pick(stats, ['location_address', 'fullAddress', 'locationAddress', 'address']) || '';
+
+        const aiAnalysisText = typeof r.ai_analysis === 'string'
+            ? r.ai_analysis
+            : r.ai_analysis ? JSON.stringify(r.ai_analysis) : '';
+
+        return [
+            escape(r.bug_title || 'Untitled Issue'),
+            escape(r.app_name || ''),
+            escape(r.tester_name || 'Anonymous'),
+            escape(r.severity || ''),
+            escape(deviceModel),
+            escape(androidVersion),
+            escape(screenRes),
+            escape(networkType),
+            escape(normalizeMbps(networkSpeed) || ''),
+            escape(batteryDrain != null ? `${batteryDrain}%` : ''),
+            escape(durationSec != null ? `${durationSec}s` : ''),
+            escape(locationAddr),
+            escape(r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : ''),
+            escape(r.ai_analysis ? 'Analyzed' : 'New'),
+            escape(aiAnalysisText),
+            escape(extractTesterNotes(r) || ''),
+            escape(r.steps_to_reproduce || ''),
+            escape(r.expected_result || ''),
+            escape(r.actual_result || ''),
+            escape(getVideoUrl(r)),
+            escape(parseScreenshots(r))
+        ];
+    });
 
     const csvContent = [headers.map(h => `"${h}"`).join(','), ...rows.map(r => r.join(','))].join('\r\n');
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });

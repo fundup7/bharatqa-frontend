@@ -1,5 +1,6 @@
 import React from 'react';
-import { Home, FileText, Settings, LogOut } from 'lucide-react';
+import { Home, FileText, Settings, Shield, LogOut } from 'lucide-react';
+import { ADMIN_EMAILS } from '../../App';
 import './Sidebar.css';
 
 export default function Sidebar({ view, company, onNavigate, onLogout }) {
@@ -8,6 +9,11 @@ export default function Sidebar({ view, company, onNavigate, onLogout }) {
     { key: 'reports', label: 'Reports', icon: FileText },
     { key: 'settings', label: 'Settings', icon: Settings },
   ];
+
+  // Only show Admin tab for authorized emails
+  if (company && ADMIN_EMAILS.includes(company.email)) {
+    navItems.push({ key: 'admin', label: 'Admin', icon: Shield });
+  }
 
   return (
     <aside className="sidebar">
