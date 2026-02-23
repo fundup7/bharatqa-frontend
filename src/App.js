@@ -20,16 +20,16 @@ import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 
-// List of allowed admin emails
-export const ADMIN_EMAILS = [
-  'fundup3@gmail.com' // Replace or add your emails here
-];
-
 // Styles
 import './styles/tokens.css';
 import './styles/glass.css';
 import './styles/animations.css';
 import './App.css';
+
+// List of allowed admin emails
+export const ADMIN_EMAILS = [
+  'fundup3@gmail.com' // Replace or add your emails here
+];
 
 function App() {
   return (
