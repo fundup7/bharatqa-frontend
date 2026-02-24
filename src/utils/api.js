@@ -126,6 +126,16 @@ export const apiClient = {
   getEligibleTesters: (testId) =>
     apiFetch(API + `/tests/${testId}/eligible-testers`).then(handleResponse),
 
+  // ── Admin: Tests ──────────────────────────────────────────────
+  getAdminTests: () =>
+    apiFetch(API + '/admin/tests').then(handleResponse),
+
+  updateTestStatus: (testId, status) =>
+    apiFetch(API + `/admin/tests/${testId}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }).then(handleResponse),
+
   // ── Admin: Testers ───────────────────────────────────────────
   getAllTesters: () =>
     apiFetch(API + '/admin/testers').then(handleResponse),
@@ -139,6 +149,12 @@ export const apiClient = {
   unbanTester: (testerId) =>
     apiFetch(API + `/admin/testers/${testerId}/ban`, {
       method: 'DELETE',
+    }).then(handleResponse),
+
+  // ── Admin: Companies ─────────────────────────────────────────
+  deleteCompanyByAdmin: (companyId) =>
+    apiFetch(API + `/auth/company/${companyId}`, {
+      method: 'DELETE'
     }).then(handleResponse),
 
   // ── Payments ─────────────────────────────────────────────────────────────
