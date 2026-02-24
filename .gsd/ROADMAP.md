@@ -14,3 +14,8 @@
 **Status**: ✅ Complete
 **Objective**: Introduce admin moderation capabilities (approve/reject tests, assign testers, manage companies), allow companies to set test quotas (calculate pricing dynamically at ₹70/tester/session).
 **Requirements**: REQ-01, REQ-02, REQ-03
+
+### Phase 2: Onboarding, UI Polish & Test Lifecycle
+**Status**: ✅ Complete
+**Objective**: Enforce mandatory onboarding fields (phone) on frontend, improve navbar UI (Sign In/Out buttons), fix manual tester assignment query, and implement the complete Test Lifecycle (Pending -> Active -> Completed) including automatic completion.
+**Requirements**: REQ-04, REQ-05

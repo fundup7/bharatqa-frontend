@@ -20,7 +20,7 @@ export default function OnboardingPage({ company, onComplete }) {
 
   const canNext = () => {
     if (step === 1) return form.company_name.trim() && form.industry;
-    if (step === 2) return form.company_size && form.role;
+    if (step === 2) return form.company_size && form.role && form.phone.trim();
     return true;
   };
 
@@ -142,7 +142,7 @@ export default function OnboardingPage({ company, onComplete }) {
             </div>
 
             <div className="form-group">
-              <label>Phone <span className="optional">(optional)</span></label>
+              <label>Phone <span className="required">*</span></label>
               <input
                 type="tel"
                 className="form-input"

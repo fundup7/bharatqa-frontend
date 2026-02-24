@@ -28,13 +28,13 @@ export default function Navbar({ company, onNavigate, onLogout }) {
                   {company.name?.[0]}
                 </div>
               )}
-              <button className="btn-secondary btn-small" onClick={onLogout}>
+              <button className="navbar-signout glass-button" onClick={onLogout}>
                 Sign Out
               </button>
             </>
           ) : (
-            <button className="btn-primary" onClick={() => onNavigate('login')}>
-              Sign In →
+            <button className="navbar-signin glass-button" onClick={() => onNavigate('login')}>
+              Sign In <span style={{ marginLeft: '4px' }}>→</span>
             </button>
           )}
         </div>

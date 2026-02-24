@@ -100,3 +100,48 @@
     display: none;
   }
 }
+
+/* Glassmorphic Navbar Buttons */
+.glass-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.navbar-signin {
+  background: linear-gradient(135deg, rgba(235, 126, 63, 0.2), rgba(63, 81, 181, 0.2));
+  border: 1px solid rgba(235, 126, 63, 0.4);
+}
+
+.navbar-signin:hover {
+  background: linear-gradient(135deg, rgba(235, 126, 63, 0.4), rgba(63, 81, 181, 0.4));
+  border-color: var(--saffron);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(235, 126, 63, 0.2);
+}
+
+.navbar-signout {
+  background: rgba(255, 59, 48, 0.1);
+  border: 1px solid rgba(255, 59, 48, 0.3);
+  color: #ff453a;
+}
+
+.navbar-signout:hover {
+  background: rgba(255, 59, 48, 0.2);
+  border-color: rgba(255, 59, 48, 0.6);
+  color: #ff6961;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.2);
+}
