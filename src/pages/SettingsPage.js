@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, Trash2, LogOut, CheckCircle, User, Briefcase, Settings2, ShieldAlert } from 'lucide-react';
+import { Save, Trash2, LogOut, User, Settings2, ShieldAlert } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import { industries, companySizes, roles } from '../utils/constants';
 import './SettingsPage.css';

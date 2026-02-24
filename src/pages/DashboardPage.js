@@ -7,20 +7,15 @@ import './DashboardPage.css';
 export default function DashboardPage({ company, onSelectTest, onViewChange, showToast }) {
   const [tests, setTests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [uniqueTesters, setUniqueTesters] = useState(0);
 
   const loadTests = useCallback(async () => {
-
-    const u = await apiClient.getCompanyUniqueTesters(company.id);
-    setUniqueTesters(u.unique_testers || 0);
 
     try {
       setLoading(true);
       const data = await apiClient.getTests(company.id);
       setTests(data);
 
-      const u = await apiClient.getCompanyUniqueTesters(company.id);
-      setUniqueTesters(u.unique_testers || 0);
+      setTests(data);
     } catch (err) {
       console.error(err);
       showToast('Failed to load tests', 'error');

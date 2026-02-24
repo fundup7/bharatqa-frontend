@@ -21,33 +21,6 @@ function useReveal(threshold = 0.15) {
   return [ref, visible];
 }
 
-/* ── counter animation ── */
-function AnimatedCounter({ end, suffix = '', duration = 1400 }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const started = useRef(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started.current) {
-        started.current = true;
-        if (typeof end !== 'number') { setCount(end); return; }
-        const start = performance.now();
-        const step = (now) => {
-          const t = Math.min((now - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - t, 3);
-          setCount(Math.round(ease * end));
-          if (t < 1) requestAnimationFrame(step);
-        };
-        requestAnimationFrame(step);
-      }
-    }, { threshold: 0.3 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [end, duration]);
-  return <span ref={ref}>{typeof end === 'number' ? count : end}{suffix}</span>;
-}
 
 export default function HomePage({ company, onLogin, onNavigate }) {
   const [health, setHealth] = useState(null);

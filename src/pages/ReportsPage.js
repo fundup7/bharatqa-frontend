@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Bug, AlertCircle, FileText, Download, Calendar, Activity, Sparkles } from 'lucide-react';
+import { Bug, AlertCircle, FileText, Download, Calendar, Sparkles } from 'lucide-react';
 import { apiClient } from '../utils/api';
-import { colors } from '../utils/constants';
 import './ReportsPage.css';
 
 function safeJsonParse(v) {

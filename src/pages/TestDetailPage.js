@@ -65,11 +65,6 @@ function extractTesterNotes(bug) {
   return raw;
 }
 
-function parseScreenshots(bug) {
-  const s = bug.screenshots || bug.screenshot_url || '';
-  if (!s) return [];
-  return String(s).split(',').map(x => x.trim()).filter(Boolean);
-}
 
 function AuthorizedVideo({ url, title }) {
   const [blobUrl, setBlobUrl] = useState(null);
@@ -465,7 +460,6 @@ export default function TestDetailPage({ test, onBack, showToast }) {
           const isExpanded = expandedBug === bug.id;
           const stats = safeJsonParse(bug.device_stats);
           const videoUrl = getVideoUrl(bug);
-          const screenshots = parseScreenshots(bug);
           const testerNotes = extractTesterNotes(bug);
 
           const deviceModel = pick(stats, ['device_model', 'deviceModel', 'model']);
