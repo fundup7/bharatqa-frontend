@@ -63,12 +63,12 @@ export default function HomePage({ company, onLogin, onNavigate }) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const [heroRef, heroVis]   = useReveal(0.1);
-  const [numRef, numVis]     = useReveal(0.2);
-  const [painRef, painVis]   = useReveal(0.15);
+  const [heroRef, heroVis] = useReveal(0.1);
+  const [numRef, numVis] = useReveal(0.2);
+  const [painRef, painVis] = useReveal(0.15);
   const [stepsRef, stepsVis] = useReveal(0.1);
-  const [featRef, featVis]   = useReveal(0.1);
-  const [ctaRef, ctaVis]     = useReveal(0.2);
+  const [featRef, featVis] = useReveal(0.1);
+  const [ctaRef, ctaVis] = useReveal(0.2);
 
   return (
     <div className="hp">
@@ -138,10 +138,10 @@ export default function HomePage({ company, onLogin, onNavigate }) {
       <section className="hp-numbers">
         <div ref={numRef} className={`hp-numbers-inner reveal ${numVis ? 'reveal--on' : ''}`}>
           {[
-            { display: '50+',    label: 'Real device types' },
+            { display: '50+', label: 'Real device types' },
             { display: '<2 days', label: 'Time to first report' },
-            { display: '100+',   label: 'Testers paid per session' },
-            { display: '24/7',   label: 'Tester availability' },
+            { display: '100+', label: 'Testers paid per session' },
+            { display: '24/7', label: 'Tester availability' },
           ].map((d, i) => (
             <div key={i} className="hp-num-block">
               <strong>{d.display}</strong>
@@ -160,7 +160,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               Real people.<br />Real phones.<br /><em style={{ color: 'var(--hp-accent)', fontStyle: 'normal' }}>Real feedback.</em>
             </h2>
             <p className="hp-testers-desc">
-              We don't simulate users — we pay them. Every tester on BharatQA is a real person 
+              We don't simulate users — we pay them. Every tester on BharatQA is a real person
               in India, using their own Android phone, earning money for every session they complete.
             </p>
             <div className="hp-testers-perks">
@@ -323,6 +323,82 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* ── Pricing ── */}
+      <section className="hp-section">
+        <div className={`reveal ${featVis ? 'reveal--on' : ''}`}>
+          <h2 className="hp-section-title">Transparent Pricing</h2>
+          <p className="hp-section-sub">Simple pay-as-you-go pricing based on the scale you need.</p>
+          <div className="hp-pain-grid" style={{ marginTop: 40 }}>
+            <div className="hp-pain-card">
+              <span className="hp-pain-emoji">🚀</span>
+              <h3>Essential</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹2,000</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <li>✓ <strong>20</strong> Real Testers</li>
+                <li>✓ <strong>1</strong> Testing Iteration</li>
+                <li>✓ Basic Demographics</li>
+                <li>✓ Standard Support</li>
+              </ul>
+              <button
+                className="hp-btn hp-btn--outline"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  if (company) onNavigate('dashboard');
+                  else document.querySelector('.hp-login-wrap button')?.click();
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+
+            <div className="hp-pain-card" style={{ border: '1px solid var(--hp-accent)', transform: 'scale(1.05)' }}>
+              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--hp-accent)', color: '#000', padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 'bold' }}>MOST POPULAR</div>
+              <span className="hp-pain-emoji">🔥</span>
+              <h3>Comprehensive</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹4,000</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <li>✓ <strong>40</strong> Real Testers</li>
+                <li>✓ <strong>1</strong> Testing Iteration</li>
+                <li>✓ Advanced Targeting</li>
+                <li>✓ Priority Support</li>
+              </ul>
+              <button
+                className="hp-btn hp-btn--pulse"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  if (company) onNavigate('dashboard');
+                  else document.querySelector('.hp-login-wrap button')?.click();
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+
+            <div className="hp-pain-card">
+              <span className="hp-pain-emoji">⚡</span>
+              <h3>Intensive</h3>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹6,000</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <li>✓ <strong>40</strong> Real Testers</li>
+                <li>✓ <strong>2</strong> Testing Iterations</li>
+                <li>✓ Premium Targeting</li>
+                <li>✓ 24/7 Dedicated Support</li>
+              </ul>
+              <button
+                className="hp-btn hp-btn--outline"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  if (company) onNavigate('dashboard');
+                  else document.querySelector('.hp-login-wrap button')?.click();
+                }}
+              >
+                Get Started
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

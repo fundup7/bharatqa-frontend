@@ -9,7 +9,12 @@ export default function CreateTestPage({ company, onClose, showToast }) {
     app_package: '',
     test_instructions: '',
     priority: 'normal',
+    tester_quota: 20,
+    testing_iterations: 1,
   });
+
+  // Derived price calculation
+  const calculatedPrice = form.tester_quota * form.testing_iterations * 70;
 
   // Targeting criteria (all optional — empty = open to all)
   const [criteria, setCriteria] = useState({
@@ -63,6 +68,9 @@ export default function CreateTestPage({ company, onClose, showToast }) {
       formData.append('app_package', form.app_package.trim());
       formData.append('instructions', form.test_instructions.trim());
       formData.append('priority', form.priority);
+      formData.append('tester_quota', form.tester_quota);
+      formData.append('testing_iterations', form.testing_iterations);
+      formData.append('price_paid', calculatedPrice);
       if (apkFile) {
         formData.append('apk', apkFile);
       }
@@ -189,6 +197,43 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                 </div>
               </div>
             </div>
+
+            <div className="ct-section-header" style={{ marginTop: '24px', paddingBottom: 0 }}>
+              <h2 className="ct-section-title">
+                <Users size={20} color="var(--saffron)" /> Quota & Scale
+              </h2>
+            </div>
+
+            <div className="form-row" style={{ marginTop: '16px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Target Number of Testers</label>
+                <input
+                  type="number"
+                  min="5"
+                  max="1000"
+                  step="5"
+                  className="form-input ct-input"
+                  value={form.tester_quota}
+                  onChange={e => update('tester_quota', parseInt(e.target.value) || 20)}
+                />
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label>Testing Iterations</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="1"
+                  className="form-input ct-input"
+                  value={form.testing_iterations}
+                  onChange={e => update('testing_iterations', parseInt(e.target.value) || 1)}
+                />
+              </div>
+            </div>
+            <div className="form-hint" style={{ marginTop: '-10px', marginBottom: '16px' }}>
+              Defines how many distinct demographics will verify the build across how many unique cycles.
+            </div>
+
           </div>
 
           {/* Targeting Criteria */}
@@ -338,7 +383,7 @@ export default function CreateTestPage({ company, onClose, showToast }) {
               <FileText size={48} className="ct-bg-icon" />
               <div className="ct-action-content">
                 <h4>Ready to launch?</h4>
-                <p>Ensure your instructions are clear.</p>
+                <p style={{ marginBottom: 12 }}>Estimated Cost: <strong style={{ color: 'var(--saffron)', fontSize: '1.2rem' }}>₹{calculatedPrice}</strong></p>
                 <button
                   className="btn-primary full-width ct-submit-btn"
                   disabled={uploading || !form.app_name.trim() || !form.test_instructions.trim()}
@@ -350,7 +395,7 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                       Uploading Build…
                     </>
                   ) : (
-                    '🚀 Create Test Mission'
+                    `🚀 Pay ₹${calculatedPrice} & Create`
                   )}
                 </button>
               </div>
