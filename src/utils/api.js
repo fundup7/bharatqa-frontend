@@ -136,6 +136,12 @@ export const apiClient = {
       body: JSON.stringify({ status }),
     }).then(handleResponse),
 
+  adminAssignTester: (testId, testerId) =>
+    apiFetch(API + `/admin/tests/${testId}/assign`, {
+      method: 'POST',
+      body: JSON.stringify({ tester_id: testerId }),
+    }).then(handleResponse),
+
   // ── Admin: Testers ───────────────────────────────────────────
   getAllTesters: () =>
     apiFetch(API + '/admin/testers').then(handleResponse),

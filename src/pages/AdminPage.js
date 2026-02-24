@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock } from 'lucide-react';
+import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './AdminPage.css';
 
@@ -19,7 +19,17 @@ function DeviceTierBadge({ tier }) {
 }
 
 export default function AdminPage({ company, showToast }) {
-    const [mainTab, setMainTab] = useState('testers'); // 'testers' | 'payments'
+    const [mainTab, setMainTab] = useState('testers'); // 'testers' | 'payments' | 'tests'
+
+    // ── Tests state ──
+    const [allTests, setAllTests] = useState([]);
+    const [loadingTests, setLoadingTests] = useState(false);
+
+    // Assign testers modal state
+    const [assignModalOpen, setAssignModalOpen] = useState(false);
+    const [assignTestContext, setAssignTestContext] = useState(null);
+    const [assignTargetTesters, setAssignTargetTesters] = useState([]);
+    const [assigningLoading, setAssigningLoading] = useState(false);
 
     // ── Testers state ──
     const [testers, setTesters] = useState([]);
@@ -57,8 +67,21 @@ export default function AdminPage({ company, showToast }) {
         }
     }, [showToast]);
 
+    const loadAdminTests = useCallback(async () => {
+        try {
+            setLoadingTests(true);
+            const data = await apiClient.getAdminTests();
+            setAllTests(Array.isArray(data) ? data : []);
+        } catch (err) {
+            showToast('Failed to load tests: ' + err.message, 'error');
+        } finally {
+            setLoadingTests(false);
+        }
+    }, [showToast]);
+
     useEffect(() => { loadTesters(); }, [loadTesters]);
     useEffect(() => { if (mainTab === 'payments') loadPending(); }, [mainTab, loadPending]);
+    useEffect(() => { if (mainTab === 'tests') loadAdminTests(); }, [mainTab, loadAdminTests]);
 
     const handleBan = async (tester) => {
         const reason = window.prompt(`Ban reason for ${tester.full_name}:`, 'Violation of terms of service');
@@ -141,13 +164,20 @@ export default function AdminPage({ company, showToast }) {
                         <p className="admin-hero-sub">Manage testers, access control, and payments.</p>
                     </div>
                 </div>
-                <button className="admin-refresh-btn" onClick={mainTab === 'testers' ? loadTesters : loadPending} title="Refresh">
+                <button className="admin-refresh-btn" onClick={() => {
+                    if (mainTab === 'testers') loadTesters();
+                    else if (mainTab === 'payments') loadPending();
+                    else loadAdminTests();
+                }} title="Refresh">
                     <RefreshCw size={16} />
                 </button>
             </div>
 
             {/* Main tabs */}
             <div className="admin-main-tabs">
+                <button className={`admin-main-tab ${mainTab === 'tests' ? 'active' : ''}`} onClick={() => setMainTab('tests')}>
+                    <ClipboardList size={15} /> All Tests
+                </button>
                 <button className={`admin-main-tab ${mainTab === 'testers' ? 'active' : ''}`} onClick={() => setMainTab('testers')}>
                     <Users size={15} /> Testers
                 </button>
@@ -339,6 +369,167 @@ export default function AdminPage({ company, showToast }) {
                         </div>
                     )}
                 </>
+            )}
+
+            {/* ════ TESTS TAB ════ */}
+            {mainTab === 'tests' && (
+                <>
+                    {loadingTests && <div className="loading-state"><div className="spinner" /><p>Loading tests…</p></div>}
+                    {!loadingTests && allTests.length === 0 && (
+                        <div className="empty-state glass-card">
+                            <div className="empty-icon">📝</div>
+                            <h3>No Tests</h3>
+                            <p>No company has created a test yet.</p>
+                        </div>
+                    )}
+                    {!loadingTests && allTests.length > 0 && (
+                        <div className="admin-table-wrap glass-card">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Company / App</th>
+                                        <th>Requested Testers</th>
+                                        <th>Iterations</th>
+                                        <th>Amount Paid</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {allTests.map(test => (
+                                        <tr key={test.id}>
+                                            <td>
+                                                <div className="admin-tester-name">{test.company_name}</div>
+                                                <div className="admin-tester-email">App: {test.app_name}</div>
+                                            </td>
+                                            <td>{test.tester_quota || 20}</td>
+                                            <td>{test.testing_iterations || 1}</td>
+                                            <td>₹{(test.price_paid || 0).toFixed(2)}</td>
+                                            <td>
+                                                <span className={`admin-status-badge ${test.status === 'approved' ? 'active' : test.status === 'rejected' ? 'banned' : ''}`}>
+                                                    {(test.status || 'pending').toUpperCase()}
+                                                </span>
+                                            </td>
+                                            <td style={{ display: 'flex', gap: '8px' }}>
+                                                {test.status === 'pending' && (
+                                                    <>
+                                                        <button className="admin-action-btn unban" onClick={async () => {
+                                                            try {
+                                                                await apiClient.updateTestStatus(test.id, 'approved');
+                                                                showToast(`✅ Test ${test.app_name} Approved`);
+                                                                loadAdminTests();
+                                                            } catch (err) {
+                                                                showToast('Error: ' + err.message, 'error');
+                                                            }
+                                                        }}>
+                                                            <Check size={14} /> Approve
+                                                        </button>
+                                                        <button className="admin-action-btn ban" onClick={async () => {
+                                                            try {
+                                                                await apiClient.updateTestStatus(test.id, 'rejected');
+                                                                showToast(`🚫 Test ${test.app_name} Rejected`);
+                                                                loadAdminTests();
+                                                            } catch (err) {
+                                                                showToast('Error: ' + err.message, 'error');
+                                                            }
+                                                        }}>
+                                                            <X size={14} /> Reject
+                                                        </button>
+                                                    </>
+                                                )}
+                                                <button className="admin-action-btn partial" onClick={() => {
+                                                    setAssignTestContext(test);
+                                                    setAssignTargetTesters([]);
+                                                    // Start by fetching eligible testers perhaps, but for admin, any active tester could work.
+                                                    setAssignModalOpen(true);
+                                                    if (testers.length === 0) loadTesters();
+                                                }} title="Assign Testers manually">
+                                                    <UserPlus size={14} />
+                                                </button>
+                                                <button className="admin-action-btn ban" onClick={async () => {
+                                                    if (window.confirm(`Are you sure you want to delete ${test.company_name} and all associated data? This cannot be undone.`)) {
+                                                        try {
+                                                            await apiClient.deleteCompanyByAdmin(test.company_id);
+                                                            showToast(`🗑️ Company ${test.company_name} deleted`);
+                                                            loadAdminTests();
+                                                        } catch (err) {
+                                                            showToast('Error: ' + err.message, 'error');
+                                                        }
+                                                    }
+                                                }} title="Delete Company">
+                                                    <Trash size={14} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* ASSIGN TESTERS MODAL */}
+            {assignModalOpen && assignTestContext && (
+                <div className="modal-overlay">
+                    <div className="modal-content glass-card" style={{ maxWidth: '600px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <h3>Assign Testers to {assignTestContext.app_name}</h3>
+                            <button className="icon-btn" onClick={() => setAssignModalOpen(false)}><X size={20} /></button>
+                        </div>
+
+                        <div style={{ marginBottom: 15, fontSize: '0.9rem', color: '#888' }}>
+                            Company: <strong>{assignTestContext.company_name}</strong> &nbsp; | &nbsp;
+                            Quota: <strong>{assignTestContext.tester_count} / {assignTestContext.tester_quota}</strong>
+                        </div>
+
+                        <div style={{ overflowY: 'auto', flex: 1, border: '1px solid #333', borderRadius: 8, padding: 10 }}>
+                            {testers.filter(t => !t.is_banned).map(t => (
+                                <div key={t.id} style={{ display: 'flex', alignItems: 'center', padding: '10px', borderBottom: '1px solid #222' }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={assignTargetTesters.includes(t.id)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) setAssignTargetTesters(prev => [...prev, t.id]);
+                                            else setAssignTargetTesters(prev => prev.filter(id => id !== t.id));
+                                        }}
+                                        style={{ marginRight: 15, transform: 'scale(1.2)' }}
+                                    />
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 600 }}>{t.full_name}</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#888' }}>{t.device_model} • {t.city}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                            <button className="btn btn-secondary" onClick={() => setAssignModalOpen(false)}>Cancel</button>
+                            <button
+                                className="btn btn-primary"
+                                disabled={assignTargetTesters.length === 0 || assigningLoading}
+                                onClick={async () => {
+                                    try {
+                                        setAssigningLoading(true);
+                                        // TODO: We need an API endpoint for this!
+                                        for (const testerId of assignTargetTesters) {
+                                            await apiClient.adminAssignTester(assignTestContext.id, testerId);
+                                        }
+                                        showToast(`✅ Successfully assigned ${assignTargetTesters.length} testers`);
+                                        setAssignModalOpen(false);
+                                        loadAdminTests();
+                                    } catch (err) {
+                                        showToast('Assignment Error: ' + err.message, 'error');
+                                    } finally {
+                                        setAssigningLoading(false);
+                                    }
+                                }}
+                            >
+                                {assigningLoading ? 'Assigning...' : `Assign ${assignTargetTesters.length} Testers`}
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
