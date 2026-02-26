@@ -406,8 +406,8 @@ export default function AdminPage({ company, showToast }) {
                                             <td>{test.tester_quota || 20}</td>
                                             <td>{test.testing_iterations || 1}</td>
                                             <td>
-                                                <div style={{ fontWeight: 600 }}>₹{(test.total_budget || 0).toFixed(0)}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{(test.price_paid || 0).toFixed(2)} / test</div>
+                                                <div style={{ fontWeight: 600 }}>₹{Number(test.total_budget || 0).toFixed(0)}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
                                             </td>
                                             <td>
                                                 <button
