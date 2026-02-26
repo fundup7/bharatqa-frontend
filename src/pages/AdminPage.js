@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus } from 'lucide-react';
+import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './AdminPage.css';
 
@@ -390,7 +390,8 @@ export default function AdminPage({ company, showToast }) {
                                         <th>Company / App</th>
                                         <th>Requested Testers</th>
                                         <th>Iterations</th>
-                                        <th>Amount Paid</th>
+                                        <th>Budget / Payout</th>
+                                        <th>Visibility</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -404,9 +405,30 @@ export default function AdminPage({ company, showToast }) {
                                             </td>
                                             <td>{test.tester_quota || 20}</td>
                                             <td>{test.testing_iterations || 1}</td>
-                                            <td>₹{(test.price_paid || 0).toFixed(2)}</td>
                                             <td>
-                                                <span className={`admin-status-badge ${test.status === 'approved' ? 'active' : test.status === 'rejected' ? 'banned' : ''}`}>
+                                                <div style={{ fontWeight: 600 }}>₹{(test.total_budget || 0).toFixed(0)}</div>
+                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{(test.price_paid || 0).toFixed(2)} / test</div>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    className={`admin-action-btn ${test.admin_approved ? 'unban' : 'ban'}`}
+                                                    onClick={async () => {
+                                                        try {
+                                                            await apiClient.approveTestVisibility(test.id, !test.admin_approved);
+                                                            showToast(test.admin_approved ? 'Test hidden from company' : 'Test visible to company');
+                                                            loadAdminTests();
+                                                        } catch (err) {
+                                                            showToast('Error: ' + err.message, 'error');
+                                                        }
+                                                    }}
+                                                    title={test.admin_approved ? "Hide from Company" : "Approve for Company Visibility"}
+                                                >
+                                                    {test.admin_approved ? <Eye size={14} /> : <EyeOff size={14} />}
+                                                    {test.admin_approved ? ' Visible' : ' Hidden'}
+                                                </button>
+                                            </td>
+                                            <td>
+                                                <span className={`admin-status-badge ${test.status === 'approved' || test.status === 'active' ? 'active' : test.status === 'rejected' ? 'banned' : ''}`}>
                                                     {(test.status || 'pending').toUpperCase()}
                                                 </span>
                                             </td>

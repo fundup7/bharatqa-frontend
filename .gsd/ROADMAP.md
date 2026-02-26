@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> **Current Phase**: Phase 1
+> **Current Phase**: Phase 3
 > **Milestone**: v1.1
 
 ## Must-Haves (from SPEC)
@@ -19,3 +19,8 @@
 **Status**: ✅ Complete
 **Objective**: Enforce mandatory onboarding fields (phone) on frontend, improve navbar UI (Sign In/Out buttons), fix manual tester assignment query, and implement the complete Test Lifecycle (Pending -> Active -> Completed) including automatic completion.
 **Requirements**: REQ-04, REQ-05
+
+### Phase 3: Resilience & Moderation
+**Status**: ✅ Complete
+**Objective**: Enhanced platform resilience, AI-driven moderation, and dynamic financial control. 
+**Requirements**: REQ-06, REQ-07, REQ-08, REQ-09, REQ-10, REQ-11, REQ-12

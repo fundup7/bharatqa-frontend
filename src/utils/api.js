@@ -136,6 +136,12 @@ export const apiClient = {
       body: JSON.stringify({ status }),
     }).then(handleResponse),
 
+  approveTestVisibility: (testId, approved) =>
+    apiFetch(API + `/admin/tests/${testId}/approve`, {
+      method: 'PUT',
+      body: JSON.stringify({ approved }),
+    }).then(handleResponse),
+
   adminAssignTester: (testId, testerId) =>
     apiFetch(API + `/admin/tests/${testId}/assign`, {
       method: 'POST',
