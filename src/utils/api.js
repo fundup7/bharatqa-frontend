@@ -158,10 +158,10 @@ export const apiClient = {
   adminGetPendingBugs: () =>
     apiFetch(API + '/admin/bugs/pending').then(handleResponse),
 
-  adminApproveBug: (bugId, approved) =>
+  adminApproveBug: (bugId, approved, status = null, reason = null) =>
     apiFetch(API + `/admin/bugs/${bugId}/approve`, {
       method: 'PUT',
-      body: JSON.stringify({ approved }),
+      body: JSON.stringify({ approved, status, reason }),
     }).then(handleResponse),
 
   // ── Admin: Testers ───────────────────────────────────────────

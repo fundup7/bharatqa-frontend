@@ -48,6 +48,7 @@ export default function AdminPage({ company, showToast }) {
     const [pendingBugs, setPendingBugs] = useState([]);
     const [loadingBugs, setLoadingBugs] = useState(false);
     const [approvingBugId, setApprovingBugId] = useState(null);
+    const [expandedBugId, setExpandedBugId] = useState(null);
 
     const loadTesters = useCallback(async () => {
         try {
@@ -433,9 +434,18 @@ export default function AdminPage({ company, showToast }) {
                                                         >
                                                             {expandedTest === test.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                                                         </button>
-                                                        <div>
-                                                            <div className="admin-tester-name">{test.company_name}</div>
-                                                            <div className="admin-tester-email">App: {test.app_name}</div>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                            {test.company_logo ? (
+                                                                <img src={test.company_logo} alt={test.company_name} style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                                                            ) : (
+                                                                <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                    <Users size={16} color="#888" />
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <div className="admin-tester-name">{test.company_name}</div>
+                                                                <div className="admin-tester-email">App: {test.app_name}</div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -480,16 +490,16 @@ export default function AdminPage({ company, showToast }) {
                                                         onClick={async () => {
                                                             try {
                                                                 await apiClient.approveTestVisibility(test.id, !test.admin_approved);
-                                                                showToast(test.admin_approved ? 'Test hidden from company' : 'Test visible to company');
+                                                                showToast(test.admin_approved ? 'Test hidden from testers' : 'Test visible to testers');
                                                                 loadAdminTests();
                                                             } catch (err) {
                                                                 showToast('Error: ' + err.message, 'error');
                                                             }
                                                         }}
-                                                        title={test.admin_approved ? "Hide from Company" : "Approve for Company Visibility"}
+                                                        title={test.admin_approved ? "Hide from Testers" : "Approve for Tester Visibility"}
                                                     >
                                                         {test.admin_approved ? <Eye size={14} /> : <EyeOff size={14} />}
-                                                        {test.admin_approved ? ' Visible' : ' Hidden'}
+                                                        {test.admin_approved ? ' Visible to Testers' : ' Hidden from Testers'}
                                                     </button>
                                                 </td>
                                                 <td>
@@ -557,7 +567,7 @@ export default function AdminPage({ company, showToast }) {
                                                                         <List size={16} /> Instructions
                                                                     </h4>
                                                                     <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', color: '#ccc', background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px' }}>
-                                                                        {test.test_instructions}
+                                                                        {test.instructions}
                                                                     </pre>
                                                                 </div>
                                                                 <div>
@@ -566,8 +576,8 @@ export default function AdminPage({ company, showToast }) {
                                                                     </h4>
                                                                     <div style={{ marginBottom: '16px' }}>
                                                                         <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '4px' }}>APK Link:</div>
-                                                                        {test.apk_url ? (
-                                                                            <a href={test.apk_url} target="_blank" rel="noreferrer" style={{ color: 'var(--saffron)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                        {test.apk_file_url ? (
+                                                                            <a href={test.apk_file_url} target="_blank" rel="noreferrer" style={{ color: 'var(--saffron)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                                                                 Download APK <ExternalLink size={12} />
                                                                             </a>
                                                                         ) : 'No APK uploaded'}
@@ -575,9 +585,13 @@ export default function AdminPage({ company, showToast }) {
                                                                     <div>
                                                                         <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px' }}>Targeting:</div>
                                                                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                                                            <DeviceTierBadge tier={test.device_tier} />
-                                                                            {test.network_type && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>📶 {test.network_type.toUpperCase()}</span>}
-                                                                            {test.max_ram_gb && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>💾 {test.max_ram_gb}GB RAM</span>}
+                                                                            <DeviceTierBadge tier={test.criteria?.device_tier} />
+                                                                            {test.criteria?.network_type && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>📶 {test.criteria.network_type.toUpperCase()}</span>}
+                                                                            {(test.criteria?.max_ram_gb || test.criteria?.min_ram_gb) && (
+                                                                                <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>
+                                                                                    💾 {test.criteria.min_ram_gb || 0}-{test.criteria.max_ram_gb || '∞'}GB RAM
+                                                                                </span>
+                                                                            )}
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -595,7 +609,6 @@ export default function AdminPage({ company, showToast }) {
                 </>
             )}
 
-            {/* ════ BUG APPROVAL TAB ════ */}
             {mainTab === 'bugs' && (
                 <>
                     {loadingBugs && <div className="loading-state"><div className="spinner" /><p>Loading pending bugs…</p></div>}
@@ -613,49 +626,220 @@ export default function AdminPage({ company, showToast }) {
                                     <tr>
                                         <th>App / Tester</th>
                                         <th>Issue</th>
+                                        <th>AI Verdict</th>
                                         <th>Details</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {pendingBugs.map(bug => (
-                                        <tr key={bug.id}>
-                                            <td>
-                                                <div className="admin-tester-name">{bug.app_name}</div>
-                                                <div className="admin-tester-email">By: {bug.tester_name}</div>
-                                            </td>
-                                            <td style={{ maxWidth: 300 }}>
-                                                <div style={{ fontWeight: 600 }}>{bug.bug_title}</div>
-                                                <div style={{ fontSize: '0.85rem', color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                    {bug.bug_description}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div style={{ fontSize: '0.8rem' }}>{new Date(bug.created_at).toLocaleString()}</div>
-                                                {bug.recording_url && <span style={{ color: 'var(--blue)', fontSize: '0.75rem' }}>📹 Recording attached</span>}
-                                            </td>
-                                            <td>
-                                                <button
-                                                    className="admin-action-btn unban"
-                                                    disabled={approvingBugId === bug.id}
-                                                    onClick={async () => {
-                                                        setApprovingBugId(bug.id);
-                                                        try {
-                                                            await apiClient.adminApproveBug(bug.id);
-                                                            showToast('Bug approved and visible to company');
-                                                            loadPendingBugs();
-                                                        } catch (err) {
-                                                            showToast('Failed to approve bug: ' + err.message, 'error');
-                                                        } finally {
-                                                            setApprovingBugId(null);
-                                                        }
-                                                    }}
-                                                >
-                                                    {approvingBugId === bug.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><Check size={14} /> Approve</>}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {pendingBugs.map(bug => {
+                                        const isExpanded = expandedBugId === bug.id;
+                                        const aiVerdict = bug.ai_analysis && bug.ai_analysis.includes('FINAL VERDICT: [APPROVE]') ? 'APPROVE' :
+                                            (bug.ai_analysis && bug.ai_analysis.includes('FINAL VERDICT: [REJECT]') ? 'REJECT' : 'PENDING');
+
+                                        return (
+                                            <React.Fragment key={bug.id}>
+                                                <tr className={isExpanded ? 'admin-row-expanded-header' : ''}>
+                                                    <td>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                            <button
+                                                                className="icon-btn"
+                                                                onClick={() => setExpandedBugId(isExpanded ? null : bug.id)}
+                                                                style={{ padding: 4 }}
+                                                            >
+                                                                {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                            </button>
+                                                            <div>
+                                                                <div className="admin-tester-name">{bug.app_name}</div>
+                                                                <div className="admin-tester-email">By: {bug.tester_name}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td style={{ maxWidth: 300 }}>
+                                                        <div style={{ fontWeight: 600 }}>{bug.bug_title}</div>
+                                                        <div style={{ fontSize: '0.85rem', color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                            {bug.bug_description}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        {aiVerdict === 'APPROVE' && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>🤖 AI: APPROVE</span>}
+                                                        {aiVerdict === 'REJECT' && <span className="admin-status-badge banned" style={{ fontSize: '0.7rem' }}>🤖 AI: REJECT</span>}
+                                                        {aiVerdict === 'PENDING' && <span className="admin-status-badge pending" style={{ fontSize: '0.7rem' }}>🤖 AI: ANALYZING...</span>}
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ fontSize: '0.8rem' }}>{new Date(bug.created_at).toLocaleString()}</div>
+                                                        {bug.recording_url && <span style={{ color: 'var(--blue)', fontSize: '0.75rem' }}>📹 Video Attached</span>}
+                                                    </td>
+                                                    <td>
+                                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                                            <button
+                                                                className="admin-action-btn unban"
+                                                                disabled={approvingBugId === bug.id}
+                                                                onClick={async () => {
+                                                                    setApprovingBugId(bug.id);
+                                                                    try {
+                                                                        await apiClient.adminApproveBug(bug.id, true, 'approved');
+                                                                        showToast('Bug approved and visible to company');
+                                                                        loadPendingBugs();
+                                                                    } catch (err) {
+                                                                        showToast('Failed to approve bug: ' + err.message, 'error');
+                                                                    } finally {
+                                                                        setApprovingBugId(null);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                {approvingBugId === bug.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <Check size={14} />}
+                                                            </button>
+                                                            <button
+                                                                className="admin-action-btn ban"
+                                                                disabled={approvingBugId === bug.id}
+                                                                onClick={async () => {
+                                                                    const reason = window.prompt("Reason for rejection:");
+                                                                    if (reason === null) return;
+                                                                    setApprovingBugId(bug.id);
+                                                                    try {
+                                                                        await apiClient.adminApproveBug(bug.id, false, 'rejected', reason);
+                                                                        showToast('Bug rejected');
+                                                                        loadPendingBugs();
+                                                                    } catch (err) {
+                                                                        showToast('Failed to reject bug: ' + err.message, 'error');
+                                                                    } finally {
+                                                                        setApprovingBugId(null);
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {isExpanded && (
+                                                    <tr className="admin-expanded-row">
+                                                        <td colSpan="5">
+                                                            <div className="admin-expanded-content" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px' }}>
+                                                                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '32px' }}>
+                                                                    {/* Left: Video Player */}
+                                                                    <div>
+                                                                        <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                            <Smartphone size={16} /> Bug Recording
+                                                                        </h4>
+                                                                        {bug.recording_url ? (
+                                                                            <div className="admin-video-container" style={{ borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '9/16', border: '1px solid #333' }}>
+                                                                                <video
+                                                                                    src={`${apiClient.getVideoBlobUrl ? 'loading...' : (bug.recording_url.startsWith('http') ? bug.recording_url : `https://bharatqa-backend.onrender.com${bug.recording_url}`)}`}
+                                                                                    controls
+                                                                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                                                                                    // Since we might need API key for B2 proxy, using a safe component or proxy URL
+                                                                                    autoPlay={false}
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <div style={{ padding: '40px', background: '#222', borderRadius: '12px', textAlign: 'center', color: '#666' }}>
+                                                                                No video recording available.
+                                                                            </div>
+                                                                        )}
+                                                                        <div style={{ marginTop: '16px' }}>
+                                                                            <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '4px' }}>Device Info:</div>
+                                                                            <div style={{ fontSize: '0.85rem' }}>{bug.device_info || 'Unknown device'}</div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Right: Info & AI */}
+                                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                                                        <div>
+                                                                            <h4 style={{ color: 'var(--saffron)', marginBottom: '12px' }}>📋 Instructions & Feedback</h4>
+                                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                                                                <div>
+                                                                                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>Test Instructions</div>
+                                                                                    <div style={{ background: 'rgba(255,107,43,0.05)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', borderLeft: '3px solid var(--saffron)' }}>
+                                                                                        {bug.test_instructions || 'No instructions provided for this test.'}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#888', marginBottom: '4px' }}>Tester Feedback</div>
+                                                                                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', borderLeft: '3px solid #ccc' }}>
+                                                                                        {bug.bug_description}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <div>
+                                                                            <h4 style={{ color: '#54a0ff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                                <Shield size={16} /> AI Vision Verdict (Gemini)
+                                                                            </h4>
+                                                                            {bug.ai_analysis ? (
+                                                                                <div className="admin-ai-analysis-box" style={{
+                                                                                    background: 'rgba(84,160,255,0.05)',
+                                                                                    padding: '20px',
+                                                                                    borderRadius: '12px',
+                                                                                    fontSize: '0.9rem',
+                                                                                    border: '1px solid rgba(84,160,255,0.2)',
+                                                                                    lineHeight: '1.6'
+                                                                                }}>
+                                                                                    <div style={{ whiteSpace: 'pre-wrap' }}>
+                                                                                        {bug.ai_analysis}
+                                                                                    </div>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <div style={{ padding: '30px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', textAlign: 'center', border: '1px dashed #444' }}>
+                                                                                    <div className="spinner" style={{ margin: '0 auto 12px' }} />
+                                                                                    <p style={{ color: '#888' }}>Gemini is currently analyzing this recording...</p>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <div style={{ marginTop: 'auto', display: 'flex', gap: '12px' }}>
+                                                                            <button
+                                                                                className="btn btn-primary"
+                                                                                style={{ flex: 1, padding: '12px' }}
+                                                                                disabled={approvingBugId === bug.id}
+                                                                                onClick={async () => {
+                                                                                    setApprovingBugId(bug.id);
+                                                                                    try {
+                                                                                        await apiClient.adminApproveBug(bug.id, true, 'approved');
+                                                                                        showToast('Bug approved and visible to company');
+                                                                                        loadPendingBugs();
+                                                                                    } catch (err) {
+                                                                                        showToast('Failed to approve bug: ' + err.message, 'error');
+                                                                                    } finally {
+                                                                                        setApprovingBugId(null);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <Check size={18} /> Approve & Release to Company
+                                                                            </button>
+                                                                            <button
+                                                                                className="btn btn-secondary"
+                                                                                style={{ background: 'rgba(255,59,92,0.1)', color: '#ff3b5c', border: '1px solid rgba(255,59,92,0.2)', flex: 0.5 }}
+                                                                                disabled={approvingBugId === bug.id}
+                                                                                onClick={async () => {
+                                                                                    const reason = window.prompt("Reason for rejection:");
+                                                                                    if (reason === null) return;
+                                                                                    setApprovingBugId(bug.id);
+                                                                                    try {
+                                                                                        await apiClient.adminApproveBug(bug.id, false, 'rejected', reason);
+                                                                                        showToast('Bug rejected');
+                                                                                        loadPendingBugs();
+                                                                                    } catch (err) {
+                                                                                        showToast('Failed to reject bug: ' + err.message, 'error');
+                                                                                    } finally {
+                                                                                        setApprovingBugId(null);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                <X size={18} /> Reject Bug
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
