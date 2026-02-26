@@ -416,7 +416,6 @@ export default function AdminPage({ company, showToast }) {
                                         <th>Requested Testers</th>
                                         <th>Iterations</th>
                                         <th>Budget / Payout</th>
-                                        <th>Visibility</th>
                                         <th>Status</th>
                                         <th>Action</th>
                                     </tr>
@@ -483,24 +482,6 @@ export default function AdminPage({ company, showToast }) {
                                                             <Pencil size={12} />
                                                         </button>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <button
-                                                        className={`admin-action-btn ${test.admin_approved ? 'unban' : 'ban'}`}
-                                                        onClick={async () => {
-                                                            try {
-                                                                await apiClient.approveTestVisibility(test.id, !test.admin_approved);
-                                                                showToast(test.admin_approved ? 'Test hidden from testers' : 'Test visible to testers');
-                                                                loadAdminTests();
-                                                            } catch (err) {
-                                                                showToast('Error: ' + err.message, 'error');
-                                                            }
-                                                        }}
-                                                        title={test.admin_approved ? "Hide from Testers" : "Approve for Tester Visibility"}
-                                                    >
-                                                        {test.admin_approved ? <Eye size={14} /> : <EyeOff size={14} />}
-                                                        {test.admin_approved ? ' Visible to Testers' : ' Hidden from Testers'}
-                                                    </button>
                                                 </td>
                                                 <td>
                                                     <span className={`admin-status-badge ${test.status === 'approved' || test.status === 'active' ? 'active' : test.status === 'rejected' ? 'banned' : 'pending'}`}>
@@ -780,6 +761,22 @@ export default function AdminPage({ company, showToast }) {
                                                                                     <div style={{ whiteSpace: 'pre-wrap' }}>
                                                                                         {bug.ai_analysis}
                                                                                     </div>
+
+                                                                                    {bug.ai_admin_context && (
+                                                                                        <div style={{
+                                                                                            marginTop: '20px',
+                                                                                            paddingTop: '20px',
+                                                                                            borderTop: '1px dashed rgba(84,160,255,0.3)',
+                                                                                            color: '#ffcc00'
+                                                                                        }}>
+                                                                                            <h5 style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                                                <Shield size={14} /> INTERNAL ADMIN CONTEXT
+                                                                                            </h5>
+                                                                                            <div style={{ whiteSpace: 'pre-wrap', fontStyle: 'italic' }}>
+                                                                                                {bug.ai_admin_context}
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    )}
                                                                                 </div>
                                                                             ) : (
                                                                                 <div style={{ padding: '30px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', textAlign: 'center', border: '1px dashed #444' }}>

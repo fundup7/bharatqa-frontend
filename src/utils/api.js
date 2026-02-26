@@ -148,10 +148,10 @@ export const apiClient = {
       body: JSON.stringify({ tester_id: testerId }),
     }).then(handleResponse),
 
-  adminUpdateTestBudget: (testId, total_budget) =>
+  adminUpdateTestBudget: (testId, total_budget, price_paid) =>
     apiFetch(API + `/admin/tests/${testId}/budget`, {
       method: 'PUT',
-      body: JSON.stringify({ total_budget }),
+      body: JSON.stringify({ total_budget, price_paid }),
     }).then(handleResponse),
 
   // ── Admin: Bugs ───────────────────────────────────────────
