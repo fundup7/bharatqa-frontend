@@ -290,7 +290,13 @@ export default function TestDetailPage({ test, onBack, showToast }) {
           <div className="td-app-details">
             <h1>{test.app_name}</h1>
             <p className="td-meta">
-              <Clock size={14} /> Created {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} <span className="td-meta-dot">•</span> <Bug size={14} /> {bugs.length} Issue{bugs.length !== 1 ? 's' : ''}
+              <Clock size={14} /> Created {new Date(test.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              <span className="td-meta-dot">•</span>
+              <Bug size={14} /> {bugs.length} Issue{bugs.length !== 1 ? 's' : ''}
+              <span className="td-meta-dot">•</span>
+              <span className={`td-status-badge ${test.status === 'pending-approval' ? 'pending' : (test.status === 'active' ? 'active' : '')}`}>
+                {test.status === 'pending-approval' ? 'Pending Approval' : (test.status ? test.status.toUpperCase() : 'PENDING')}
+              </span>
             </p>
           </div>
         </div>

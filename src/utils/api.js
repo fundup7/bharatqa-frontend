@@ -148,6 +148,22 @@ export const apiClient = {
       body: JSON.stringify({ tester_id: testerId }),
     }).then(handleResponse),
 
+  adminUpdateTestBudget: (testId, total_budget) =>
+    apiFetch(API + `/admin/tests/${testId}/budget`, {
+      method: 'PUT',
+      body: JSON.stringify({ total_budget }),
+    }).then(handleResponse),
+
+  // ── Admin: Bugs ───────────────────────────────────────────
+  adminGetPendingBugs: () =>
+    apiFetch(API + '/admin/bugs/pending').then(handleResponse),
+
+  adminApproveBug: (bugId, approved) =>
+    apiFetch(API + `/admin/bugs/${bugId}/approve`, {
+      method: 'PUT',
+      body: JSON.stringify({ approved }),
+    }).then(handleResponse),
+
   // ── Admin: Testers ───────────────────────────────────────────
   getAllTesters: () =>
     apiFetch(API + '/admin/testers').then(handleResponse),

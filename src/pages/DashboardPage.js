@@ -14,8 +14,6 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
       setLoading(true);
       const data = await apiClient.getTests(company.id);
       setTests(data);
-
-      setTests(data);
     } catch (err) {
       console.error(err);
       showToast('Failed to load tests', 'error');
@@ -139,9 +137,9 @@ export default function DashboardPage({ company, onSelectTest, onViewChange, sho
             </p>
 
             <div className="test-stats">
-              <div className={(test.status === 'active' || test.status === 'approved') ? 'status-good test-stat' : 'status-warning test-stat'}>
+              <div className={(test.status === 'active' || test.status === 'approved') ? 'status-good test-stat' : (test.status === 'pending-approval' ? 'status-pending test-stat' : 'status-warning test-stat')}>
                 <div className="test-stat-val">
-                  {test.status ? test.status.charAt(0).toUpperCase() + test.status.slice(1) : 'Pending'}
+                  {test.status === 'pending-approval' ? 'Pending Approval' : (test.status ? test.status.charAt(0).toUpperCase() + test.status.slice(1) : 'Pending')}
                 </div>
                 <div className="test-stat-label">Status</div>
               </div>

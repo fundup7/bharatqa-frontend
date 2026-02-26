@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff, Bug, Pencil, ChevronDown, ChevronUp, ExternalLink, List } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './AdminPage.css';
 
@@ -19,11 +19,12 @@ function DeviceTierBadge({ tier }) {
 }
 
 export default function AdminPage({ company, showToast }) {
-    const [mainTab, setMainTab] = useState('testers'); // 'testers' | 'payments' | 'tests'
+    const [mainTab, setMainTab] = useState('tests'); // 'tests' | 'bugs' | 'testers' | 'payments'
 
     // ── Tests state ──
     const [allTests, setAllTests] = useState([]);
     const [loadingTests, setLoadingTests] = useState(false);
+    const [expandedTest, setExpandedTest] = useState(null);
 
     // Assign testers modal state
     const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -42,6 +43,11 @@ export default function AdminPage({ company, showToast }) {
     const [loadingPending, setLoadingPending] = useState(false);
     const [paying, setPaying] = useState(false);
     const [selected, setSelected] = useState(new Set()); // tester ids selected for payment
+
+    // ── Bug Approval state ──
+    const [pendingBugs, setPendingBugs] = useState([]);
+    const [loadingBugs, setLoadingBugs] = useState(false);
+    const [approvingBugId, setApprovingBugId] = useState(null);
 
     const loadTesters = useCallback(async () => {
         try {
@@ -79,9 +85,22 @@ export default function AdminPage({ company, showToast }) {
         }
     }, [showToast]);
 
+    const loadPendingBugs = useCallback(async () => {
+        try {
+            setLoadingBugs(true);
+            const data = await apiClient.adminGetPendingBugs();
+            setPendingBugs(Array.isArray(data) ? data : []);
+        } catch (err) {
+            showToast('Failed to load pending bugs: ' + err.message, 'error');
+        } finally {
+            setLoadingBugs(false);
+        }
+    }, [showToast]);
+
     useEffect(() => { loadTesters(); }, [loadTesters]);
     useEffect(() => { if (mainTab === 'payments') loadPending(); }, [mainTab, loadPending]);
     useEffect(() => { if (mainTab === 'tests') loadAdminTests(); }, [mainTab, loadAdminTests]);
+    useEffect(() => { if (mainTab === 'bugs') loadPendingBugs(); }, [mainTab, loadPendingBugs]);
 
     const handleBan = async (tester) => {
         const reason = window.prompt(`Ban reason for ${tester.full_name}:`, 'Violation of terms of service');
@@ -167,6 +186,7 @@ export default function AdminPage({ company, showToast }) {
                 <button className="admin-refresh-btn" onClick={() => {
                     if (mainTab === 'testers') loadTesters();
                     else if (mainTab === 'payments') loadPending();
+                    else if (mainTab === 'bugs') loadPendingBugs();
                     else loadAdminTests();
                 }} title="Refresh">
                     <RefreshCw size={16} />
@@ -177,6 +197,10 @@ export default function AdminPage({ company, showToast }) {
             <div className="admin-main-tabs">
                 <button className={`admin-main-tab ${mainTab === 'tests' ? 'active' : ''}`} onClick={() => setMainTab('tests')}>
                     <ClipboardList size={15} /> All Tests
+                </button>
+                <button className={`admin-main-tab ${mainTab === 'bugs' ? 'active' : ''}`} onClick={() => setMainTab('bugs')}>
+                    <Bug size={15} /> Bug Approval
+                    {pendingBugs.length > 0 && <span className="admin-filter-count">{pendingBugs.length}</span>}
                 </button>
                 <button className={`admin-main-tab ${mainTab === 'testers' ? 'active' : ''}`} onClick={() => setMainTab('testers')}>
                     <Users size={15} /> Testers
@@ -398,88 +422,236 @@ export default function AdminPage({ company, showToast }) {
                                 </thead>
                                 <tbody>
                                     {allTests.map(test => (
-                                        <tr key={test.id}>
+                                        <React.Fragment key={test.id}>
+                                            <tr>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <button
+                                                            className="icon-btn"
+                                                            onClick={() => setExpandedTest(expandedTest === test.id ? null : test.id)}
+                                                            style={{ padding: 4 }}
+                                                        >
+                                                            {expandedTest === test.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                                                        </button>
+                                                        <div>
+                                                            <div className="admin-tester-name">{test.company_name}</div>
+                                                            <div className="admin-tester-email">App: {test.app_name}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>{test.tester_quota || 20}</td>
+                                                <td>{test.testing_iterations || 1}</td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                        <div>
+                                                            <div style={{ fontWeight: 600 }}>₹{Number(test.total_budget || 0).toFixed(0)}</div>
+                                                            <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
+                                                        </div>
+                                                        <button
+                                                            className="admin-action-btn partial"
+                                                            style={{ padding: '4px 8px' }}
+                                                            onClick={async () => {
+                                                                const newBudget = window.prompt(`Enter total budget for ${test.app_name}:`, test.total_budget);
+                                                                if (newBudget === null) return;
+                                                                const b = parseFloat(newBudget);
+                                                                if (isNaN(b)) return showToast('Invalid budget', 'error');
+
+                                                                const newPrice = window.prompt(`Enter price per test (paid to tester):`, test.price_paid || 70);
+                                                                if (newPrice === null) return;
+                                                                const p = parseFloat(newPrice);
+                                                                if (isNaN(p)) return showToast('Invalid price', 'error');
+
+                                                                try {
+                                                                    await apiClient.adminUpdateTestBudget(test.id, b, p);
+                                                                    showToast('Budget updated successfully');
+                                                                    loadAdminTests();
+                                                                } catch (err) {
+                                                                    showToast('Update failed: ' + err.message, 'error');
+                                                                }
+                                                            }}
+                                                        >
+                                                            <Pencil size={12} />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <button
+                                                        className={`admin-action-btn ${test.admin_approved ? 'unban' : 'ban'}`}
+                                                        onClick={async () => {
+                                                            try {
+                                                                await apiClient.approveTestVisibility(test.id, !test.admin_approved);
+                                                                showToast(test.admin_approved ? 'Test hidden from company' : 'Test visible to company');
+                                                                loadAdminTests();
+                                                            } catch (err) {
+                                                                showToast('Error: ' + err.message, 'error');
+                                                            }
+                                                        }}
+                                                        title={test.admin_approved ? "Hide from Company" : "Approve for Company Visibility"}
+                                                    >
+                                                        {test.admin_approved ? <Eye size={14} /> : <EyeOff size={14} />}
+                                                        {test.admin_approved ? ' Visible' : ' Hidden'}
+                                                    </button>
+                                                </td>
+                                                <td>
+                                                    <span className={`admin-status-badge ${test.status === 'approved' || test.status === 'active' ? 'active' : test.status === 'rejected' ? 'banned' : 'pending'}`}>
+                                                        {(test.status || 'pending').toUpperCase()}
+                                                    </span>
+                                                </td>
+                                                <td style={{ display: 'flex', gap: '8px' }}>
+                                                    {(test.status === 'pending-approval' || test.status === 'pending') && (
+                                                        <>
+                                                            <button className="admin-action-btn unban" onClick={async () => {
+                                                                try {
+                                                                    await apiClient.updateTestStatus(test.id, 'approved');
+                                                                    showToast(`✅ Test ${test.app_name} Approved`);
+                                                                    loadAdminTests();
+                                                                } catch (err) {
+                                                                    showToast('Error: ' + err.message, 'error');
+                                                                }
+                                                            }}>
+                                                                <Check size={14} /> Approve
+                                                            </button>
+                                                            <button className="admin-action-btn ban" onClick={async () => {
+                                                                try {
+                                                                    await apiClient.updateTestStatus(test.id, 'rejected');
+                                                                    showToast(`🚫 Test ${test.app_name} Rejected`);
+                                                                    loadAdminTests();
+                                                                } catch (err) {
+                                                                    showToast('Error: ' + err.message, 'error');
+                                                                }
+                                                            }}>
+                                                                <X size={14} /> Reject
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    <button className="admin-action-btn partial" onClick={() => {
+                                                        setAssignTestContext(test);
+                                                        setAssignTargetTesters([]);
+                                                        setAssignModalOpen(true);
+                                                        if (testers.length === 0) loadTesters();
+                                                    }} title="Assign Testers manually">
+                                                        <UserPlus size={14} />
+                                                    </button>
+                                                    <button className="admin-action-btn ban" onClick={async () => {
+                                                        if (window.confirm(`Are you sure you want to delete ${test.company_name} and all associated data? This cannot be undone.`)) {
+                                                            try {
+                                                                await apiClient.deleteCompanyByAdmin(test.company_id);
+                                                                showToast(`🗑️ Company ${test.company_name} deleted`);
+                                                                loadAdminTests();
+                                                            } catch (err) {
+                                                                showToast('Error: ' + err.message, 'error');
+                                                            }
+                                                        }
+                                                    }} title="Delete Company">
+                                                        <Trash size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {expandedTest === test.id && (
+                                                <tr className="admin-expanded-row">
+                                                    <td colSpan="7">
+                                                        <div className="admin-expanded-content" style={{ padding: '20px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                                                                <div>
+                                                                    <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <List size={16} /> Instructions
+                                                                    </h4>
+                                                                    <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem', color: '#ccc', background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '4px' }}>
+                                                                        {test.test_instructions}
+                                                                    </pre>
+                                                                </div>
+                                                                <div>
+                                                                    <h4 style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                                        <Smartphone size={16} /> Build & Criteria
+                                                                    </h4>
+                                                                    <div style={{ marginBottom: '16px' }}>
+                                                                        <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '4px' }}>APK Link:</div>
+                                                                        {test.apk_url ? (
+                                                                            <a href={test.apk_url} target="_blank" rel="noreferrer" style={{ color: 'var(--saffron)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                                                Download APK <ExternalLink size={12} />
+                                                                            </a>
+                                                                        ) : 'No APK uploaded'}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '8px' }}>Targeting:</div>
+                                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                                            <DeviceTierBadge tier={test.device_tier} />
+                                                                            {test.network_type && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>📶 {test.network_type.toUpperCase()}</span>}
+                                                                            {test.max_ram_gb && <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>💾 {test.max_ram_gb}GB RAM</span>}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* ════ BUG APPROVAL TAB ════ */}
+            {mainTab === 'bugs' && (
+                <>
+                    {loadingBugs && <div className="loading-state"><div className="spinner" /><p>Loading pending bugs…</p></div>}
+                    {!loadingBugs && pendingBugs.length === 0 && (
+                        <div className="empty-state glass-card">
+                            <div className="empty-icon">✅</div>
+                            <h3>All Bugs Approved</h3>
+                            <p>No bugs waiting for approval right now.</p>
+                        </div>
+                    )}
+                    {!loadingBugs && pendingBugs.length > 0 && (
+                        <div className="admin-table-wrap glass-card">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>App / Tester</th>
+                                        <th>Issue</th>
+                                        <th>Details</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {pendingBugs.map(bug => (
+                                        <tr key={bug.id}>
                                             <td>
-                                                <div className="admin-tester-name">{test.company_name}</div>
-                                                <div className="admin-tester-email">App: {test.app_name}</div>
+                                                <div className="admin-tester-name">{bug.app_name}</div>
+                                                <div className="admin-tester-email">By: {bug.tester_name}</div>
                                             </td>
-                                            <td>{test.tester_quota || 20}</td>
-                                            <td>{test.testing_iterations || 1}</td>
+                                            <td style={{ maxWidth: 300 }}>
+                                                <div style={{ fontWeight: 600 }}>{bug.bug_title}</div>
+                                                <div style={{ fontSize: '0.85rem', color: '#888', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    {bug.bug_description}
+                                                </div>
+                                            </td>
                                             <td>
-                                                <div style={{ fontWeight: 600 }}>₹{Number(test.total_budget || 0).toFixed(0)}</div>
-                                                <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
+                                                <div style={{ fontSize: '0.8rem' }}>{new Date(bug.created_at).toLocaleString()}</div>
+                                                {bug.recording_url && <span style={{ color: 'var(--blue)', fontSize: '0.75rem' }}>📹 Recording attached</span>}
                                             </td>
                                             <td>
                                                 <button
-                                                    className={`admin-action-btn ${test.admin_approved ? 'unban' : 'ban'}`}
+                                                    className="admin-action-btn unban"
+                                                    disabled={approvingBugId === bug.id}
                                                     onClick={async () => {
+                                                        setApprovingBugId(bug.id);
                                                         try {
-                                                            await apiClient.approveTestVisibility(test.id, !test.admin_approved);
-                                                            showToast(test.admin_approved ? 'Test hidden from company' : 'Test visible to company');
-                                                            loadAdminTests();
+                                                            await apiClient.adminApproveBug(bug.id);
+                                                            showToast('Bug approved and visible to company');
+                                                            loadPendingBugs();
                                                         } catch (err) {
-                                                            showToast('Error: ' + err.message, 'error');
+                                                            showToast('Failed to approve bug: ' + err.message, 'error');
+                                                        } finally {
+                                                            setApprovingBugId(null);
                                                         }
                                                     }}
-                                                    title={test.admin_approved ? "Hide from Company" : "Approve for Company Visibility"}
                                                 >
-                                                    {test.admin_approved ? <Eye size={14} /> : <EyeOff size={14} />}
-                                                    {test.admin_approved ? ' Visible' : ' Hidden'}
-                                                </button>
-                                            </td>
-                                            <td>
-                                                <span className={`admin-status-badge ${test.status === 'approved' || test.status === 'active' ? 'active' : test.status === 'rejected' ? 'banned' : ''}`}>
-                                                    {(test.status || 'pending').toUpperCase()}
-                                                </span>
-                                            </td>
-                                            <td style={{ display: 'flex', gap: '8px' }}>
-                                                {test.status === 'pending' && (
-                                                    <>
-                                                        <button className="admin-action-btn unban" onClick={async () => {
-                                                            try {
-                                                                await apiClient.updateTestStatus(test.id, 'approved');
-                                                                showToast(`✅ Test ${test.app_name} Approved`);
-                                                                loadAdminTests();
-                                                            } catch (err) {
-                                                                showToast('Error: ' + err.message, 'error');
-                                                            }
-                                                        }}>
-                                                            <Check size={14} /> Approve
-                                                        </button>
-                                                        <button className="admin-action-btn ban" onClick={async () => {
-                                                            try {
-                                                                await apiClient.updateTestStatus(test.id, 'rejected');
-                                                                showToast(`🚫 Test ${test.app_name} Rejected`);
-                                                                loadAdminTests();
-                                                            } catch (err) {
-                                                                showToast('Error: ' + err.message, 'error');
-                                                            }
-                                                        }}>
-                                                            <X size={14} /> Reject
-                                                        </button>
-                                                    </>
-                                                )}
-                                                <button className="admin-action-btn partial" onClick={() => {
-                                                    setAssignTestContext(test);
-                                                    setAssignTargetTesters([]);
-                                                    // Start by fetching eligible testers perhaps, but for admin, any active tester could work.
-                                                    setAssignModalOpen(true);
-                                                    if (testers.length === 0) loadTesters();
-                                                }} title="Assign Testers manually">
-                                                    <UserPlus size={14} />
-                                                </button>
-                                                <button className="admin-action-btn ban" onClick={async () => {
-                                                    if (window.confirm(`Are you sure you want to delete ${test.company_name} and all associated data? This cannot be undone.`)) {
-                                                        try {
-                                                            await apiClient.deleteCompanyByAdmin(test.company_id);
-                                                            showToast(`🗑️ Company ${test.company_name} deleted`);
-                                                            loadAdminTests();
-                                                        } catch (err) {
-                                                            showToast('Error: ' + err.message, 'error');
-                                                        }
-                                                    }
-                                                }} title="Delete Company">
-                                                    <Trash size={14} />
+                                                    {approvingBugId === bug.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><Check size={14} /> Approve</>}
                                                 </button>
                                             </td>
                                         </tr>

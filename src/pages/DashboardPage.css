@@ -325,6 +325,10 @@
   color: var(--amber);
 }
 
+.status-pending .test-stat-val {
+  color: var(--saffron);
+}
+
 .test-card-footer {
   margin-top: auto;
   display: flex;

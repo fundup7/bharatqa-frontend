@@ -11,13 +11,8 @@ export default function CreateTestPage({ company, onClose, showToast }) {
     priority: 'normal',
     tester_quota: 20,
     testing_iterations: 1,
-    total_budget: 1400, // Default: 20 * 1 * 70
   });
 
-  // Derived price calculation
-  const calculatedPrice = form.tester_quota * form.testing_iterations * 70;
-
-  // Targeting criteria (all optional — empty = open to all)
   const [criteria, setCriteria] = useState({
     device_tier: '',
     network_type: '',
@@ -32,15 +27,7 @@ export default function CreateTestPage({ company, onClose, showToast }) {
   const fileRef = useRef(null);
 
   const update = (key, value) => {
-    setForm(prev => {
-      const next = { ...prev, [key]: value };
-      // Auto-sync budget if it matches the previous default calculation
-      const prevDefault = prev.tester_quota * prev.testing_iterations * 70;
-      if (prev.total_budget === prevDefault) {
-        next.total_budget = next.tester_quota * next.testing_iterations * 70;
-      }
-      return next;
-    });
+    setForm(prev => ({ ...prev, [key]: value }));
   };
   const updateCriteria = (key, value) => setCriteria(prev => ({ ...prev, [key]: value }));
 
@@ -81,8 +68,6 @@ export default function CreateTestPage({ company, onClose, showToast }) {
       formData.append('priority', form.priority);
       formData.append('tester_quota', form.tester_quota);
       formData.append('testing_iterations', form.testing_iterations);
-      formData.append('total_budget', form.total_budget);
-      formData.append('price_paid', form.total_budget / form.tester_quota);
       if (apkFile) {
         formData.append('apk', apkFile);
       }
@@ -132,6 +117,13 @@ export default function CreateTestPage({ company, onClose, showToast }) {
 
   return (
     <div className="create-test-page">
+      {uploading && (
+        <div className="upload-overlay">
+          <div className="spinner" />
+          <h2>Uploading Project...</h2>
+          <p>Please do not close this page while we process your application build.</p>
+        </div>
+      )}
       <div className="ct-info-hero">
         <div className="ct-info-main">
           <div className="ct-app-icon">
@@ -242,31 +234,8 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                 />
               </div>
             </div>
-            <div className="form-hint" style={{ marginTop: '-10px', marginBottom: '16px' }}>
-              Defines how many distinct demographics will verify the build across how many unique cycles.
-            </div>
-
-            <div className="form-group" style={{ marginTop: '8px' }}>
-              <label>Total Project Budget (₹)</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#888' }}>₹</span>
-                <input
-                  type="number"
-                  min={form.tester_quota * form.testing_iterations * 70}
-                  className="form-input ct-input"
-                  style={{ paddingLeft: 28 }}
-                  value={form.total_budget}
-                  onChange={e => update('total_budget', parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <span className="form-hint">
-                Min: ₹{form.tester_quota * form.testing_iterations * 70} (₹70/tester). Higher budget attracts more skilled testers.
-              </span>
-            </div>
-
           </div>
 
-          {/* Targeting Criteria */}
           <div className="ct-section-header" style={{ marginTop: '24px' }}>
             <h2 className="ct-section-title">
               <Target size={20} color="var(--saffron)" /> Tester Targeting
@@ -413,7 +382,6 @@ export default function CreateTestPage({ company, onClose, showToast }) {
               <FileText size={48} className="ct-bg-icon" />
               <div className="ct-action-content">
                 <h4>Ready to launch?</h4>
-                <p style={{ marginBottom: 12 }}>Total Budget: <strong style={{ color: 'var(--saffron)', fontSize: '1.2rem' }}>₹{form.total_budget}</strong></p>
                 <button
                   className="btn-primary full-width ct-submit-btn"
                   disabled={uploading || !form.app_name.trim() || !form.test_instructions.trim()}
@@ -425,7 +393,7 @@ export default function CreateTestPage({ company, onClose, showToast }) {
                       Uploading Build…
                     </>
                   ) : (
-                    `🚀 Pay ₹${calculatedPrice} & Create`
+                    `🚀 Submit for Approval`
                   )}
                 </button>
               </div>
