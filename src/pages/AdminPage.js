@@ -18,6 +18,67 @@ function DeviceTierBadge({ tier }) {
     );
 }
 
+function BlobVideoPlayer({ src }) {
+    const [blobUrl, setBlobUrl] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        let url = src;
+        if (!url.startsWith('http')) {
+            url = `https://bharatqa-backend.onrender.com${url}`;
+        }
+
+        let current = true;
+        setLoading(true);
+        setError(null);
+
+        apiClient.getVideoBlobUrl(url)
+            .then(blobUrl => {
+                if (current) {
+                    setBlobUrl(blobUrl);
+                    setLoading(false);
+                }
+            })
+            .catch(err => {
+                if (current) {
+                    console.error('Video error:', err);
+                    setError(err.message);
+                    setLoading(false);
+                }
+            });
+
+        return () => {
+            current = false;
+            if (blobUrl) URL.revokeObjectURL(blobUrl);
+        };
+    }, [src]);
+
+    if (loading) return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', color: '#666' }}>
+            <div className="spinner" style={{ marginBottom: '12px' }} />
+            <div style={{ fontSize: '0.8rem' }}>Streaming recording...</div>
+        </div>
+    );
+
+    if (error) return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#111', color: '#ff4d4d', padding: '20px', textAlign: 'center' }}>
+            <ShieldAlert size={32} style={{ marginBottom: '12px', opacity: 0.5 }} />
+            <div style={{ fontSize: '0.85rem' }}>Failed to load recording</div>
+            <div style={{ fontSize: '0.7rem', opacity: 0.7, marginTop: '4px' }}>{error}</div>
+        </div>
+    );
+
+    return (
+        <video
+            src={blobUrl}
+            controls
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            autoPlay={false}
+        />
+    );
+}
+
 export default function AdminPage({ company, showToast }) {
     const [mainTab, setMainTab] = useState('tests'); // 'tests' | 'bugs' | 'testers' | 'payments'
 
@@ -706,13 +767,7 @@ export default function AdminPage({ company, showToast }) {
                                                                         </h4>
                                                                         {bug.recording_url ? (
                                                                             <div className="admin-video-container" style={{ borderRadius: '12px', overflow: 'hidden', background: '#000', aspectRatio: '9/16', border: '1px solid #333' }}>
-                                                                                <video
-                                                                                    src={`${apiClient.getVideoBlobUrl ? 'loading...' : (bug.recording_url.startsWith('http') ? bug.recording_url : `https://bharatqa-backend.onrender.com${bug.recording_url}`)}`}
-                                                                                    controls
-                                                                                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                                                                                    // Since we might need API key for B2 proxy, using a safe component or proxy URL
-                                                                                    autoPlay={false}
-                                                                                />
+                                                                                <BlobVideoPlayer src={bug.recording_url} />
                                                                             </div>
                                                                         ) : (
                                                                             <div style={{ padding: '40px', background: '#222', borderRadius: '12px', textAlign: 'center', color: '#666' }}>
@@ -788,27 +843,25 @@ export default function AdminPage({ company, showToast }) {
 
                                                                         <div style={{ marginTop: 'auto', display: 'flex', gap: '12px' }}>
                                                                             <button
-                                                                                className="btn btn-primary"
-                                                                                style={{ flex: 1, padding: '12px' }}
+                                                                                className="admin-premium-btn approve"
                                                                                 disabled={approvingBugId === bug.id}
                                                                                 onClick={async () => {
                                                                                     setApprovingBugId(bug.id);
                                                                                     try {
                                                                                         await apiClient.adminApproveBug(bug.id, 'approved');
-                                                                                        showToast('Bug approved and visible to company');
+                                                                                        showToast('✅ Bug Approved');
                                                                                         loadPendingBugs();
                                                                                     } catch (err) {
-                                                                                        showToast('Failed to approve bug: ' + err.message, 'error');
+                                                                                        showToast('Error: ' + err.message, 'error');
                                                                                     } finally {
                                                                                         setApprovingBugId(null);
                                                                                     }
                                                                                 }}
                                                                             >
-                                                                                <Check size={18} /> Approve & Release to Company
+                                                                                <Check size={18} /> <span>Approve & Release</span>
                                                                             </button>
                                                                             <button
-                                                                                className="btn btn-secondary"
-                                                                                style={{ background: 'rgba(255,59,92,0.1)', color: '#ff3b5c', border: '1px solid rgba(255,59,92,0.2)', flex: 0.5 }}
+                                                                                className="admin-premium-btn reject"
                                                                                 disabled={approvingBugId === bug.id}
                                                                                 onClick={async () => {
                                                                                     const reason = window.prompt("Reason for rejection:");
@@ -816,16 +869,16 @@ export default function AdminPage({ company, showToast }) {
                                                                                     setApprovingBugId(bug.id);
                                                                                     try {
                                                                                         await apiClient.adminApproveBug(bug.id, 'rejected', reason);
-                                                                                        showToast('Bug rejected');
+                                                                                        showToast('🚫 Bug Rejected');
                                                                                         loadPendingBugs();
                                                                                     } catch (err) {
-                                                                                        showToast('Failed to reject bug: ' + err.message, 'error');
+                                                                                        showToast('Error: ' + err.message, 'error');
                                                                                     } finally {
                                                                                         setApprovingBugId(null);
                                                                                     }
                                                                                 }}
                                                                             >
-                                                                                <X size={18} /> Reject Bug
+                                                                                <X size={18} /> <span>Reject</span>
                                                                             </button>
                                                                         </div>
                                                                     </div>
