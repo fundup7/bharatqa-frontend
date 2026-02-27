@@ -524,37 +524,102 @@
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid rgba(255,255,255,0.1);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     border-top-color: var(--saffron);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
 }
 
 /* ── Budget Manager Redesign ── */
+/* ── Budget Manager Centered Modal ── */
+.admin-budget-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: adminFadeIn 0.25s ease-out;
+}
+
 .admin-budget-manager {
-    position: absolute;
-    z-index: 100;
-    min-width: 320px;
+    position: relative;
+    z-index: 101;
+    min-width: 420px;
     background: rgba(15, 23, 42, 0.98) !important;
     backdrop-filter: blur(25px);
     border: 1px solid rgba(255, 107, 43, 0.4);
-    border-radius: 18px;
-    padding: 24px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(255, 107, 43, 0.15);
-    transform: translateY(-50%);
-    margin-left: -340px; /* Shift to left of the cell */
-    animation: budgetManagerPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 50px rgba(255, 107, 43, 0.15);
+    animation: adminModalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.admin-modal-close {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #94a3b8;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-modal-close:hover {
+    background: rgba(255, 68, 68, 0.15);
+    color: #ff4444;
+    transform: rotate(90deg);
+}
+
+@keyframes adminFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes adminModalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 @keyframes budgetManagerPop {
-    from { opacity: 0; transform: translateY(-50%) scale(0.9) translateX(15px); }
-    to { opacity: 1; transform: translateY(-50%) scale(1) translateX(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.9) translateX(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(-50%) scale(1) translateX(0);
+    }
 }
 
 .admin-budget-manager-header {
