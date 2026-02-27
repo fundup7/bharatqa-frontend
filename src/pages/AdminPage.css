@@ -1,8 +1,8 @@
 .admin-page {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding-bottom: 64px;
-    animation: fadeSlideUp 0.5s ease-out;
+    position: relative;
+    animation: adminFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Hero */
@@ -538,8 +538,6 @@
     animation: spin 0.8s linear infinite;
 }
 
-/* ── Budget Manager Redesign ── */
-/* ── Budget Manager Centered Modal ── */
 /* ── Budget Manager Centered Modal ── */
 .admin-budget-modal-overlay {
     position: fixed;

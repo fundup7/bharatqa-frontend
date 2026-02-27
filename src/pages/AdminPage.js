@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff, Bug, Pencil, ChevronDown, ChevronUp, ExternalLink, List } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './AdminPage.css';
@@ -517,135 +518,24 @@ export default function AdminPage({ company, showToast }) {
                                                 <td>{test.testing_iterations || 1}</td>
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        {editingBudget && editingBudget.id === test.id ? (
-                                                            <div className="admin-budget-modal-overlay" onClick={() => setEditingBudget(null)}>
-                                                                <div className="admin-budget-manager glass-card" onClick={e => e.stopPropagation()}>
-                                                                    <div className="admin-budget-manager-header">
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                                                            <IndianRupee size={20} className="header-icon" />
-                                                                            <span>Manage Test Budget</span>
-                                                                        </div>
-                                                                        <button className="admin-modal-close" onClick={() => setEditingBudget(null)}>
-                                                                            <X size={18} />
-                                                                        </button>
-                                                                    </div>
-
-                                                                    <div className="admin-budget-manager-grid">
-                                                                        <div className="admin-budget-field">
-                                                                            <label>Total Campaign (₹)</label>
-                                                                            <div className="admin-budget-input-wrapper">
-                                                                                <IndianRupee size={16} />
-                                                                                <input
-                                                                                    type="number"
-                                                                                    value={editingBudget.total_budget}
-                                                                                    onChange={(e) => {
-                                                                                        const val = parseFloat(e.target.value) || 0;
-                                                                                        const totalTests = editingBudget.tester_quota * editingBudget.testing_iterations;
-                                                                                        setEditingBudget({
-                                                                                            ...editingBudget,
-                                                                                            total_budget: val,
-                                                                                            price_paid: (val / totalTests).toFixed(2)
-                                                                                        });
-                                                                                    }}
-                                                                                />
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <div className="admin-budget-field">
-                                                                            <label>Payout Per Test (₹)</label>
-                                                                            <div className="admin-budget-input-wrapper">
-                                                                                <IndianRupee size={16} />
-                                                                                <input
-                                                                                    type="number"
-                                                                                    value={editingBudget.price_paid}
-                                                                                    onChange={(e) => {
-                                                                                        const val = parseFloat(e.target.value) || 0;
-                                                                                        const totalTests = editingBudget.tester_quota * editingBudget.testing_iterations;
-                                                                                        setEditingBudget({
-                                                                                            ...editingBudget,
-                                                                                            price_paid: val,
-                                                                                            total_budget: (val * totalTests).toFixed(0)
-                                                                                        });
-                                                                                    }}
-                                                                                />
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="admin-budget-breakdown">
-                                                                        <div className="admin-breakdown-item">
-                                                                            <span className="label">Testers</span>
-                                                                            <span className="value">{editingBudget.tester_quota}</span>
-                                                                        </div>
-                                                                        <div className="admin-breakdown-sep">×</div>
-                                                                        <div className="admin-breakdown-item">
-                                                                            <span className="label">Iterations</span>
-                                                                            <span className="value">{editingBudget.testing_iterations}</span>
-                                                                        </div>
-                                                                        <div className="admin-breakdown-sep">=</div>
-                                                                        <div className="admin-breakdown-item highlight">
-                                                                            <span className="label">Total Tests</span>
-                                                                            <span className="value">{editingBudget.tester_quota * editingBudget.testing_iterations}</span>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div className="admin-budget-manager-actions">
-                                                                        <button
-                                                                            className="admin-budget-manager-btn cancel"
-                                                                            onClick={() => setEditingBudget(null)}
-                                                                            disabled={savingBudget}
-                                                                        >
-                                                                            Cancel
-                                                                        </button>
-                                                                        <button
-                                                                            className="admin-budget-manager-btn save"
-                                                                            disabled={savingBudget}
-                                                                            onClick={async () => {
-                                                                                setSavingBudget(true);
-                                                                                try {
-                                                                                    await apiClient.adminUpdateTestBudget(
-                                                                                        editingBudget.id,
-                                                                                        parseFloat(editingBudget.total_budget),
-                                                                                        parseFloat(editingBudget.price_paid)
-                                                                                    );
-                                                                                    showToast('Budget applied successfully');
-                                                                                    setEditingBudget(null);
-                                                                                    loadAdminTests();
-                                                                                } catch (err) {
-                                                                                    showToast('Failed to apply budget: ' + err.message, 'error');
-                                                                                } finally {
-                                                                                    setSavingBudget(false);
-                                                                                }
-                                                                            }}
-                                                                        >
-                                                                            {savingBudget ? <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} /> : "Apply Changes"}
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-
-                                                            <>
-                                                                <div className="admin-budget-display">
-                                                                    <div className="admin-budget-total">₹{Number(test.total_budget || 0).toLocaleString()}</div>
-                                                                    <div className="admin-budget-per">₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
-                                                                </div>
-                                                                <button
-                                                                    className="admin-budget-edit-trigger"
-                                                                    onClick={() => {
-                                                                        setEditingBudget({
-                                                                            id: test.id,
-                                                                            total_budget: test.total_budget || 0,
-                                                                            price_paid: test.price_paid || 0,
-                                                                            tester_quota: test.tester_quota || 20,
-                                                                            testing_iterations: test.testing_iterations || 1
-                                                                        });
-                                                                    }}
-                                                                >
-                                                                    <Pencil size={12} />
-                                                                </button>
-                                                            </>
-                                                        )}
+                                                        <div className="admin-budget-display">
+                                                            <div className="admin-budget-total">₹{Number(test.total_budget || 0).toLocaleString()}</div>
+                                                            <div className="admin-budget-per">₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
+                                                        </div>
+                                                        <button
+                                                            className="admin-budget-edit-trigger"
+                                                            onClick={() => {
+                                                                setEditingBudget({
+                                                                    id: test.id,
+                                                                    total_budget: test.total_budget || 0,
+                                                                    price_paid: test.price_paid || 0,
+                                                                    tester_quota: test.tester_quota || 20,
+                                                                    testing_iterations: test.testing_iterations || 1
+                                                                });
+                                                            }}
+                                                        >
+                                                            <Pencil size={12} />
+                                                        </button>
                                                     </div>
                                                 </td>
                                                 <td>
@@ -1001,15 +891,125 @@ export default function AdminPage({ company, showToast }) {
                 </>
             )}
 
-            {/* ASSIGN TESTERS MODAL */}
-            {assignModalOpen && assignTestContext && (
-                <div className="modal-overlay">
-                    <div className="modal-content glass-card" style={{ maxWidth: '600px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                            <h3>Assign Testers to {assignTestContext.app_name}</h3>
-                            <button className="icon-btn" onClick={() => setAssignModalOpen(false)}><X size={20} /></button>
+            {/* BUDGET MODAL */}
+            {editingBudget && createPortal(
+                <div className="admin-budget-modal-overlay" onClick={() => setEditingBudget(null)}>
+                    <div className="admin-budget-manager glass-card" onClick={e => e.stopPropagation()}>
+                        <div className="admin-budget-manager-header">
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <IndianRupee size={20} className="header-icon" />
+                                <span>Manage Test Budget</span>
+                            </div>
+                            <button className="admin-modal-close" onClick={() => setEditingBudget(null)}>
+                                <X size={18} />
+                            </button>
                         </div>
 
+                        <div className="admin-budget-manager-grid">
+                            <div className="admin-budget-field">
+                                <label>Total Campaign (₹)</label>
+                                <div className="admin-budget-input-wrapper">
+                                    <IndianRupee size={16} />
+                                    <input
+                                        type="number"
+                                        value={editingBudget.total_budget}
+                                        onChange={(e) => {
+                                            const val = parseFloat(e.target.value) || 0;
+                                            const totalTests = editingBudget.tester_quota * editingBudget.testing_iterations;
+                                            setEditingBudget({
+                                                ...editingBudget,
+                                                total_budget: val,
+                                                price_paid: (val / totalTests).toFixed(2)
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="admin-budget-field">
+                                <label>Payout Per Test (₹)</label>
+                                <div className="admin-budget-input-wrapper">
+                                    <IndianRupee size={16} />
+                                    <input
+                                        type="number"
+                                        value={editingBudget.price_paid}
+                                        onChange={(e) => {
+                                            const val = parseFloat(e.target.value) || 0;
+                                            const totalTests = editingBudget.tester_quota * editingBudget.testing_iterations;
+                                            setEditingBudget({
+                                                ...editingBudget,
+                                                price_paid: val,
+                                                total_budget: (val * totalTests).toFixed(0)
+                                            });
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="admin-budget-breakdown">
+                            <div className="admin-breakdown-item">
+                                <span className="label">Testers</span>
+                                <span className="value">{editingBudget.tester_quota}</span>
+                            </div>
+                            <div className="admin-breakdown-sep">×</div>
+                            <div className="admin-breakdown-item">
+                                <span className="label">Iterations</span>
+                                <span className="value">{editingBudget.testing_iterations}</span>
+                            </div>
+                            <div className="admin-breakdown-sep">=</div>
+                            <div className="admin-breakdown-item highlight">
+                                <span className="label">Total Tests</span>
+                                <span className="value">{editingBudget.tester_quota * editingBudget.testing_iterations}</span>
+                            </div>
+                        </div>
+
+                        <div className="admin-budget-manager-actions">
+                            <button
+                                className="admin-budget-manager-btn cancel"
+                                onClick={() => setEditingBudget(null)}
+                                disabled={savingBudget}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="admin-budget-manager-btn save"
+                                disabled={savingBudget}
+                                onClick={async () => {
+                                    setSavingBudget(true);
+                                    try {
+                                        await apiClient.adminUpdateTestBudget(
+                                            editingBudget.id,
+                                            parseFloat(editingBudget.total_budget),
+                                            parseFloat(editingBudget.price_paid)
+                                        );
+                                        showToast('Budget applied successfully');
+                                        setEditingBudget(null);
+                                        loadAdminTests();
+                                    } catch (err) {
+                                        showToast('Failed to apply budget: ' + err.message, 'error');
+                                    } finally {
+                                        setSavingBudget(false);
+                                    }
+                                }}
+                            >
+                                {savingBudget ? <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} /> : "Apply Changes"}
+                            </button>
+                        </div>
+                    </div>
+                </div>,
+                document.body
+            )}
+
+            {/* ASSIGN TESTERS MODAL */}
+            {assignModalOpen && assignTestContext && createPortal(
+                <div className="admin-budget-modal-overlay" onClick={() => setAssignModalOpen(false)}>
+                    <div className="modal-content glass-card" style={{ maxWidth: '600px', width: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <h3>Assign Testers to {assignTestContext.app_name}</h3>
+                            <button className="admin-modal-close" onClick={() => setAssignModalOpen(false)}><X size={20} /></button>
+                        </div>
+                        {/* ... rest of the modal ... */}
                         <div style={{ marginBottom: 15, fontSize: '0.9rem', color: '#888' }}>
                             Company: <strong>{assignTestContext.company_name}</strong> &nbsp; | &nbsp;
                             Quota: <strong>{assignTestContext.tester_count} / {assignTestContext.tester_quota}</strong>
@@ -1036,14 +1036,13 @@ export default function AdminPage({ company, showToast }) {
                         </div>
 
                         <div style={{ marginTop: 20, display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                            <button className="btn btn-secondary" onClick={() => setAssignModalOpen(false)}>Cancel</button>
+                            <button className="admin-budget-manager-btn cancel" onClick={() => setAssignModalOpen(false)}>Cancel</button>
                             <button
-                                className="btn btn-primary"
+                                className="admin-budget-manager-btn save"
                                 disabled={assignTargetTesters.length === 0 || assigningLoading}
                                 onClick={async () => {
                                     try {
                                         setAssigningLoading(true);
-                                        // TODO: We need an API endpoint for this!
                                         for (const testerId of assignTargetTesters) {
                                             await apiClient.adminAssignTester(assignTestContext.id, testerId);
                                         }
@@ -1061,7 +1060,8 @@ export default function AdminPage({ company, showToast }) {
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );
