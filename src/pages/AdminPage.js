@@ -111,6 +111,10 @@ export default function AdminPage({ company, showToast }) {
     const [approvingBugId, setApprovingBugId] = useState(null);
     const [expandedBugId, setExpandedBugId] = useState(null);
 
+    // Budget editing state
+    const [editingBudget, setEditingBudget] = useState(null); // { id, total_budget, price_paid, tester_quota }
+    const [savingBudget, setSavingBudget] = useState(false);
+
     const loadTesters = useCallback(async () => {
         try {
             setLoadingTesters(true);
@@ -513,35 +517,92 @@ export default function AdminPage({ company, showToast }) {
                                                 <td>{test.testing_iterations || 1}</td>
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <div>
-                                                            <div style={{ fontWeight: 600 }}>₹{Number(test.total_budget || 0).toFixed(0)}</div>
-                                                            <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
-                                                        </div>
-                                                        <button
-                                                            className="admin-action-btn partial"
-                                                            style={{ padding: '4px 8px' }}
-                                                            onClick={async () => {
-                                                                const newBudget = window.prompt(`Enter total budget for ${test.app_name}:`, test.total_budget);
-                                                                if (newBudget === null) return;
-                                                                const b = parseFloat(newBudget);
-                                                                if (isNaN(b)) return showToast('Invalid budget', 'error');
-
-                                                                const newPrice = window.prompt(`Enter price per test (paid to tester):`, test.price_paid || 70);
-                                                                if (newPrice === null) return;
-                                                                const p = parseFloat(newPrice);
-                                                                if (isNaN(p)) return showToast('Invalid price', 'error');
-
-                                                                try {
-                                                                    await apiClient.adminUpdateTestBudget(test.id, b, p);
-                                                                    showToast('Budget updated successfully');
-                                                                    loadAdminTests();
-                                                                } catch (err) {
-                                                                    showToast('Update failed: ' + err.message, 'error');
-                                                                }
-                                                            }}
-                                                        >
-                                                            <Pencil size={12} />
-                                                        </button>
+                                                        {editingBudget && editingBudget.id === test.id ? (
+                                                            <div className="admin-budget-editor">
+                                                                <div className="admin-budget-input-group">
+                                                                    <div className="admin-budget-input-field">
+                                                                        <label>Total (₹)</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={editingBudget.total_budget}
+                                                                            onChange={(e) => {
+                                                                                const val = parseFloat(e.target.value) || 0;
+                                                                                setEditingBudget({
+                                                                                    ...editingBudget,
+                                                                                    total_budget: val,
+                                                                                    price_paid: (val / editingBudget.tester_quota).toFixed(2)
+                                                                                });
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    <div className="admin-budget-input-field">
+                                                                        <label>Per Tester (₹)</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={editingBudget.price_paid}
+                                                                            onChange={(e) => {
+                                                                                const val = parseFloat(e.target.value) || 0;
+                                                                                setEditingBudget({
+                                                                                    ...editingBudget,
+                                                                                    price_paid: val,
+                                                                                    total_budget: (val * editingBudget.tester_quota).toFixed(0)
+                                                                                });
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="admin-budget-actions">
+                                                                    <button
+                                                                        className="admin-budget-save"
+                                                                        title="Save"
+                                                                        disabled={savingBudget}
+                                                                        onClick={async () => {
+                                                                            setSavingBudget(true);
+                                                                            try {
+                                                                                await apiClient.adminUpdateTestBudget(
+                                                                                    editingBudget.id,
+                                                                                    parseFloat(editingBudget.total_budget),
+                                                                                    parseFloat(editingBudget.price_paid)
+                                                                                );
+                                                                                showToast('Budget updated successfully');
+                                                                                setEditingBudget(null);
+                                                                                loadAdminTests();
+                                                                            } catch (err) {
+                                                                                showToast('Update failed: ' + err.message, 'error');
+                                                                            } finally {
+                                                                                setSavingBudget(false);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        {savingBudget ? <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} /> : <Check size={14} />}
+                                                                    </button>
+                                                                    <button className="admin-budget-cancel" title="Cancel" onClick={() => setEditingBudget(null)}>
+                                                                        <X size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <div>
+                                                                    <div style={{ fontWeight: 600 }}>₹{Number(test.total_budget || 0).toFixed(0)}</div>
+                                                                    <div style={{ fontSize: '0.75rem', color: '#888' }}>₹{Number(test.price_paid || 0).toFixed(2)} / test</div>
+                                                                </div>
+                                                                <button
+                                                                    className="admin-action-btn partial"
+                                                                    style={{ padding: '4px 8px' }}
+                                                                    onClick={() => {
+                                                                        setEditingBudget({
+                                                                            id: test.id,
+                                                                            total_budget: test.total_budget || 0,
+                                                                            price_paid: test.price_paid || 70,
+                                                                            tester_quota: test.tester_quota || 20
+                                                                        });
+                                                                    }}
+                                                                >
+                                                                    <Pencil size={12} />
+                                                                </button>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </td>
                                                 <td>
