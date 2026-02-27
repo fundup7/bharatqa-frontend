@@ -794,7 +794,7 @@ export default function AdminPage({ company, showToast }) {
                                                                                 onClick={async () => {
                                                                                     setApprovingBugId(bug.id);
                                                                                     try {
-                                                                                        await apiClient.adminApproveBug(bug.id, true, 'approved');
+                                                                                        await apiClient.adminApproveBug(bug.id, 'approved');
                                                                                         showToast('Bug approved and visible to company');
                                                                                         loadPendingBugs();
                                                                                     } catch (err) {
@@ -815,7 +815,7 @@ export default function AdminPage({ company, showToast }) {
                                                                                     if (reason === null) return;
                                                                                     setApprovingBugId(bug.id);
                                                                                     try {
-                                                                                        await apiClient.adminApproveBug(bug.id, false, 'rejected', reason);
+                                                                                        await apiClient.adminApproveBug(bug.id, 'rejected', reason);
                                                                                         showToast('Bug rejected');
                                                                                         loadPendingBugs();
                                                                                     } catch (err) {

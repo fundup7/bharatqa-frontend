@@ -136,11 +136,7 @@ export const apiClient = {
       body: JSON.stringify({ status }),
     }).then(handleResponse),
 
-  approveTestVisibility: (testId, approved) =>
-    apiFetch(API + `/admin/tests/${testId}/approve`, {
-      method: 'PUT',
-      body: JSON.stringify({ approved }),
-    }).then(handleResponse),
+  // Removed approveTestVisibility - use updateTestStatus instead
 
   adminAssignTester: (testId, testerId) =>
     apiFetch(API + `/admin/tests/${testId}/assign`, {
@@ -158,10 +154,10 @@ export const apiClient = {
   adminGetPendingBugs: () =>
     apiFetch(API + '/admin/bugs/pending').then(handleResponse),
 
-  adminApproveBug: (bugId, approved, status = null, reason = null) =>
+  adminApproveBug: (bugId, status, reason = null) =>
     apiFetch(API + `/admin/bugs/${bugId}/approve`, {
       method: 'PUT',
-      body: JSON.stringify({ approved, status, reason }),
+      body: JSON.stringify({ status, reason }),
     }).then(handleResponse),
 
   // ── Admin: Testers ───────────────────────────────────────────
