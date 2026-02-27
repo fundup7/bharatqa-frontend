@@ -520,13 +520,21 @@ export default function AdminPage({ company, showToast }) {
                                                         {editingBudget && editingBudget.id === test.id ? (
                                                             <div className="admin-budget-modal-overlay" onClick={() => setEditingBudget(null)}>
                                                                 <div className="admin-budget-manager glass-card" onClick={e => e.stopPropagation()}>
-
+                                                                    <div className="admin-budget-manager-header">
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                                            <IndianRupee size={20} className="header-icon" />
+                                                                            <span>Manage Test Budget</span>
+                                                                        </div>
+                                                                        <button className="admin-modal-close" onClick={() => setEditingBudget(null)}>
+                                                                            <X size={18} />
+                                                                        </button>
+                                                                    </div>
 
                                                                     <div className="admin-budget-manager-grid">
                                                                         <div className="admin-budget-field">
                                                                             <label>Total Campaign (₹)</label>
                                                                             <div className="admin-budget-input-wrapper">
-                                                                                <IndianRupee size={12} />
+                                                                                <IndianRupee size={16} />
                                                                                 <input
                                                                                     type="number"
                                                                                     value={editingBudget.total_budget}
@@ -546,7 +554,7 @@ export default function AdminPage({ company, showToast }) {
                                                                         <div className="admin-budget-field">
                                                                             <label>Payout Per Test (₹)</label>
                                                                             <div className="admin-budget-input-wrapper">
-                                                                                <IndianRupee size={12} />
+                                                                                <IndianRupee size={16} />
                                                                                 <input
                                                                                     type="number"
                                                                                     value={editingBudget.price_paid}
