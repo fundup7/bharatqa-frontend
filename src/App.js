@@ -19,6 +19,7 @@ import TestDetailPage from './pages/TestDetailPage';
 import SettingsPage from './pages/SettingsPage';
 import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
+import SharedTestDetailPage from './pages/SharedTestDetailPage';
 
 // Styles
 import './styles/tokens.css';
@@ -45,10 +46,19 @@ function AppContent() {
   const [selectedTest, setSelectedTest] = useState(null);
   const [toast, setToast] = useState(null);
   const [impersonating, setImpersonating] = useState(null);
+  const [sharedToken, setSharedToken] = useState(null);
 
   const activeCompany = impersonating || company;
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('share');
+    if (token) {
+      setSharedToken(token);
+      setView('shared-test');
+      return;
+    }
+
     const saved = localStorage.getItem('bharatqa_company');
     if (saved) {
       try {
@@ -100,7 +110,7 @@ function AppContent() {
   const navigate = (newView) => setView(newView);
 
   // Public pages (no sidebar)
-  const isPublicPage = ['home', 'login', 'onboarding'].includes(view);
+  const isPublicPage = ['home', 'login', 'onboarding', 'shared-test'].includes(view);
 
   return (
     <div className="app-container">
@@ -221,6 +231,16 @@ function AppContent() {
               } catch (err) {
                 showToast('Failed to impersonate: ' + err.message, 'error');
               }
+            }}
+          />
+        )}
+
+        {view === 'shared-test' && sharedToken && (
+          <SharedTestDetailPage
+            token={sharedToken}
+            showToast={showToast}
+            onExit={() => {
+              window.location.href = '/';
             }}
           />
         )}
