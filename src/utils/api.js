@@ -71,6 +71,12 @@ export const apiClient = {
   getTests: (companyId) =>
     apiFetch(API + `/company/${companyId}/tests`).then(handleResponse),
 
+  getSharedTest: (token) =>
+    fetch(API + `/shared/tests/${token}`).then(handleResponse),
+
+  generateShareToken: (testId) =>
+    apiFetch(API + `/tests/${testId}/share`, { method: 'POST' }).then(handleResponse),
+
   createTest: (formData) =>
     // FormData: don't set Content-Type so browser sets multipart boundary automatically
     fetch(API + '/tests', {
@@ -180,6 +186,9 @@ export const apiClient = {
     apiFetch(API + `/auth/company/${companyId}`, {
       method: 'DELETE'
     }).then(handleResponse),
+
+  adminGetCompanyProfile: (companyId) =>
+    apiFetch(API + `/admin/companies/${companyId}`).then(handleResponse),
 
   // ── Payments ─────────────────────────────────────────────────────────────
   getTesterWallet: (testerId) =>

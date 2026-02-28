@@ -80,7 +80,7 @@ function BlobVideoPlayer({ src }) {
     );
 }
 
-export default function AdminPage({ company, showToast }) {
+export default function AdminPage({ company, showToast, onImpersonate }) {
     const [mainTab, setMainTab] = useState('tests'); // 'tests' | 'bugs' | 'testers' | 'payments'
 
     // ── Tests state ──
@@ -570,6 +570,9 @@ export default function AdminPage({ company, showToast }) {
                                                             </button>
                                                         </>
                                                     )}
+                                                    <button className="admin-action-btn partial" onClick={() => onImpersonate(test.company_id)} title="Impersonate Company">
+                                                        <Eye size={14} />
+                                                    </button>
                                                     <button className="admin-action-btn partial" onClick={() => {
                                                         setAssignTestContext(test);
                                                         setAssignTargetTesters([]);

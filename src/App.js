@@ -44,6 +44,9 @@ function AppContent() {
   const [company, setCompany] = useState(null);
   const [selectedTest, setSelectedTest] = useState(null);
   const [toast, setToast] = useState(null);
+  const [impersonating, setImpersonating] = useState(null);
+
+  const activeCompany = impersonating || company;
 
   useEffect(() => {
     const saved = localStorage.getItem('bharatqa_company');
@@ -114,24 +117,36 @@ function AppContent() {
 
       <Navbar
         view={view}
-        company={company}
+        company={activeCompany}
         onNavigate={navigate}
         onLogout={handleLogout}
       />
 
-      {!isPublicPage && company && (
+      {!isPublicPage && activeCompany && (
         <Sidebar
           view={view}
-          company={company}
+          company={activeCompany}
           onNavigate={navigate}
           onLogout={handleLogout}
         />
       )}
 
       <main className={isPublicPage ? 'main-content-full' : 'main-content-sidebar'}>
+        {impersonating && (
+          <div style={{ background: '#ff4d4d', color: '#fff', padding: '12px', textAlign: 'center', zIndex: 1000, position: 'relative', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+            <span>⚠️ You are impersonating <strong>{impersonating.company_name}</strong></span>
+            <button
+              onClick={() => { setImpersonating(null); setView('admin'); }}
+              style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.3)', padding: '4px 12px', borderRadius: '4px', color: '#fff', cursor: 'pointer', fontSize: '0.85rem' }}
+            >
+              Exit Impersonation
+            </button>
+          </div>
+        )}
+
         {view === 'home' && (
           <HomePage
-            company={company}
+            company={activeCompany}
             onLogin={handleLogin}
             onNavigate={navigate}
           />
@@ -141,9 +156,9 @@ function AppContent() {
           <LoginPage onLogin={handleLogin} />
         )}
 
-        {view === 'onboarding' && company && !company.onboarding_complete && (
+        {view === 'onboarding' && activeCompany && !activeCompany.onboarding_complete && (
           <OnboardingPage
-            company={company}
+            company={activeCompany}
             onComplete={(updated) => {
               updateCompany(updated);
               navigate('dashboard');
@@ -152,18 +167,18 @@ function AppContent() {
           />
         )}
 
-        {(view === 'dashboard' || view === 'tests') && company && company.onboarding_complete && (
+        {(view === 'dashboard' || view === 'tests') && activeCompany && activeCompany.onboarding_complete && (
           <DashboardPage
-            company={company}
+            company={activeCompany}
             onSelectTest={setSelectedTest}
             onViewChange={navigate}
             showToast={showToast}
           />
         )}
 
-        {view === 'create-test' && company && (
+        {view === 'create-test' && activeCompany && (
           <CreateTestPage
-            company={company}
+            company={activeCompany}
             onClose={() => navigate('tests')}
             showToast={showToast}
           />
@@ -177,16 +192,16 @@ function AppContent() {
           />
         )}
 
-        {view === 'reports' && company && (
+        {view === 'reports' && activeCompany && (
           <ReportsPage
-            company={company}
+            company={activeCompany}
             showToast={showToast}
           />
         )}
 
-        {view === 'settings' && company && (
+        {view === 'settings' && activeCompany && (
           <SettingsPage
-            company={company}
+            company={activeCompany}
             onUpdate={updateCompany}
             onLogout={handleLogout}
             showToast={showToast}
@@ -197,6 +212,16 @@ function AppContent() {
           <AdminPage
             company={company}
             showToast={showToast}
+            onImpersonate={async (companyId) => {
+              try {
+                const data = await apiClient.adminGetCompanyProfile(companyId);
+                setImpersonating(data.company);
+                setView('dashboard');
+                showToast(`Impersonating ${data.company.company_name} 🕵️`);
+              } catch (err) {
+                showToast('Failed to impersonate: ' + err.message, 'error');
+              }
+            }}
           />
         )}
 
