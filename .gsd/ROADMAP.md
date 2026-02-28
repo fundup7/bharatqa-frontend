@@ -28,3 +28,7 @@
 ### Phase 4: Shareable Reports & Admin Impersonation
 **Status**: ✅ Complete
 **Objective**: Enable sharing a company's dashboard with external stakeholders via an expiring public link. Allow admins to impersonate companies from the admin panel.
+
+### Phase 6: Share Link Expiry & Tester Assignment Fix
+**Status**: ✅ Complete
+**Objective**: Override targeting for manually assigned testers and add duration bounds for test sharing.
