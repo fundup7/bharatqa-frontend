@@ -74,8 +74,11 @@ export const apiClient = {
   getSharedTest: (token) =>
     fetch(API + `/shared/tests/${token}`).then(handleResponse),
 
-  generateShareToken: (testId) =>
-    apiFetch(API + `/tests/${testId}/share`, { method: 'POST' }).then(handleResponse),
+  generateShareToken: (testId, durationHours = null) =>
+    apiFetch(API + `/tests/${testId}/share`, {
+      method: 'POST',
+      body: JSON.stringify(durationHours ? { durationHours } : {})
+    }).then(handleResponse),
 
   createTest: (formData) =>
     // FormData: don't set Content-Type so browser sets multipart boundary automatically
@@ -135,6 +138,18 @@ export const apiClient = {
   // ── Admin: Tests ──────────────────────────────────────────────
   getAdminTests: () =>
     apiFetch(API + '/admin/tests').then(handleResponse),
+
+  deleteTestByAdmin: (testId) =>
+    apiFetch(API + `/admin/tests/${testId}`, { method: 'DELETE' }).then(handleResponse),
+
+  updateTestTargeting: (testId, data) =>
+    apiFetch(API + `/admin/tests/${testId}/targeting`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }).then(handleResponse),
+
+  forceCloseSession: (testId, testerId) =>
+    apiFetch(API + `/admin/tests/${testId}/sessions/${testerId}`, { method: 'DELETE' }).then(handleResponse),
 
   updateTestStatus: (testId, status) =>
     apiFetch(API + `/admin/tests/${testId}/status`, {
@@ -205,6 +220,9 @@ export const apiClient = {
 
   getPendingPayments: () =>
     apiFetch(API + '/admin/payments/pending').then(handleResponse),
+
+  exportPaymentHistory: () =>
+    apiFetch(API + '/admin/payments/export').then(handleResponse),
 
   batchPay: (testerIds = [], note = '') =>
     apiFetch(API + '/admin/payments/batch', {
