@@ -196,6 +196,15 @@ export const apiClient = {
       method: 'DELETE'
     }).then(handleResponse),
 
+  adminDeleteTester: (testerId) =>
+    apiFetch(API + `/admin/testers/${testerId}`, { method: 'DELETE' }).then(handleResponse),
+
+  adminDeleteBug: (bugId) =>
+    apiFetch(API + `/bugs/${bugId}`, { method: 'DELETE' }).then(handleResponse),
+
+  adminDeleteCompany: (companyId) =>
+    apiFetch(API + `/admin/companies/${companyId}`, { method: 'DELETE' }).then(handleResponse),
+
   adminGetCompanyProfile: (companyId) =>
     apiFetch(API + `/admin/companies/${companyId}`).then(handleResponse),
 

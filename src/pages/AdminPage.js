@@ -381,15 +381,29 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                                                 }
                                             </td>
                                             <td>
-                                                {tester.is_banned ? (
-                                                    <button className="admin-action-btn unban" disabled={banningId === tester.id} onClick={() => handleUnban(tester)}>
-                                                        {banningId === tester.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><Shield size={14} /> Unban</>}
+                                                <div style={{ display: 'flex', gap: '6px' }}>
+                                                    {tester.is_banned ? (
+                                                        <button className="admin-action-btn unban" disabled={banningId === tester.id} onClick={() => handleUnban(tester)}>
+                                                            {banningId === tester.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><Shield size={14} /> Unban</>}
+                                                        </button>
+                                                    ) : (
+                                                        <button className="admin-action-btn ban" disabled={banningId === tester.id} onClick={() => handleBan(tester)}>
+                                                            {banningId === tester.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><ShieldOff size={14} /> Ban</>}
+                                                        </button>
+                                                    )}
+                                                    <button className="admin-action-btn ban" onClick={async () => {
+                                                        if (!window.confirm(`WARNING: Permanently delete tester "${tester.full_name}"? This removes ALL their bug reports, earnings, and payment history. This cannot be undone.`)) return;
+                                                        const confirmText = window.prompt('Type "DELETE" to confirm:');
+                                                        if (confirmText !== 'DELETE') { if (confirmText !== null) showToast('Cancelled: did not type DELETE', 'error'); return; }
+                                                        try {
+                                                            await apiClient.adminDeleteTester(tester.id);
+                                                            showToast(`🗑️ Tester ${tester.full_name} deleted`);
+                                                            loadTesters();
+                                                        } catch (err) { showToast('Error: ' + err.message, 'error'); }
+                                                    }} title="Permanently Delete Tester">
+                                                        <Trash size={14} />
                                                     </button>
-                                                ) : (
-                                                    <button className="admin-action-btn ban" disabled={banningId === tester.id} onClick={() => handleBan(tester)}>
-                                                        {banningId === tester.id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><ShieldOff size={14} /> Ban</>}
-                                                    </button>
-                                                )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -857,6 +871,26 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                                                                 }}
                                                             >
                                                                 <X size={14} />
+                                                            </button>
+                                                            <button
+                                                                className="admin-action-btn ban"
+                                                                disabled={approvingBugId === bug.id}
+                                                                onClick={async () => {
+                                                                    if (!window.confirm(`Permanently delete this bug report by ${bug.tester_name}? This cannot be undone.`)) return;
+                                                                    setApprovingBugId(bug.id);
+                                                                    try {
+                                                                        await apiClient.adminDeleteBug(bug.id);
+                                                                        showToast('🗑️ Bug deleted');
+                                                                        loadPendingBugs();
+                                                                    } catch (err) {
+                                                                        showToast('Failed to delete bug: ' + err.message, 'error');
+                                                                    } finally {
+                                                                        setApprovingBugId(null);
+                                                                    }
+                                                                }}
+                                                                title="Delete Bug"
+                                                            >
+                                                                <Trash size={14} />
                                                             </button>
                                                         </div>
                                                     </td>
