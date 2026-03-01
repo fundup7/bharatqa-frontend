@@ -29,6 +29,10 @@
 **Status**: ✅ Complete
 **Objective**: Enable sharing a company's dashboard with external stakeholders via an expiring public link. Allow admins to impersonate companies from the admin panel.
 
-### Phase 5: Share Link Expiry & Tester Assignment Fix
+### Phase 5 & 6: Payout History, Tester Approvals & Advanced Controls
 **Status**: ✅ Complete
-**Objective**: Override targeting for manually assigned testers and add duration bounds for test sharing.
+**Objective**: Add payouts to wallet history, prevent test visibility before admin approval, and enable Admin targeting overrides.
+
+### Phase 7: Analytics, Refined Deletions & Session Management
+**Status**: ⏳ Pending
+**Objective**: Introduce detailed CSV payment statements (Option I), prevent complete company deletion while enabling strict project deletion ("DELETE" confirmation), and implement Active Testing Sessions management with manual force-closures (Option G).

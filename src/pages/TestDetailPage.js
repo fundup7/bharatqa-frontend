@@ -147,8 +147,8 @@ export default function TestDetailPage({ test, onBack, showToast }) {
   });
   const [savingCriteria, setSavingCriteria] = useState(false);
 
-  // Share menu state
-  const [showShareMenu, setShowShareMenu] = useState(false);
+  // Share link state
+  const [shareDuration, setShareDuration] = useState('1d'); // 1h, 1d, 7d
 
   const showToastRef = useRef(showToast);
   showToastRef.current = showToast;
@@ -285,51 +285,41 @@ export default function TestDetailPage({ test, onBack, showToast }) {
         <button className="td-back" onClick={onBack}>
           <ArrowLeft size={18} /> Back to Projects
         </button>
-        <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <select
+            className="td-duration-select"
+            value={shareDuration}
+            onChange={(e) => setShareDuration(e.target.value)}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '6px',
+              background: 'rgba(255,255,255,0.1)',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.2)',
+              fontSize: '0.85rem'
+            }}
+          >
+            <option value="1h" style={{ color: '#000' }}>1 Hour</option>
+            <option value="1d" style={{ color: '#000' }}>1 Day</option>
+            <option value="7d" style={{ color: '#000' }}>7 Days</option>
+          </select>
+
           <button
             className="btn-secondary"
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '6px 14px' }}
-            onClick={() => setShowShareMenu(!showShareMenu)}
+            onClick={async () => {
+              try {
+                const data = await apiClient.generateShareToken(test.id, shareDuration);
+                const link = `${window.location.origin}/?share=${data.token}`;
+                await navigator.clipboard.writeText(link);
+                showToastRef.current(`🔗 Link copied! Expires in ${shareDuration === '1h' ? '1 hour' : shareDuration === '1d' ? '1 day' : '7 days'}.`);
+              } catch (err) {
+                showToastRef.current('Failed to generate link', 'error');
+              }
+            }}
           >
-            <Share2 size={14} /> Share Results <ChevronDown size={14} />
+            <Share2 size={14} /> Share Results
           </button>
-          {showShareMenu && (
-            <div className="share-dropdown-menu" style={{
-              position: 'absolute', top: '100%', right: 0, marginTop: '8px',
-              background: '#fff', border: '1px solid #eee', borderRadius: '8px',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100,
-              minWidth: '180px', overflow: 'hidden'
-            }}>
-              <div style={{ padding: '8px 12px', fontSize: '0.75rem', fontWeight: 600, color: '#666', borderBottom: '1px solid #eee' }}>
-                EXPIRATION
-              </div>
-              {[{ l: '1 Hour', h: 1 }, { l: '1 Day', h: 24 }, { l: '7 Days', h: 168 }].map((opt) => (
-                <button
-                  key={opt.h}
-                  style={{
-                    display: 'block', width: '100%', padding: '10px 12px', textAlign: 'left',
-                    background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem',
-                    color: '#333'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#f5f5f5'}
-                  onMouseLeave={(e) => e.target.style.background = 'none'}
-                  onClick={async () => {
-                    setShowShareMenu(false);
-                    try {
-                      const data = await apiClient.generateShareToken(test.id, opt.h);
-                      const link = `${window.location.origin}/?share=${data.token}`;
-                      await navigator.clipboard.writeText(link);
-                      showToastRef.current(`🔗 Share link copied to clipboard! (Valid for ${opt.l})`);
-                    } catch (err) {
-                      showToastRef.current('Failed to generate link', 'error');
-                    }
-                  }}
-                >
-                  Generate for {opt.l}
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

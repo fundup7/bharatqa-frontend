@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff, Bug, Pencil, ChevronDown, ChevronUp, ExternalLink, List } from 'lucide-react';
+import { ShieldAlert, ShieldOff, Shield, Users, Smartphone, Wifi, MemoryStick, MapPin, RefreshCw, Wallet, IndianRupee, CheckCircle, Clock, ClipboardList, Check, X, Trash, UserPlus, Eye, EyeOff, Bug, Pencil, ChevronDown, ChevronUp, ExternalLink, List, Activity } from 'lucide-react';
 import { apiClient } from '../utils/api';
 import './AdminPage.css';
 
@@ -112,6 +112,11 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
     const [approvingBugId, setApprovingBugId] = useState(null);
     const [expandedBugId, setExpandedBugId] = useState(null);
 
+    // ── Active Sessions state ──
+    const [activeSessions, setActiveSessions] = useState([]);
+    const [loadingSessions, setLoadingSessions] = useState(false);
+    const [closingSessionId, setClosingSessionId] = useState(null);
+
     // Budget editing state
     const [editingBudget, setEditingBudget] = useState(null); // { id, total_budget, price_paid, tester_quota, testing_iterations }
     const [savingBudget, setSavingBudget] = useState(false);
@@ -164,10 +169,23 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
         }
     }, [showToast]);
 
+    const loadSessions = useCallback(async () => {
+        try {
+            setLoadingSessions(true);
+            const data = await apiClient.getAdminActiveSessions();
+            setActiveSessions(data.sessions || []);
+        } catch (err) {
+            showToast('Failed to load active sessions: ' + err.message, 'error');
+        } finally {
+            setLoadingSessions(false);
+        }
+    }, [showToast]);
+
     useEffect(() => { loadTesters(); }, [loadTesters]);
     useEffect(() => { if (mainTab === 'payments') loadPending(); }, [mainTab, loadPending]);
     useEffect(() => { if (mainTab === 'tests') loadAdminTests(); }, [mainTab, loadAdminTests]);
     useEffect(() => { if (mainTab === 'bugs') loadPendingBugs(); }, [mainTab, loadPendingBugs]);
+    useEffect(() => { if (mainTab === 'sessions') loadSessions(); }, [mainTab, loadSessions]);
 
     const handleBan = async (tester) => {
         const reason = window.prompt(`Ban reason for ${tester.full_name}:`, 'Violation of terms of service');
@@ -277,6 +295,10 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                     {totalPending > 0 && mainTab === 'payments' && (
                         <span className="admin-filter-count">₹{totalPending.toFixed(0)}</span>
                     )}
+                </button>
+                <button className={`admin-main-tab ${mainTab === 'sessions' ? 'active' : ''}`} onClick={() => setMainTab('sessions')}>
+                    <Activity size={15} /> Active Sessions
+                    {activeSessions.length > 0 && <span className="admin-filter-count">{activeSessions.length}</span>}
                 </button>
             </div>
 
@@ -409,6 +431,11 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                             )}
                             <button className="admin-pay-btn" disabled={paying || pending.length === 0} onClick={() => handleBatchPay([])}>
                                 {paying ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : `✅ Pay All (${pending.length})`}
+                            </button>
+                            <button className="admin-pay-btn partial" style={{ background: '#5f27cd', border: 'none' }} onClick={() => {
+                                window.open('/api/admin/payments/csv', '_blank');
+                            }}>
+                                ⬇️ Export CSV
                             </button>
                         </div>
                     </div>
@@ -582,16 +609,22 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                                                         <UserPlus size={14} />
                                                     </button>
                                                     <button className="admin-action-btn ban" onClick={async () => {
-                                                        if (window.confirm(`Are you sure you want to delete ${test.company_name} and all associated data? This cannot be undone.`)) {
+                                                        const confirm1 = window.confirm(`WARNING: Are you sure you want to delete this test (${test.app_name})? This deletes all associated bugs, AI analysis, and tester progress.`);
+                                                        if (!confirm1) return;
+
+                                                        const confirmText = window.prompt(`To permanently delete this test, type "DELETE" below:`);
+                                                        if (confirmText === 'DELETE') {
                                                             try {
-                                                                await apiClient.deleteCompanyByAdmin(test.company_id);
-                                                                showToast(`🗑️ Company ${test.company_name} deleted`);
+                                                                await apiClient.deleteTest(test.id);
+                                                                showToast(`🗑️ Test ${test.app_name} deleted forever`);
                                                                 loadAdminTests();
                                                             } catch (err) {
                                                                 showToast('Error: ' + err.message, 'error');
                                                             }
+                                                        } else if (confirmText !== null) {
+                                                            showToast('Deletion cancelled: You did not type DELETE', 'error');
                                                         }
-                                                    }} title="Delete Company">
+                                                    }} title="Delete Test (Safeguarded)">
                                                         <Trash size={14} />
                                                     </button>
                                                 </td>
@@ -640,6 +673,82 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                                                 </tr>
                                             )}
                                         </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {/* ════ SESSIONS TAB ════ */}
+            {mainTab === 'sessions' && (
+                <>
+                    <div className="admin-stats-row">
+                        <div className="admin-stat-card glass-card">
+                            <Activity size={22} color="#5f27cd" />
+                            <div>
+                                <div className="admin-stat-val">{activeSessions.length}</div>
+                                <div className="admin-stat-label">Active Testing Sessions</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {loadingSessions && <div className="loading-state"><div className="spinner" /><p>Loading active sessions…</p></div>}
+                    {!loadingSessions && activeSessions.length === 0 && (
+                        <div className="empty-state glass-card">
+                            <div className="empty-icon">🎮</div>
+                            <h3>No Active Sessions</h3>
+                            <p>No testers are currently in a manual testing session.</p>
+                        </div>
+                    )}
+                    {!loadingSessions && activeSessions.length > 0 && (
+                        <div className="admin-table-wrap glass-card">
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tester</th>
+                                        <th>Target App</th>
+                                        <th>Started At</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {activeSessions.map(session => (
+                                        <tr key={session.session_id}>
+                                            <td>
+                                                <div className="admin-tester-name">{session.full_name}</div>
+                                                <div className="admin-tester-email">{session.email}</div>
+                                            </td>
+                                            <td>
+                                                <div className="admin-tester-name">{session.app_name}</div>
+                                                <div className="admin-tester-email">by {session.company_name}</div>
+                                            </td>
+                                            <td>
+                                                <div style={{ fontSize: '0.85rem' }}>{new Date(session.started_at).toLocaleString()}</div>
+                                            </td>
+                                            <td>
+                                                <button
+                                                    className="admin-action-btn ban"
+                                                    disabled={closingSessionId === session.session_id}
+                                                    onClick={async () => {
+                                                        if (!window.confirm(`Force close session for ${session.full_name}? This will free up the testing slot.`)) return;
+                                                        setClosingSessionId(session.session_id);
+                                                        try {
+                                                            await apiClient.forceCloseSession(session.session_id);
+                                                            showToast(`🚫 Session forcefully closed`);
+                                                            loadSessions();
+                                                        } catch (err) {
+                                                            showToast('Error: ' + err.message, 'error');
+                                                        } finally {
+                                                            setClosingSessionId(null);
+                                                        }
+                                                    }}
+                                                >
+                                                    {closingSessionId === session.session_id ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : <><X size={14} /> Force Close</>}
+                                                </button>
+                                            </td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>

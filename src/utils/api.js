@@ -74,10 +74,10 @@ export const apiClient = {
   getSharedTest: (token) =>
     fetch(API + `/shared/tests/${token}`).then(handleResponse),
 
-  generateShareToken: (testId, durationHours = null) =>
+  generateShareToken: (testId, duration) =>
     apiFetch(API + `/tests/${testId}/share`, {
       method: 'POST',
-      body: JSON.stringify(durationHours ? { durationHours } : {})
+      body: JSON.stringify({ duration })
     }).then(handleResponse),
 
   createTest: (formData) =>
@@ -135,29 +135,23 @@ export const apiClient = {
   getEligibleTesters: (testId) =>
     apiFetch(API + `/tests/${testId}/eligible-testers`).then(handleResponse),
 
-  // ── Admin: Tests ──────────────────────────────────────────────
+  // ── Admin: Tests & Sessions ──────────────────────────────────
   getAdminTests: () =>
     apiFetch(API + '/admin/tests').then(handleResponse),
 
-  deleteTestByAdmin: (testId) =>
-    apiFetch(API + `/admin/tests/${testId}`, { method: 'DELETE' }).then(handleResponse),
+  getAdminActiveSessions: () =>
+    apiFetch(API + '/admin/active-sessions').then(handleResponse),
 
-  updateTestTargeting: (testId, data) =>
-    apiFetch(API + `/admin/tests/${testId}/targeting`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
+  forceCloseSession: (sessionId) =>
+    apiFetch(API + `/admin/sessions/${sessionId}/force-close`, {
+      method: 'POST'
     }).then(handleResponse),
-
-  forceCloseSession: (testId, testerId) =>
-    apiFetch(API + `/admin/tests/${testId}/sessions/${testerId}`, { method: 'DELETE' }).then(handleResponse),
 
   updateTestStatus: (testId, status) =>
     apiFetch(API + `/admin/tests/${testId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     }).then(handleResponse),
-
-  // Removed approveTestVisibility - use updateTestStatus instead
 
   adminAssignTester: (testId, testerId) =>
     apiFetch(API + `/admin/tests/${testId}/assign`, {
@@ -220,9 +214,6 @@ export const apiClient = {
 
   getPendingPayments: () =>
     apiFetch(API + '/admin/payments/pending').then(handleResponse),
-
-  exportPaymentHistory: () =>
-    apiFetch(API + '/admin/payments/export').then(handleResponse),
 
   batchPay: (testerIds = [], note = '') =>
     apiFetch(API + '/admin/payments/batch', {
