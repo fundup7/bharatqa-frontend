@@ -709,7 +709,7 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                                     <tr>
                                         <th>Tester</th>
                                         <th>Target App</th>
-                                        <th>Started At</th>
+                                        <th>Assigned At</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
