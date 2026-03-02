@@ -1,6 +1,6 @@
 import React from 'react';
 // Icon imports removed as navbar buttons are no longer needed
-import logo from '../../Logo/Logo.png';
+import logo from '../../Logo/logo.png';
 import './Navbar.css';
 
 export default function Navbar({ view, company, onNavigate, onLogout }) {

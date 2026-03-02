@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { apiClient } from '../utils/api';
-import logo from '../Logo/Logo.png';
+import logo from '../Logo/logo.png';
 import './HomePage.css';
 
 /* ── tiny hook: fade-up on scroll ── */
