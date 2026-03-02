@@ -1,13 +1,13 @@
 import React from 'react';
 // Icon imports removed as navbar buttons are no longer needed
-import logo from '../../Logo/logo.png';
+import logo from '../../Logo/Logo.png';
 import './Navbar.css';
 
-export default function Navbar({ company, onNavigate, onLogout }) {
+export default function Navbar({ view, company, onNavigate, onLogout }) {
   // Navigation items removed; sidebar provides navigation
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar${view === 'home' ? ' navbar-hidden' : ''}`}>
       <div className="navbar-container">
         <div className="navbar-logo" onClick={() => onNavigate('home')}>
           <img src={logo} alt="BharatQA" className="navbar-logo-img" />

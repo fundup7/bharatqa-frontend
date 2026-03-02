@@ -10,6 +10,9 @@
   -webkit-backdrop-filter: var(--blur);
   border-bottom: 1px solid var(--glass-border);
 }
+.navbar.navbar-hidden {
+  display: none;
+}
 
 .navbar-container {
   max-width: 1400px;

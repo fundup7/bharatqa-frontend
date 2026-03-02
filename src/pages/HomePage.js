@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { apiClient } from '../utils/api';
-import logo from '../Logo/logo.png';
+import logo from '../Logo/Logo.png';
 import './HomePage.css';
 
 /* ── tiny hook: fade-up on scroll ── */
@@ -74,6 +74,8 @@ export default function HomePage({ company, onLogin, onNavigate }) {
 
       {/* ── Hero ── */}
       <header className="hp-hero">
+        <div className="hp-glow-blob hp-glow-blob--1" />
+        <div className="hp-glow-blob hp-glow-blob--2" />
         <div ref={heroRef} className={`hp-hero-inner reveal ${heroVis ? 'reveal--on' : ''}`}>
           <div className="hp-hero-badge">For Android developers who ship fast</div>
           <h1 className="hp-h1">
@@ -208,51 +210,50 @@ export default function HomePage({ company, onLogin, onNavigate }) {
         </div>
       </section>
 
+      {/* ── Mobile-only tester CTA ── */}
+      <div className="hp-mobile-dl-banner">
+        <p>📱 <strong>Earn money testing apps.</strong> Download the BharatQA Tester App.</p>
+        {latestApk ? (
+          <a href={latestApk.apk_url} className="hp-btn hp-btn--pulse" style={{ textDecoration: 'none' }}>
+            ⬇️ Download APK
+          </a>
+        ) : (
+          <span className="hp-dl-card-loading">Loading download link…</span>
+        )}
+      </div>
+
       {/* ── Become a Tester / Download Section ── */}
-      <section style={{
-        background: 'linear-gradient(135deg, rgba(255,159,67,0.08) 0%, rgba(95,39,205,0.12) 100%)',
-        borderTop: '1px solid rgba(255,159,67,0.15)',
-        borderBottom: '1px solid rgba(255,159,67,0.15)',
-        padding: '80px 24px',
-      }}>
-        <div ref={dlRef} className={`reveal ${dlVis ? 'reveal--on' : ''}`} style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
-          <div>
+      <section className="hp-dl-section">
+        <div ref={dlRef} className={`hp-dl-grid reveal ${dlVis ? 'reveal--on' : ''}`}>
+          <div className="hp-dl-left">
             <div className="hp-hero-badge" style={{ marginBottom: 16 }}>📱 For Testers</div>
             <h2 className="hp-section-title" style={{ textAlign: 'left', marginBottom: 16 }}>
               Earn money.<br />Test real apps.<br /><em style={{ color: 'var(--hp-accent)', fontStyle: 'normal' }}>From your phone.</em>
             </h2>
-            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 28 }}>
+            <p>
               Join BharatQA as a tester. Download the app, register with your Google account,
               and start earning ₹50–₹200 per test session — right from your Android phone.
             </p>
-            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <ul className="hp-dl-perks">
               {[
                 ['✅', 'Free to join — no investment required'],
                 ['💳', 'Instant UPI payments after approval'],
                 ['📱', 'Works on any Android phone (Android 8+)'],
                 ['🎯', 'Get matched to tests based on your device'],
               ].map(([icon, text], i) => (
-                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9rem', color: 'rgba(255,255,255,0.75)' }}>
-                  <span style={{ fontSize: '1.1rem' }}>{icon}</span> {text}
+                <li key={i}>
+                  <span>{icon}</span> {text}
                 </li>
               ))}
             </ul>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-            <div style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 20,
-              padding: '32px 28px',
-              textAlign: 'center',
-              width: '100%',
-              backdropFilter: 'blur(12px)',
-            }}>
-              <div style={{ fontSize: '3rem', marginBottom: 12 }}>📲</div>
-              <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>BharatQA Tester App</h3>
+          <div className="hp-dl-right">
+            <div className="hp-dl-card">
+              <div className="hp-dl-card-icon">📲</div>
+              <h3>BharatQA Tester App</h3>
               {latestApk ? (
                 <>
-                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 20px' }}>
+                  <p className="hp-dl-card-version">
                     Version {latestApk.version_name} · Android APK
                   </p>
                   <a
@@ -264,15 +265,15 @@ export default function HomePage({ company, onLogin, onNavigate }) {
                   </a>
                 </>
               ) : (
-                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 16px' }}>
+                <p className="hp-dl-card-loading">
                   Download link loading…<br />Contact us if it doesn't appear.
                 </p>
               )}
-              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
+              <div className="hp-dl-card-note">
                 ⚠️ Enable "Install from unknown sources" in your<br />Android settings before installing.
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 12, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <div className="hp-dl-contact">
               <span>📞 +91 6361434273</span>
               <span>·</span>
               <span>fundup3@gmail.com</span>
@@ -384,7 +385,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
           <h2 className="hp-section-title">Transparent Pricing</h2>
           <p className="hp-section-sub">Simple pay-as-you-go pricing based on the scale you need.</p>
           <div className="hp-pain-grid" style={{ marginTop: 40 }}>
-            <div className="hp-pain-card">
+            <div className="hp-pain-card hp-pricing-card">
               <span className="hp-pain-emoji">🚀</span>
               <h3>Essential</h3>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹2,000</div>
@@ -406,8 +407,8 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               </button>
             </div>
 
-            <div className="hp-pain-card" style={{ border: '1px solid var(--hp-accent)', transform: 'scale(1.05)' }}>
-              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: 'var(--hp-accent)', color: '#000', padding: '4px 12px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 'bold' }}>MOST POPULAR</div>
+            <div className="hp-pain-card hp-pricing-card" style={{ border: '1px solid var(--hp-accent)', transform: 'scale(1.05)' }}>
+              <div className="hp-pop-badge">MOST POPULAR</div>
               <span className="hp-pain-emoji">🔥</span>
               <h3>Comprehensive</h3>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹4,000</div>
@@ -429,7 +430,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               </button>
             </div>
 
-            <div className="hp-pain-card">
+            <div className="hp-pain-card hp-pricing-card">
               <span className="hp-pain-emoji">⚡</span>
               <h3>Intensive</h3>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹6,000</div>
