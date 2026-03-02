@@ -25,9 +25,15 @@ function useReveal(threshold = 0.15) {
 export default function HomePage({ company, onLogin, onNavigate }) {
   const [health, setHealth] = useState(null);
   const [navScrolled, setNavScrolled] = useState(false);
+  const [latestApk, setLatestApk] = useState(null);
+  const [dlRef, dlVis] = useReveal(0.15);
 
   useEffect(() => {
     apiClient.getHealth().then(setHealth).catch(() => setHealth(null));
+    // Fetch latest APK link
+    apiClient.getLatestAppVersion()
+      .then(data => { if (data?.latest?.apk_url) setLatestApk(data.latest); })
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -197,6 +203,79 @@ export default function HomePage({ company, onLogin, onNavigate }) {
                 <span className="hp-dot on" style={{ width: 8, height: 8 }} />
                 3 testers live right now
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Become a Tester / Download Section ── */}
+      <section style={{
+        background: 'linear-gradient(135deg, rgba(255,159,67,0.08) 0%, rgba(95,39,205,0.12) 100%)',
+        borderTop: '1px solid rgba(255,159,67,0.15)',
+        borderBottom: '1px solid rgba(255,159,67,0.15)',
+        padding: '80px 24px',
+      }}>
+        <div ref={dlRef} className={`reveal ${dlVis ? 'reveal--on' : ''}`} style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, alignItems: 'center' }}>
+          <div>
+            <div className="hp-hero-badge" style={{ marginBottom: 16 }}>📱 For Testers</div>
+            <h2 className="hp-section-title" style={{ textAlign: 'left', marginBottom: 16 }}>
+              Earn money.<br />Test real apps.<br /><em style={{ color: 'var(--hp-accent)', fontStyle: 'normal' }}>From your phone.</em>
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 28 }}>
+              Join BharatQA as a tester. Download the app, register with your Google account,
+              and start earning ₹50–₹200 per test session — right from your Android phone.
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                ['✅', 'Free to join — no investment required'],
+                ['💳', 'Instant UPI payments after approval'],
+                ['📱', 'Works on any Android phone (Android 8+)'],
+                ['🎯', 'Get matched to tests based on your device'],
+              ].map(([icon, text], i) => (
+                <li key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: '0.9rem', color: 'rgba(255,255,255,0.75)' }}>
+                  <span style={{ fontSize: '1.1rem' }}>{icon}</span> {text}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 20,
+              padding: '32px 28px',
+              textAlign: 'center',
+              width: '100%',
+              backdropFilter: 'blur(12px)',
+            }}>
+              <div style={{ fontSize: '3rem', marginBottom: 12 }}>📲</div>
+              <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem' }}>BharatQA Tester App</h3>
+              {latestApk ? (
+                <>
+                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', margin: '0 0 20px' }}>
+                    Version {latestApk.version_name} · Android APK
+                  </p>
+                  <a
+                    href={latestApk.apk_url}
+                    className="hp-btn hp-btn--pulse"
+                    style={{ display: 'inline-block', textDecoration: 'none', padding: '12px 28px', fontSize: '0.95rem', marginBottom: 16 }}
+                  >
+                    ⬇️ Download APK
+                  </a>
+                </>
+              ) : (
+                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.35)', margin: '0 0 16px' }}>
+                  Download link loading…<br />Contact us if it doesn't appear.
+                </p>
+              )}
+              <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
+                ⚠️ Enable "Install from unknown sources" in your<br />Android settings before installing.
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 12, fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span>📞 +91 6361434273</span>
+              <span>·</span>
+              <span>fundup3@gmail.com</span>
             </div>
           </div>
         </div>

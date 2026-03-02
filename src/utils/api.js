@@ -229,4 +229,22 @@ export const apiClient = {
       method: 'POST',
       body: JSON.stringify({ tester_ids: testerIds, note }),
     }).then(handleResponse),
+
+  // ── Push Notifications ────────────────────────────────────────
+  sendAdminNotification: (payload) =>
+    apiFetch(API + '/admin/notify', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }).then(handleResponse),
+
+  toggleTesterNotifications: (testerId, enabled) =>
+    apiFetch(API + `/admin/testers/${testerId}/notifications`, {
+      method: 'PUT',
+      body: JSON.stringify({ enabled }),
+    }).then(handleResponse),
+
+  // Returns latest APK info (version 0 always returns the latest)
+  getLatestAppVersion: () =>
+    apiFetch(API + '/app/check-update/0').then(handleResponse),
 };
+

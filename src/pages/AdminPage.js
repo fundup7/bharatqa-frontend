@@ -81,7 +81,16 @@ function BlobVideoPlayer({ src }) {
 }
 
 export default function AdminPage({ company, showToast, onImpersonate }) {
-    const [mainTab, setMainTab] = useState('tests'); // 'tests' | 'bugs' | 'testers' | 'payments'
+    const [mainTab, setMainTab] = useState('tests'); // 'tests' | 'bugs' | 'testers' | 'payments' | 'notifications'
+
+    // ── Notification state ──
+    const [notifTitle, setNotifTitle] = useState('');
+    const [notifBody, setNotifBody] = useState('');
+    const [notifTestId, setNotifTestId] = useState('');
+    const [sendingNotif, setSendingNotif] = useState(false);
+    const [notifResult, setNotifResult] = useState(null);
+    const [togglingNotifId, setTogglingNotifId] = useState(null);
+
 
     // ── Tests state ──
     const [allTests, setAllTests] = useState([]);
@@ -183,9 +192,39 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
 
     useEffect(() => { loadTesters(); }, [loadTesters]);
     useEffect(() => { if (mainTab === 'payments') loadPending(); }, [mainTab, loadPending]);
-    useEffect(() => { if (mainTab === 'tests') loadAdminTests(); }, [mainTab, loadAdminTests]);
+    useEffect(() => { if (mainTab === 'tests' || mainTab === 'notifications') loadAdminTests(); }, [mainTab, loadAdminTests]);
     useEffect(() => { if (mainTab === 'bugs') loadPendingBugs(); }, [mainTab, loadPendingBugs]);
     useEffect(() => { if (mainTab === 'sessions') loadSessions(); }, [mainTab, loadSessions]);
+
+    const handleSendNotification = async () => {
+        if (!notifTitle.trim() || !notifBody.trim()) { showToast('Title and body are required', 'error'); return; }
+        setSendingNotif(true); setNotifResult(null);
+        try {
+            const payload = { title: notifTitle, body: notifBody };
+            if (notifTestId) payload.test_id = parseInt(notifTestId);
+            const result = await apiClient.sendAdminNotification(payload);
+            setNotifResult(result);
+            showToast(`✅ Sent to ${result.sent} testers!`);
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        } finally {
+            setSendingNotif(false);
+        }
+    };
+
+    const handleToggleNotifications = async (tester) => {
+        setTogglingNotifId(tester.id);
+        try {
+            await apiClient.toggleTesterNotifications(tester.id, !(tester.notifications_enabled !== false));
+            showToast(`🔔 Notifications ${tester.notifications_enabled !== false ? 'disabled' : 'enabled'} for ${tester.full_name}`);
+            loadTesters();
+        } catch (err) {
+            showToast('Failed: ' + err.message, 'error');
+        } finally {
+            setTogglingNotifId(null);
+        }
+    };
+
 
     const handleBan = async (tester) => {
         const reason = window.prompt(`Ban reason for ${tester.full_name}:`, 'Violation of terms of service');
@@ -300,6 +339,9 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                     <Activity size={15} /> Active Sessions
                     {activeSessions.length > 0 && <span className="admin-filter-count">{activeSessions.length}</span>}
                 </button>
+                <button className={`admin-main-tab ${mainTab === 'notifications' ? 'active' : ''}`} onClick={() => setMainTab('notifications')}>
+                    🔔 Push Notifications
+                </button>
             </div>
 
             {/* ════ TESTERS TAB ════ */}
@@ -413,6 +455,119 @@ export default function AdminPage({ company, showToast, onImpersonate }) {
                     )}
                 </>
             )}
+
+            {/* ════ NOTIFICATIONS TAB ════ */}
+            {mainTab === 'notifications' && (
+                <>
+                    {/* Manual Send Form */}
+                    <div className="glass-card" style={{ padding: '28px', marginBottom: '24px' }}>
+                        <h3 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            🔔 Send Manual Push Notification
+                        </h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.8rem', color: '#aaa' }}>Title *</label>
+                                <input
+                                    type="text"
+                                    value={notifTitle}
+                                    onChange={e => setNotifTitle(e.target.value)}
+                                    placeholder="e.g. 🎯 New Testing Opportunity!"
+                                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.8rem', color: '#aaa' }}>Target Test ID (optional — leave blank for all testers)</label>
+                                <input
+                                    type="number"
+                                    value={notifTestId}
+                                    onChange={e => setNotifTestId(e.target.value)}
+                                    placeholder="e.g. 42 (or leave blank)"
+                                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ marginBottom: '20px' }}>
+                            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.8rem', color: '#aaa' }}>Message Body *</label>
+                            <textarea
+                                rows={3}
+                                value={notifBody}
+                                onChange={e => setNotifBody(e.target.value)}
+                                placeholder="Describe the opportunity: app name, pay amount, etc."
+                                style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box' }}
+                            />
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <button
+                                className="admin-action-btn unban"
+                                style={{ padding: '10px 24px', fontSize: '0.95rem' }}
+                                disabled={sendingNotif || !notifTitle || !notifBody}
+                                onClick={handleSendNotification}
+                            >
+                                {sendingNotif ? <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2, display: 'inline-block', marginRight: 8 }} />Sending…</> : '📤 Send Notification'}
+                            </button>
+                            {notifResult && (
+                                <span style={{ fontSize: '0.85rem', color: '#34c759' }}>
+                                    ✅ Sent: {notifResult.sent} / {notifResult.total} · Failed: {notifResult.failed || 0}
+                                </span>
+                            )}
+                        </div>
+                        <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', background: 'rgba(255,159,67,0.08)', border: '1px solid rgba(255,159,67,0.2)', fontSize: '0.8rem', color: '#ff9f43' }}>
+                            ⏰ <strong>Automatic schedule</strong>: Notifications fire automatically at <strong>9:00 AM IST</strong> and <strong>3:00 PM IST</strong> every day when there are active tests. Only testers with FCM tokens and notifications enabled receive them.
+                        </div>
+                    </div>
+
+                    {/* Per-tester notification toggle */}
+                    <div className="admin-table-wrap glass-card">
+                        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ margin: 0 }}>Tester Notification Settings</h3>
+                            <span style={{ fontSize: '0.8rem', color: '#888' }}>{testers.filter(t => t.notifications_enabled !== false && t.fcm_token).length} / {testers.length} have notifications active</span>
+                        </div>
+                        {loadingTesters ? <div className="loading-state"><div className="spinner" /><p>Loading…</p></div> : (
+                            <table className="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tester</th>
+                                        <th>Device</th>
+                                        <th>FCM Token</th>
+                                        <th>Notifications</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {testers.map(tester => (
+                                        <tr key={tester.id}>
+                                            <td>
+                                                <div className="admin-tester-name">{tester.full_name}</div>
+                                                <div className="admin-tester-email">{tester.email || tester.phone}</div>
+                                            </td>
+                                            <td>{tester.device_model || '—'}</td>
+                                            <td>
+                                                {tester.fcm_token
+                                                    ? <span className="admin-status-badge active" style={{ fontSize: '0.7rem' }}>✅ Registered</span>
+                                                    : <span className="admin-status-badge pending" style={{ fontSize: '0.7rem' }}>⚠️ No Token</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button
+                                                    className={`admin-action-btn ${tester.notifications_enabled !== false ? 'unban' : 'ban'}`}
+                                                    disabled={togglingNotifId === tester.id}
+                                                    onClick={() => handleToggleNotifications(tester)}
+                                                    style={{ minWidth: 90 }}
+                                                >
+                                                    {togglingNotifId === tester.id
+                                                        ? <div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} />
+                                                        : tester.notifications_enabled !== false ? '🔔 On' : '🔕 Off'
+                                                    }
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </>
+            )}
+
 
             {/* ════ PAYMENTS TAB ════ */}
             {mainTab === 'payments' && (
