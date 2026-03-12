@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { apiClient } from '../utils/api';
 import logo from '../Logo/logo.png';
+import { Frown, Flame, DollarSign, HelpCircle, Video, BarChart3, MapPin, Zap, Bot, Share2, UserCheck, Wallet, Smartphone, MessageCircle, Rocket, CheckCircle2, CreditCard, Target, Download } from 'lucide-react';
 import './HomePage.css';
 
 /* ── tiny hook: fade-up on scroll ── */
@@ -74,8 +75,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
 
       {/* ── Hero ── */}
       <header className="hp-hero">
-        <div className="hp-glow-blob hp-glow-blob--1" />
-        <div className="hp-glow-blob hp-glow-blob--2" />
+
         <div ref={heroRef} className={`hp-hero-inner reveal ${heroVis ? 'reveal--on' : ''}`}>
           <div className="hp-hero-badge">For Android developers who ship fast</div>
           <h1 className="hp-h1">
@@ -91,7 +91,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
           </p>
           <div className="hp-cta">
             {company ? (
-              <button className="hp-btn hp-btn--pulse" onClick={() => onNavigate('dashboard')}>
+              <button className="hp-btn" onClick={() => onNavigate('dashboard')}>
                 Open Dashboard →
               </button>
             ) : (
@@ -146,28 +146,28 @@ export default function HomePage({ company, onLogin, onNavigate }) {
             </p>
             <div className="hp-testers-perks">
               <div className="hp-tester-perk">
-                <span className="hp-tester-perk-icon">🙋</span>
+                <span className="hp-tester-perk-icon"><UserCheck size={20} /></span>
                 <div>
                   <strong>Verified humans, not bots</strong>
                   <span>Each tester is onboarded and verified before they can accept jobs. No automation, no scripts.</span>
                 </div>
               </div>
               <div className="hp-tester-perk">
-                <span className="hp-tester-perk-icon">💰</span>
+                <span className="hp-tester-perk-icon"><Wallet size={20} /></span>
                 <div>
                   <strong>We pay testers fairly</strong>
                   <span>Testers earn per completed test session. We're transparent about this — it's how we get motivated, honest feedback.</span>
                 </div>
               </div>
               <div className="hp-tester-perk">
-                <span className="hp-tester-perk-icon">📱</span>
+                <span className="hp-tester-perk-icon"><Smartphone size={20} /></span>
                 <div>
                   <strong>Their own devices</strong>
                   <span>Testers use the phones they actually own — budget Redmis, mid-range Samsungs, older Motorolas. Real India, not a lab.</span>
                 </div>
               </div>
               <div className="hp-tester-perk">
-                <span className="hp-tester-perk-icon">🗣️</span>
+                <span className="hp-tester-perk-icon"><MessageCircle size={20} /></span>
                 <div>
                   <strong>Qualitative feedback too</strong>
                   <span>Beyond crash reports — testers record their reactions, confusion, and delight. You hear what real users think.</span>
@@ -212,9 +212,9 @@ export default function HomePage({ company, onLogin, onNavigate }) {
 
       {/* ── Mobile-only tester CTA ── */}
       <div className="hp-mobile-dl-banner">
-        <p>📱 <strong>Earn money testing apps.</strong> Download the BharatQA Tester App.</p>
+        <p><Smartphone size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} /> <strong>Earn money testing apps.</strong> Download the BharatQA Tester App.</p>
         {latestApk ? (
-          <a href={latestApk.apk_url} className="hp-btn hp-btn--pulse" style={{ textDecoration: 'none' }}>
+          <a href={latestApk.apk_url} className="hp-btn" style={{ textDecoration: 'none' }}>
             ⬇️ Download APK
           </a>
         ) : (
@@ -226,7 +226,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
       <section className="hp-dl-section">
         <div ref={dlRef} className={`hp-dl-grid reveal ${dlVis ? 'reveal--on' : ''}`}>
           <div className="hp-dl-left">
-            <div className="hp-hero-badge" style={{ marginBottom: 16 }}>📱 For Testers</div>
+            <div className="hp-hero-badge" style={{ marginBottom: 16 }}><Smartphone size={14} style={{ verticalAlign: 'middle', marginRight: 4 }} /> For Testers</div>
             <h2 className="hp-section-title" style={{ textAlign: 'left', marginBottom: 16 }}>
               Earn money.<br />Test real apps.<br /><em style={{ color: 'var(--hp-accent)', fontStyle: 'normal' }}>From your phone.</em>
             </h2>
@@ -236,10 +236,10 @@ export default function HomePage({ company, onLogin, onNavigate }) {
             </p>
             <ul className="hp-dl-perks">
               {[
-                ['✅', 'Free to join — no investment required'],
-                ['💳', 'Instant UPI payments after approval'],
-                ['📱', 'Works on any Android phone (Android 8+)'],
-                ['🎯', 'Get matched to tests based on your device'],
+                [<CheckCircle2 key="ic1" size={18} />, 'Free to join — no investment required'],
+                [<CreditCard key="ic2" size={18} />, 'Instant UPI payments after approval'],
+                [<Smartphone key="ic3" size={18} />, 'Works on any Android phone (Android 8+)'],
+                [<Target key="ic4" size={18} />, 'Get matched to tests based on your device'],
               ].map(([icon, text], i) => (
                 <li key={i}>
                   <span>{icon}</span> {text}
@@ -249,7 +249,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
           </div>
           <div className="hp-dl-right">
             <div className="hp-dl-card">
-              <div className="hp-dl-card-icon">📲</div>
+              <div className="hp-dl-card-icon"><Download size={32} /></div>
               <h3>BharatQA Tester App</h3>
               {latestApk ? (
                 <>
@@ -258,7 +258,7 @@ export default function HomePage({ company, onLogin, onNavigate }) {
                   </p>
                   <a
                     href={latestApk.apk_url}
-                    className="hp-btn hp-btn--pulse"
+                    className="hp-btn"
                     style={{ display: 'inline-block', textDecoration: 'none', padding: '12px 28px', fontSize: '0.95rem', marginBottom: 16 }}
                   >
                     ⬇️ Download APK
@@ -292,28 +292,28 @@ export default function HomePage({ company, onLogin, onNavigate }) {
           <div className="hp-pain-grid">
             {[
               {
-                emoji: '😤',
+                icon: <Frown size={24} />,
                 title: '"Works on my machine"',
                 text: 'Your app runs perfectly on your Pixel — then crashes on a Samsung M31 running Android 11 with 2 GB free RAM.',
               },
               {
-                emoji: '🔥',
+                icon: <Flame size={24} />,
                 title: '1-star reviews before you know',
                 text: 'Users don\'t file bug reports. They leave angry Play Store reviews. You find out too late.',
               },
               {
-                emoji: '💸',
+                icon: <DollarSign size={24} />,
                 title: 'Device labs are expensive',
                 text: 'BrowserStack and AWS Device Farm bill hundreds of dollars a month. Way too much for a bootstrapped team.',
               },
               {
-                emoji: '🤷',
+                icon: <HelpCircle size={24} />,
                 title: 'Crashlytics shows the what, not the why',
                 text: 'You see a stack trace, but you don\'t see what the user was actually doing when it broke.',
               },
             ].map((p, i) => (
               <div key={i} className="hp-pain-card" style={{ animationDelay: `${i * 100}ms` }}>
-                <span className="hp-pain-emoji">{p.emoji}</span>
+                <span className="hp-pain-emoji">{p.icon}</span>
                 <h3>{p.title}</h3>
                 <p>{p.text}</p>
               </div>
@@ -362,12 +362,12 @@ export default function HomePage({ company, onLogin, onNavigate }) {
           <p className="hp-section-sub">Everything you need to ship with confidence.</p>
           <ul className="hp-features">
             {[
-              ['📹', 'Screen recordings', 'Full video of every tester session — see exactly what happened, not just a stack trace.'],
-              ['📊', 'Device telemetry', 'Battery, RAM, CPU, network type, and Android version captured automatically.'],
-              ['📍', 'Geo-verified testers', 'Real testers verified across Tier-1, Tier-2, and Tier-3 Indian cities.'],
-              ['💥', 'Crash detection', 'Automatic ANR and crash capture with stack traces and full device context.'],
-              ['🤖', 'AI bug reports', 'Gemini-powered analysis that tags severity, suggests root causes, and groups duplicates.'],
-              ['📤', 'Export & share', 'One-click export to Slack, Jira, or plain CSV — plug into your existing workflow.'],
+              [<Video key="f1" size={24} />, 'Screen recordings', 'Full video of every tester session — see exactly what happened, not just a stack trace.'],
+              [<BarChart3 key="f2" size={24} />, 'Device telemetry', 'Battery, RAM, CPU, network type, and Android version captured automatically.'],
+              [<MapPin key="f3" size={24} />, 'Geo-verified testers', 'Real testers verified across Tier-1, Tier-2, and Tier-3 Indian cities.'],
+              [<Zap key="f4" size={24} />, 'Crash detection', 'Automatic ANR and crash capture with stack traces and full device context.'],
+              [<Bot key="f5" size={24} />, 'AI bug reports', 'Gemini-powered analysis that tags severity, suggests root causes, and groups duplicates.'],
+              [<Share2 key="f6" size={24} />, 'Export & share', 'One-click export to Slack, Jira, or plain CSV — plug into your existing workflow.'],
             ].map(([icon, title, desc], i) => (
               <li key={i} style={{ animationDelay: `${i * 60}ms` }}>
                 <span className="hp-feat-icon">{icon}</span>
@@ -384,20 +384,19 @@ export default function HomePage({ company, onLogin, onNavigate }) {
         <div className={`reveal ${featVis ? 'reveal--on' : ''}`}>
           <h2 className="hp-section-title">Transparent Pricing</h2>
           <p className="hp-section-sub">Simple pay-as-you-go pricing based on the scale you need.</p>
-          <div className="hp-pain-grid" style={{ marginTop: 40 }}>
-            <div className="hp-pain-card hp-pricing-card">
-              <span className="hp-pain-emoji">🚀</span>
+          <div className="hp-pricing-grid">
+            <div className="hp-pricing-card">
+              <span className="hp-pricing-icon"><Rocket size={24} /></span>
               <h3>Essential</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹2,000</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <li>✓ <strong>20</strong> Real Testers</li>
-                <li>✓ <strong>1</strong> Testing Iteration</li>
-                <li>✓ Basic Demographics</li>
-                <li>✓ Standard Support</li>
+              <div className="hp-pricing-price">₹2,000</div>
+              <ul className="hp-pricing-features">
+                <li><strong>20</strong> Real Testers</li>
+                <li><strong>1</strong> Testing Iteration</li>
+                <li>Basic Demographics</li>
+                <li>Standard Support</li>
               </ul>
               <button
-                className="hp-btn hp-btn--outline"
-                style={{ width: '100%' }}
+                className="hp-btn hp-btn--outline hp-pricing-btn"
                 onClick={() => {
                   if (company) onNavigate('dashboard');
                   else document.querySelector('.hp-login-wrap button')?.click();
@@ -407,20 +406,19 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               </button>
             </div>
 
-            <div className="hp-pain-card hp-pricing-card" style={{ border: '1px solid var(--hp-accent)', transform: 'scale(1.05)' }}>
+            <div className="hp-pricing-card hp-pricing-card--featured">
               <div className="hp-pop-badge">MOST POPULAR</div>
-              <span className="hp-pain-emoji">🔥</span>
+              <span className="hp-pricing-icon"><Flame size={24} /></span>
               <h3>Comprehensive</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹4,000</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <li>✓ <strong>40</strong> Real Testers</li>
-                <li>✓ <strong>1</strong> Testing Iteration</li>
-                <li>✓ Advanced Targeting</li>
-                <li>✓ Priority Support</li>
+              <div className="hp-pricing-price">₹4,000</div>
+              <ul className="hp-pricing-features">
+                <li><strong>40</strong> Real Testers</li>
+                <li><strong>1</strong> Testing Iteration</li>
+                <li>Advanced Targeting</li>
+                <li>Priority Support</li>
               </ul>
               <button
-                className="hp-btn hp-btn--pulse"
-                style={{ width: '100%' }}
+                className="hp-btn hp-pricing-btn"
                 onClick={() => {
                   if (company) onNavigate('dashboard');
                   else document.querySelector('.hp-login-wrap button')?.click();
@@ -430,19 +428,18 @@ export default function HomePage({ company, onLogin, onNavigate }) {
               </button>
             </div>
 
-            <div className="hp-pain-card hp-pricing-card">
-              <span className="hp-pain-emoji">⚡</span>
+            <div className="hp-pricing-card">
+              <span className="hp-pricing-icon"><Zap size={24} /></span>
               <h3>Intensive</h3>
-              <div style={{ fontSize: '2rem', fontWeight: 'bold', margin: '15px 0', color: 'var(--hp-accent)' }}>₹6,000</div>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', textAlign: 'left', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <li>✓ <strong>40</strong> Real Testers</li>
-                <li>✓ <strong>2</strong> Testing Iterations</li>
-                <li>✓ Premium Targeting</li>
-                <li>✓ 24/7 Dedicated Support</li>
+              <div className="hp-pricing-price">₹6,000</div>
+              <ul className="hp-pricing-features">
+                <li><strong>40</strong> Real Testers</li>
+                <li><strong>2</strong> Testing Iterations</li>
+                <li>Premium Targeting</li>
+                <li>24/7 Dedicated Support</li>
               </ul>
               <button
-                className="hp-btn hp-btn--outline"
-                style={{ width: '100%' }}
+                className="hp-btn hp-btn--outline hp-pricing-btn"
                 onClick={() => {
                   if (company) onNavigate('dashboard');
                   else document.querySelector('.hp-login-wrap button')?.click();

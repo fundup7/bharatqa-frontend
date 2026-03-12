@@ -1,0 +1,65 @@
+# BharatQA Landing Page — Design Audit
+
+> **Auditor:** Senior Product Designer · **Date:** March 12, 2026
+> **Page:** [bharatqa-frontend.vercel.app](https://bharatqa-frontend.vercel.app)
+
+---
+
+## Executive Summary
+
+The landing page has strong copywriting and a premium dark-mode aesthetic, but it suffers from **"template-itis"** — every section relies on emojis + text with **zero product screenshots, zero human photography, and zero evidence of the actual product.** For a service that sells *"real people testing on real phones,"* the page ironically shows none of that.
+
+---
+
+## Captured Screenshots
+
+````carousel
+![Hero Section — text-only, no product visual](C:\Users\sohai\.gemini\antigravity\brain\acf42a74-0e7a-4d1e-aef9-17f30530dde0\hero_section_1773324736436.png)
+<!-- slide -->
+![Human-Powered Testing — emoji icons + initials-only tester cards](C:\Users\sohai\.gemini\antigravity\brain\acf42a74-0e7a-4d1e-aef9-17f30530dde0\human_powered_testing_section_1773324847273.png)
+<!-- slide -->
+![For Testers — checklist + generic download card](C:\Users\sohai\.gemini\antigravity\brain\acf42a74-0e7a-4d1e-aef9-17f30530dde0\for_testers_section_1773324860783.png)
+<!-- slide -->
+![Sound Familiar? — emoji + heading + description cards](C:\Users\sohai\.gemini\antigravity\brain\acf42a74-0e7a-4d1e-aef9-17f30530dde0\problem_section_1773324902205.png)
+````
+
+---
+
+## Section-by-Section Audit
+
+| # | Section | Problem | Recommended Visual Addition |
+|---|---------|---------|---------------------------|
+| 1 | **Hero** | Entirely text-only. No visual shows what BharatQA actually *is*. The right half of the viewport is empty dark space. | **Add a hero mockup** — a browser window showing the BharatQA dashboard with an active test session, bug reports, and a screen recording thumbnail. Float it over the right side at an angle. |
+| 2 | **Stats Strip** (50+ devices, <2 days, etc.) | Text-only row of numbers with no supporting evidence. Numbers feel like claims, not proof. | **Add a mini map of India** with glowing dots representing tester locations across Tier-1, 2, and 3 cities — makes "100+ testers" tangible and geographically real. |
+| 3 | **Human-Powered Testing** | Uses emoji icons (🙋💰📱🗣️) + the generic *"icon → heading → description"* pattern. Tester cards show **initials only** (RK, PM, AS) — no real human faces. For a section about *real people*, this feels fake. | **Replace initials with real headshot photos** of testers (with consent). Even stock photos of people holding Android phones would dramatically increase trust. |
+| 4 | **For Testers** (Download section) | Checklist uses emojis as bullet icons (✅💳📱🎯). The download card has a generic 📲 icon instead of the actual app. No preview of what the tester app looks like. | **Add a screenshot of the tester app** inside a realistic phone frame — show the "Available Tests" or "Earnings" screen so testers can see what they'll get before downloading. |
+| 5 | **Sound Familiar?** (Pain Points) | Classic *emoji → heading → short paragraph* grid (2×2). Every card looks identical. No visual variation or real-world evidence of the problems described. | **Add a real 1-star Play Store review screenshot** (anonymized) to the "1-star reviews" card, and a **Crashlytics stack trace screenshot** to the "Crashlytics shows the what, not the why" card. Real artifacts > emojis. |
+| 6 | **How It Works** (3 Steps) | Completely text-only step cards. No illustrations, no diagrams, no product UI. "Step 01, Step 02, Step 03" with a number badge and paragraph — the most generic pattern possible. | **Add a mini product screenshot to each step**: Step 1 → the APK upload form; Step 2 → a photo of someone testing on a phone; Step 3 → an AI-generated bug report with severity tags. |
+| 7 | **What You Get** (Features Grid) | Uses the exact same *emoji → title → one-line description* pattern for all 6 features (📹📊📍💥🤖📤). This is the most visually lazy section — it's a bulleted list wearing cards. | **Add a screenshot of the screen recording player** with the telemetry overlay for the "Screen recordings" card, and a **screenshot of an actual AI bug report** for the "AI bug reports" card. Even 2 real screenshots would break the monotony. |
+| 8 | **Transparent Pricing** | Reuses the `hp-pain-card` class from the pain-points section (!), so pricing cards look identical to problem cards. Uses emoji tier icons (🚀🔥⚡). Inconsistent visual weight — the "MOST POPULAR" card uses `transform: scale(1.05)` which creates awkward spacing with siblings. | **Add a small "device coverage" visual** to each tier — e.g., Essential shows 3 phone silhouettes, Comprehensive shows 6, Intensive shows 12 — to visually communicate the difference between tiers. |
+| 9 | **Bottom CTA + Footer** | Bare text ("Ship with confidence. Know it works everywhere.") + a lone Google sign-in button. No social proof at the decision point. Footer is functional but has no visual personality. | **Add a "Trusted by" logo row** above the CTA button — even 3–4 company logos or a testimonial quote with a headshot would add conversion-critical trust at the final decision point. |
+
+---
+
+## Cross-Cutting Issues
+
+### Spacing & Sizing Inconsistencies
+- **Pricing cards reuse `hp-pain-card`** — a component designed for problem descriptions, not pricing. This causes the "MOST POPULAR" badge to clip against the card's overflow boundary.
+- **Inline styles everywhere** — 15+ uses of `style={{ ... }}` in [HomePage.js](file:///d:/bharatqa-frontend/src/pages/HomePage.js) for margins, font sizes, and layout overrides, making spacing inconsistent and hard to maintain.
+- The **"MOST POPULAR" card** uses `transform: scale(1.05)` which doesn't adjust padding or margins of neighboring cards, creating a cramped look.
+
+### The Core Problem
+> **The page has 0 product screenshots, 0 photos of humans, and 0 real artifacts from the product.**
+
+For a product that promises *"screen recordings, device telemetry, and AI bug reports from real testers,"* the landing page shows **none of these things**. Every section uses the identicl pattern: `emoji + bold heading + 1–2 sentence description`. This makes BharatQA look like a concept, not a shipped product.
+
+### Priority Fixes (Impact vs. Effort)
+
+| Priority | Fix | Impact |
+|----------|-----|--------|
+| 🔴 P0 | Add a hero dashboard screenshot to the Hero section | Instantly communicates "this is a real product" |
+| 🔴 P0 | Add real tester photos to the Human-Powered Testing section | Builds trust for the core value prop |
+| 🟠 P1 | Add a tester app screenshot to the For Testers download card | Increases APK download conversion |
+| 🟠 P1 | Add an AI bug report screenshot to What You Get | Proves the key differentiator is real |
+| 🟡 P2 | Add trusted-by logos or a testimonial to the Bottom CTA | Adds social proof at the conversion point |
+| 🟡 P2 | Refactor pricing cards to use a dedicated component, not `hp-pain-card` | Fixes spacing/badge clipping issues |

@@ -1,6 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
+  "homepage": "/bharatqa",
   "private": true,
   "dependencies": {
     "@react-oauth/google": "^0.13.4",
